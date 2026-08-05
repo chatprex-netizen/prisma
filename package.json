@@ -1,0 +1,21 @@
+{
+  "name": "propify-crm",
+  "version": "1.0.0",
+  "description": "Premium Real Estate CRM",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @propify-crm/api",
+    "dev:web": "npm run dev -w @propify-crm/web",
+    "build:api": "npm run build -w @propify-crm/api",
+    "build:web": "npm run build -w @propify-crm/web",
+    "prisma:generate": "npm run generate -w @propify-crm/prisma",
+    "prisma:migrate": "npm run migrate -w @propify-crm/prisma"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

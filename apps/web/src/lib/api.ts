@@ -1,0 +1,76 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+export async function fetchApi(endpoint: string, options: RequestInit = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  const config: RequestInit = {
+    ...options,
+    headers,
+  };
+
+  const response = await fetch(`${API_URL}${endpoint}`, config);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'API Error');
+  }
+
+  return data;
+}
+
+// Contacts
+export const getContacts = () => fetchApi('/contacts');
+export const createContact = (data: any) => fetchApi('/contacts', { method: 'POST', body: JSON.stringify(data) });
+export const updateContact = (id: string, data: any) => fetchApi(`/contacts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteContact = (id: string) => fetchApi(`/contacts/${id}`, { method: 'DELETE' });
+
+// Inventory
+export const getProjects = () => fetchApi('/inventory/projects');
+export const createProject = (data: any) => fetchApi('/inventory/projects', { method: 'POST', body: JSON.stringify(data) });
+export const updateProject = (id: string, data: any) => fetchApi(`/inventory/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteProject = (id: string) => fetchApi(`/inventory/projects/${id}`, { method: 'DELETE' });
+
+export const getProperties = () => fetchApi('/inventory/properties');
+export const createProperty = (data: any) => fetchApi('/inventory/properties', { method: 'POST', body: JSON.stringify(data) });
+
+// Pipeline
+export const getPipeline = () => fetchApi('/pipeline');
+export const createOpportunity = (data: any) => fetchApi('/pipeline', { method: 'POST', body: JSON.stringify(data) });
+export const updateOpportunityStage = (id: string, stage: string) => fetchApi(`/pipeline/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) });
+
+// Finances
+export const getTransactions = () => fetchApi('/finances/transactions');
+export const createTransaction = (data: any) => fetchApi('/finances/transactions', { method: 'POST', body: JSON.stringify(data) });
+
+// Appointments
+export const getAppointments = () => fetchApi('/appointments');
+export const createAppointment = (data: any) => fetchApi('/appointments', { method: 'POST', body: JSON.stringify(data) });
+export const updateAppointment = (id: string, data: any) => fetchApi(`/appointments/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteAppointment = (id: string) => fetchApi(`/appointments/${id}`, { method: 'DELETE' });
+
+// Contracts
+export const getContracts = () => fetchApi('/contracts');
+export const createContract = (data: any) => fetchApi('/contracts', { method: 'POST', body: JSON.stringify(data) });
+export const updateContract = (id: string, data: any) => fetchApi(`/contracts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteContract = (id: string) => fetchApi(`/contracts/${id}`, { method: 'DELETE' });
+
+// Chats (WhatsApp)
+export const getChats = () => fetchApi('/chats');
+export const getChatMessages = (chatId: string) => fetchApi(`/chats/${chatId}/messages`);
+export const sendChatMessage = (chatId: string, text: string) => fetchApi(`/chats/${chatId}/send`, { method: 'POST', body: JSON.stringify({ text }) });
+export const toggleChatBot = (chatId: string, isBotActive: boolean) => fetchApi(`/chats/${chatId}/bot`, { method: 'PATCH', body: JSON.stringify({ isBotActive }) });
+
+// Templates (WhatsApp)
+export const getTemplates = () => fetchApi('/templates');
+export const createTemplate = (data: any) => fetchApi('/templates', { method: 'POST', body: JSON.stringify(data) });
+export const seedTemplates = () => fetchApi('/templates/seed', { method: 'POST' });
+
+// Campaigns
+export const getCampaigns = () => fetchApi('/campaigns');
+export const getCampaign = (id: string) => fetchApi(`/campaigns/${id}`);
+export const createCampaign = (data: { name: string; templateId: string; contactIds: string[]; scheduledAt?: string }) => fetchApi('/campaigns', { method: 'POST', body: JSON.stringify(data) });
+export const sendCampaign = (id: string) => fetchApi(`/campaigns/${id}/send`, { method: 'POST' });
+
