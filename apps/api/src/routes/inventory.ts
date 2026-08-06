@@ -71,4 +71,24 @@ router.post('/properties', async (req: Request, res: Response) => {
   }
 });
 
+// GET /developers
+router.get('/developers', async (req: Request, res: Response) => {
+  try {
+    let developers = await prisma.developer.findMany();
+    if (developers.length === 0) {
+      const defaultDev = await prisma.developer.create({
+        data: {
+          name: 'Desarrolladora General',
+          logo: '',
+          notes: 'Creado por defecto para albergar proyectos'
+        }
+      });
+      developers = [defaultDev];
+    }
+    res.json({ success: true, data: developers });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;

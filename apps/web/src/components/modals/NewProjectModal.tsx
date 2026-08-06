@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createProject } from '../../lib/api';
+import { createProject, getDevelopers } from '../../lib/api';
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface NewProjectModalProps {
 
 export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalProps) {
   const [loading, setLoading] = useState(false);
+  const [developers, setDevelopers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     developerId: '',
@@ -25,11 +26,25 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
     description: ''
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      getDevelopers()
+        .then(res => {
+          const devs = res?.data || [];
+          setDevelopers(devs);
+          if (devs.length > 0) {
+            setFormData(prev => ({ ...prev, developerId: devs[0].id }));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.developerId) {
-      alert('El Nombre del Proyecto y el Desarrollador ID son obligatorios');
+      alert('El Nombre del Proyecto y la Desarrolladora son obligatorios');
       return;
     }
 
@@ -82,14 +97,17 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Desarrollador ID *</label>
-              <input 
-                type="text"
+              <label className="block text-[11px] font-medium text-slate-700">Desarrolladora *</label>
+              <select 
                 value={formData.developerId}
                 onChange={e => setFormData({...formData, developerId: e.target.value})}
-                placeholder="UUID del desarrollador"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
-              />
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
+              >
+                <option value="">Selecciona desarrolladora...</option>
+                {developers.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
