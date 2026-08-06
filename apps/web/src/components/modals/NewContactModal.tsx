@@ -81,11 +81,14 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
 
     try {
       setLoading(true);
+      const { currency, projectOfInterest, assignedUserId, ...restOfData } = formData;
       const payload = {
-        ...formData,
+        ...restOfData,
         budgetMin: formData.budgetMin ? Number(formData.budgetMin) : null,
         budgetMax: formData.budgetMax ? Number(formData.budgetMax) : null,
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+        interests: formData.projectOfInterest ? [formData.projectOfInterest] : [],
+        assignedTo: formData.assignedUserId || null
       };
 
       if (initialData?.id) {
