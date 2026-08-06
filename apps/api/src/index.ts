@@ -47,6 +47,14 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Propify CRM API is running' });
 });
 
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 app.listen(port, () => {
   console.log(`🚀 Propify CRM API running on http://localhost:${port}`);
 });
