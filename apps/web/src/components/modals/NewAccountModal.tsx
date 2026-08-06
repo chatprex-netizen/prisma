@@ -200,10 +200,12 @@ export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalP
               <select
                 value={formData.currency}
                 onChange={e => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+                translate="no"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white notranslate"
               >
-                <option value="PEN">Soles (S/)</option>
-                <option value="USD">Dólares ($)</option>
+                <option value="PEN">PEN (S/)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
               </select>
             </div>
             <div className="space-y-1">

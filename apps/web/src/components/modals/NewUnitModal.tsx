@@ -158,9 +158,12 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
               <select 
                 value={formData.currency}
                 onChange={e => setFormData({...formData, currency: e.target.value})}
-                className="w-24 px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50 text-slate-700">
+                translate="no"
+                className="w-24 px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50 text-slate-700 notranslate"
+              >
                 <option value="USD">USD ($)</option>
                 <option value="PEN">PEN (S/)</option>
+                <option value="EUR">EUR (€)</option>
               </select>
               <input 
                 type="number" 

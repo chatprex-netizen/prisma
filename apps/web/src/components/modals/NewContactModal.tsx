@@ -237,7 +237,8 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 <select 
                   value={formData.currency}
                   onChange={e => setFormData({...formData, currency: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                  translate="no"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white notranslate"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="PEN">PEN (S/)</option>

@@ -163,10 +163,12 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                 <select 
                   value={formData.currency}
                   onChange={e => setFormData({...formData, currency: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                  translate="no"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white notranslate"
                 >
-                  <option value="USD">Dólares (USD)</option>
-                  <option value="PEN">Soles (PEN)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="PEN">PEN (S/)</option>
+                  <option value="EUR">EUR (€)</option>
                 </select>
               </div>
               <div className="space-y-1">
