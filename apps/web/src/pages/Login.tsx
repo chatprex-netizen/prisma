@@ -1,4 +1,48 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { fetchApi } from '../lib/api';
+
 export function Login() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        const data = await fetchApi('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+        login(data.token, data.user);
+        navigate('/');
+      } else {
+        const data = await fetchApi('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ email, password, firstName, lastName }),
+        });
+        login(data.token, data.user);
+        navigate('/');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Ocurrió un error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex h-screen w-full font-sans">
       {/* Left side (Dark) */}
@@ -41,19 +85,59 @@ export function Login() {
           </div>
 
           <div className="bg-slate-50 p-1 rounded-lg flex mb-6 border border-slate-100">
-            <button className="flex-1 py-1.5 text-xs font-semibold bg-white rounded-md shadow-sm border border-slate-200 text-slate-900">
+            <button 
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-colors ${isLogin ? 'bg-white shadow-sm border border-slate-200 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+            >
               Ingresar
             </button>
-            <button className="flex-1 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700">
+            <button 
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${!isLogin ? 'bg-white shadow-sm border border-slate-200 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+            >
               Crear cuenta
             </button>
           </div>
 
-          <form className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-xs font-medium text-slate-700">Nombre</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-xs font-medium text-slate-700">Apellido</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-slate-700">Correo</label>
               <input 
                 type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
@@ -62,12 +146,19 @@ export function Login() {
               <label className="block text-xs font-medium text-slate-700">Contraseña</label>
               <input 
                 type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
 
-            <button type="submit" className="w-full py-2.5 mt-2 rounded-lg bg-brand-green text-white text-sm font-semibold hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/30">
-              Ingresar
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full py-2.5 mt-2 rounded-lg bg-brand-green text-white text-sm font-semibold hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/30 disabled:opacity-50"
+            >
+              {isLoading ? 'Cargando...' : isLogin ? 'Ingresar' : 'Crear cuenta'}
             </button>
           </form>
         </div>

@@ -14,31 +14,37 @@ import { Users } from './pages/Users';
 import { Finances } from './pages/Finances';
 import { AIAssistants } from './pages/AIAssistants';
 import { Conversations } from './pages/Conversations';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected routes wrapped in MainLayout */}
-        <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
-        <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
-        <Route path="/pipeline" element={<MainLayout><Pipeline /></MainLayout>} />
-        <Route path="/projects" element={<MainLayout><Projects /></MainLayout>} />
-        <Route path="/units" element={<MainLayout><Units /></MainLayout>} />
-        <Route path="/contacts" element={<MainLayout><Contacts /></MainLayout>} />
-        <Route path="/calendar" element={<MainLayout><Calendar /></MainLayout>} />
-        <Route path="/conversations" element={<MainLayout><Conversations /></MainLayout>} />
-        <Route path="/campaigns" element={<MainLayout><Campaigns /></MainLayout>} />
-        <Route path="/finances" element={<MainLayout><Finances /></MainLayout>} />
-        <Route path="/ai-assistants" element={<MainLayout><AIAssistants /></MainLayout>} />
-        <Route path="/users" element={<MainLayout><Users /></MainLayout>} />
-        <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected routes wrapped in MainLayout */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
+            <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
+            <Route path="/pipeline" element={<MainLayout><Pipeline /></MainLayout>} />
+            <Route path="/projects" element={<MainLayout><Projects /></MainLayout>} />
+            <Route path="/units" element={<MainLayout><Units /></MainLayout>} />
+            <Route path="/contacts" element={<MainLayout><Contacts /></MainLayout>} />
+            <Route path="/calendar" element={<MainLayout><Calendar /></MainLayout>} />
+            <Route path="/conversations" element={<MainLayout><Conversations /></MainLayout>} />
+            <Route path="/campaigns" element={<MainLayout><Campaigns /></MainLayout>} />
+            <Route path="/finances" element={<MainLayout><Finances /></MainLayout>} />
+            <Route path="/ai-assistants" element={<MainLayout><AIAssistants /></MainLayout>} />
+            <Route path="/users" element={<MainLayout><Users /></MainLayout>} />
+            <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
