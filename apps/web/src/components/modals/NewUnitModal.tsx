@@ -22,6 +22,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
     bedrooms: '',
     bathrooms: '',
     floor: '',
+    parkingSpots: '',
     description: ''
   });
 
@@ -53,20 +54,23 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
 
     try {
       setLoading(true);
+      // Clean and map fields to match the database schema
+      const { currency, ...restData } = formData;
       await createProperty({
-        ...formData,
+        ...restData,
         projectId: formData.projectId || undefined,
         price: Number(formData.price),
         areaTotal: formData.areaTotal ? Number(formData.areaTotal) : null,
         bedrooms: formData.bedrooms ? Number(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : null,
         floor: formData.floor ? Number(formData.floor) : null,
+        parkingSpots: formData.parkingSpots ? Number(formData.parkingSpots) : null,
       });
       if (onSuccess) onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Error al crear la unidad');
+      alert(error?.message || 'Error al crear la unidad');
     } finally {
       setLoading(false);
     }
@@ -169,10 +173,10 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
             </div>
           </div>
 
-          {/* Fila 4: Características */}
-          <div className="grid grid-cols-4 gap-2">
+          {/* Fila 4: Características Compactas */}
+          <div className="grid grid-cols-5 gap-2">
             <div className="space-y-1">
-              <label className="block text-[10px] font-medium text-slate-700">Área (m²)</label>
+              <label className="block text-[10px] font-medium text-slate-700 truncate">Área (m²)</label>
               <input 
                 type="number" 
                 step="0.1"
@@ -183,7 +187,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-medium text-slate-700">Dorms</label>
+              <label className="block text-[10px] font-medium text-slate-700 truncate">Habitac.</label>
               <input 
                 type="number" 
                 value={formData.bedrooms}
@@ -193,7 +197,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-medium text-slate-700">Baños</label>
+              <label className="block text-[10px] font-medium text-slate-700 truncate">Baños</label>
               <input 
                 type="number" 
                 value={formData.bathrooms}
@@ -203,12 +207,22 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-medium text-slate-700">Piso N°</label>
+              <label className="block text-[10px] font-medium text-slate-700 truncate">Piso N°</label>
               <input 
                 type="number" 
                 value={formData.floor}
                 onChange={e => setFormData({...formData, floor: e.target.value})}
                 placeholder="1"
+                className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-medium text-slate-700 truncate" title="Estacionamiento">Estac.</label>
+              <input 
+                type="number" 
+                value={formData.parkingSpots}
+                onChange={e => setFormData({...formData, parkingSpots: e.target.value})}
+                placeholder="0"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
