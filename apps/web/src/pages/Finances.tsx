@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Receipt, BookOpen, Plus, Search, DollarSign, ChevronRight } from 'lucide-react';
-import { getIncomes, getExpenses, getAccounts } from '../lib/api';
+import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Receipt, BookOpen, Plus, Search, DollarSign, ChevronRight, Trash2 } from 'lucide-react';
+import { getIncomes, getExpenses, getAccounts, deleteIncome, deleteExpense, deleteAccount } from '../lib/api';
+import { NewIncomeModal } from '../components/modals/NewIncomeModal';
+import { NewExpenseModal } from '../components/modals/NewExpenseModal';
+import { NewAccountModal } from '../components/modals/NewAccountModal';
 
 type FinanceTab = 'dashboard' | 'incomes' | 'expenses' | 'accounts';
 
@@ -65,6 +68,11 @@ export function Finances() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Modals visibility states
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+
   useEffect(() => {
     setActiveTab(getTabFromPath());
   }, [location.pathname]);
@@ -84,6 +92,39 @@ export function Finances() {
       console.error('Error loading finances:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteIncome = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este ingreso?')) return;
+    try {
+      await deleteIncome(id);
+      loadAll();
+    } catch (err: any) {
+      console.error(err);
+      alert('Error al eliminar el ingreso');
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este egreso?')) return;
+    try {
+      await deleteExpense(id);
+      loadAll();
+    } catch (err: any) {
+      console.error(err);
+      alert('Error al eliminar el egreso');
+    }
+  };
+
+  const handleDeleteAccount = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta cuenta contable?')) return;
+    try {
+      await deleteAccount(id);
+      loadAll();
+    } catch (err: any) {
+      console.error(err);
+      alert('Error al eliminar la cuenta contable');
     }
   };
 
@@ -216,7 +257,10 @@ export function Finances() {
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-semibold text-slate-900">Cuentas por Cobrar (Ingresos)</h3>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors">
+                <button 
+                  onClick={() => setIsIncomeModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                >
                   <Plus className="w-3.5 h-3.5" />Nuevo Ingreso
                 </button>
               </div>
@@ -225,24 +269,36 @@ export function Finances() {
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Nro.</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Fecha</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Descripción</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Tipo</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Cliente</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Método</th>
                       <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Monto</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
+                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {incomes.map(inc => (
                       <tr key={inc.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-3 px-4 text-slate-500 font-mono text-xs">{inc.number}</td>
+                        <td className="py-3 px-4 text-slate-600 text-xs">{new Date(inc.date).toLocaleDateString('es-PE')}</td>
                         <td className="py-3 px-4 font-medium text-slate-900">{inc.description?.substring(0, 50) || '—'}</td>
                         <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-medium">{incomeTypeLabels[inc.type] || inc.type}</span></td>
-                        <td className="py-3 px-4 text-slate-600">{inc.contact ? `${inc.contact.firstName} ${inc.contact.lastName}` : '—'}</td>
+                        <td className="py-3 px-4 text-slate-600">{inc.contact ? `${inc.contact.firstName} ${inc.contact.lastName || ''}` : '—'}</td>
                         <td className="py-3 px-4 text-slate-500 text-xs">{paymentMethodLabels[inc.paymentMethod] || inc.paymentMethod}</td>
                         <td className="py-3 px-4 text-right font-semibold text-emerald-600">S/ {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                         <td className="py-3 px-4"><StatusBadge status={inc.status} /></td>
+                        <td className="py-3 px-4 text-center">
+                          <button 
+                            onClick={() => handleDeleteIncome(inc.id)}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Eliminar Ingreso"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -262,7 +318,10 @@ export function Finances() {
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-semibold text-slate-900">Cuentas por Pagar (Egresos)</h3>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors">
+                <button 
+                  onClick={() => setIsExpenseModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                >
                   <Plus className="w-3.5 h-3.5" />Nuevo Egreso
                 </button>
               </div>
@@ -271,24 +330,36 @@ export function Finances() {
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Nro.</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Fecha</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Descripción</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Categoría</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Proveedor</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Doc. Tipo</th>
                       <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Total</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
+                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {expenses.map(exp => (
                       <tr key={exp.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-3 px-4 text-slate-500 font-mono text-xs">{exp.number}</td>
+                        <td className="py-3 px-4 text-slate-600 text-xs">{new Date(exp.date).toLocaleDateString('es-PE')}</td>
                         <td className="py-3 px-4 font-medium text-slate-900">{exp.description?.substring(0, 50) || '—'}</td>
                         <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{expenseCategoryLabels[exp.category] || exp.category}</span></td>
                         <td className="py-3 px-4 text-slate-600">{exp.vendorName || '—'}</td>
                         <td className="py-3 px-4 text-slate-500 text-xs">{exp.docType}</td>
                         <td className="py-3 px-4 text-right font-semibold text-red-500">S/ {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                         <td className="py-3 px-4"><StatusBadge status={exp.status} /></td>
+                        <td className="py-3 px-4 text-center">
+                          <button 
+                            onClick={() => handleDeleteExpense(exp.id)}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Eliminar Egreso"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -308,7 +379,10 @@ export function Finances() {
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-semibold text-slate-900">Plan de Cuentas Contable</h3>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors">
+                <button 
+                  onClick={() => setIsAccountModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                >
                   <Plus className="w-3.5 h-3.5" />Nueva Cuenta
                 </button>
               </div>
@@ -322,6 +396,7 @@ export function Finances() {
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Subtipo</th>
                       <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Saldo</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
+                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -339,11 +414,20 @@ export function Finances() {
                           }`}>{acc.type}</span>
                         </td>
                         <td className="py-3 px-4 text-slate-500 text-xs">{acc.subtype?.replace(/_/g, ' ')}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-slate-900">S/ {Number(acc.currentBalance || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3 px-4 text-right font-semibold text-slate-900 font-mono">S/ {Number(acc.currentBalance || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${acc.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                             {acc.isActive ? 'Activa' : 'Inactiva'}
                           </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button 
+                            onClick={() => handleDeleteAccount(acc.id)}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Eliminar Cuenta"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -361,6 +445,24 @@ export function Finances() {
           )}
         </>
       )}
+
+      <NewIncomeModal 
+        isOpen={isIncomeModalOpen}
+        onClose={() => setIsIncomeModalOpen(false)}
+        onSuccess={loadAll}
+      />
+
+      <NewExpenseModal 
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSuccess={loadAll}
+      />
+
+      <NewAccountModal 
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
+        onSuccess={loadAll}
+      />
     </div>
   );
 }

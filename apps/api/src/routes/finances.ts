@@ -50,7 +50,12 @@ router.get('/incomes', authenticate, async (req: Request, res: Response) => {
 
 router.post('/incomes', authenticate, async (req: Request, res: Response) => {
   try {
-    const income = await prisma.income.create({ data: req.body });
+    const data = {
+      ...req.body,
+      number: req.body.number || `INC-${Date.now()}`,
+      createdBy: (req as any).user?.id || 'system'
+    };
+    const income = await prisma.income.create({ data });
     res.status(201).json(income);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -77,7 +82,12 @@ router.get('/expenses', authenticate, async (req: Request, res: Response) => {
 
 router.post('/expenses', authenticate, async (req: Request, res: Response) => {
   try {
-    const expense = await prisma.expense.create({ data: req.body });
+    const data = {
+      ...req.body,
+      number: req.body.number || `EXP-${Date.now()}`,
+      createdBy: (req as any).user?.id || 'system'
+    };
+    const expense = await prisma.expense.create({ data });
     res.status(201).json(expense);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -114,6 +124,36 @@ router.post('/journal-entries', authenticate, async (req: Request, res: Response
       include: { lines: true }
     });
     res.status(201).json(entry);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE income
+router.delete('/incomes/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    await prisma.income.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Income deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE expense
+router.delete('/expenses/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    await prisma.expense.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Expense deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE account
+router.delete('/accounts/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    await prisma.account.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Account deleted successfully' });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }

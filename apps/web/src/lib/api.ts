@@ -82,14 +82,17 @@ export const updateClient = (id: string, data: any) => fetchApi(`/clients/${id}`
 // Finances - Accounts
 export const getAccounts = () => fetchApi('/finances/accounts');
 export const createAccount = (data: any) => fetchApi('/finances/accounts', { method: 'POST', body: JSON.stringify(data) });
+export const deleteAccount = (id: string) => fetchApi(`/finances/accounts/${id}`, { method: 'DELETE' });
 
 // Finances - Incomes
 export const getIncomes = () => fetchApi('/finances/incomes');
 export const createIncome = (data: any) => fetchApi('/finances/incomes', { method: 'POST', body: JSON.stringify(data) });
+export const deleteIncome = (id: string) => fetchApi(`/finances/incomes/${id}`, { method: 'DELETE' });
 
 // Finances - Expenses
 export const getExpenses = () => fetchApi('/finances/expenses');
 export const createExpense = (data: any) => fetchApi('/finances/expenses', { method: 'POST', body: JSON.stringify(data) });
+export const deleteExpense = (id: string) => fetchApi(`/finances/expenses/${id}`, { method: 'DELETE' });
 
 // Finances - Journal Entries
 export const getJournalEntries = () => fetchApi('/finances/journal-entries');

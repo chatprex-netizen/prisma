@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { UserCheck, Search, Filter, ChevronDown, ChevronRight, X, Edit3, FileText, Phone, Mail, MapPin, Heart, Save } from 'lucide-react';
-import { getClients, updateClient } from '../lib/api';
+import { UserCheck, Search, Filter, ChevronDown, ChevronRight, X, Edit3, FileText, Phone, Mail, MapPin, Heart, Save, Plus, Trash2 } from 'lucide-react';
+import { getClients, updateClient, deleteContact } from '../lib/api';
+import { NewContactModal } from '../components/modals/NewContactModal';
 
 type MaritalStatus = 'SOLTERO' | 'CASADO' | 'DIVORCIADO' | 'VIUDO' | 'CONVIVIENTE';
 
@@ -44,6 +45,7 @@ export function Clients() {
   const [editData, setEditData] = useState<Partial<Client>>({});
   const [activeTab, setActiveTab] = useState<'personal' | 'spouse' | 'contracts'>('personal');
   const [saving, setSaving] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadClients();
@@ -64,7 +66,7 @@ export function Clients() {
     const term = search.toLowerCase();
     return (
       c.firstName.toLowerCase().includes(term) ||
-      c.lastName.toLowerCase().includes(term) ||
+      (c.lastName && c.lastName.toLowerCase().includes(term)) ||
       (c.dni && c.dni.includes(term)) ||
       (c.email && c.email.toLowerCase().includes(term)) ||
       c.phone.includes(term)
@@ -84,11 +86,25 @@ export function Clients() {
     try {
       await updateClient(selectedClient.id, editData);
       await loadClients();
+      // Keep selected client updated
+      setSelectedClient({ ...selectedClient, ...editData } as Client);
       setEditMode(false);
     } catch (err) {
       console.error('Error saving client:', err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar permanentemente este cliente?')) return;
+    try {
+      await deleteContact(id);
+      setSelectedClient(null);
+      loadClients();
+    } catch (err) {
+      console.error('Error deleting client:', err);
+      alert('Error al eliminar el cliente');
     }
   };
 
@@ -116,6 +132,13 @@ export function Clients() {
               className="pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-64"
             />
           </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Cliente
+          </button>
         </div>
       </div>
 
@@ -174,10 +197,10 @@ export function Clients() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green font-bold text-xs shrink-0">
-                            {client.firstName[0]}{client.lastName[0]}
+                            {client.firstName[0]}{client.lastName ? client.lastName[0] : ''}
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">{client.firstName} {client.lastName}</p>
+                            <p className="font-medium text-slate-900">{client.firstName} {client.lastName || ''}</p>
                             <p className="text-xs text-slate-400">{client.email || 'Sin email'}</p>
                           </div>
                         </div>
@@ -206,7 +229,7 @@ export function Clients() {
             {/* Panel Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
               <div>
-                <h2 className="font-bold text-slate-900">{selectedClient.firstName} {selectedClient.lastName}</h2>
+                <h2 className="font-bold text-slate-900">{selectedClient.firstName} {selectedClient.lastName || ''}</h2>
                 <p className="text-xs text-slate-400">{selectedClient.dni ? `DNI: ${selectedClient.dni}` : 'Sin DNI registrado'}</p>
               </div>
               <div className="flex items-center gap-2">
@@ -215,9 +238,14 @@ export function Clients() {
                     <Save className="w-3.5 h-3.5" />{saving ? 'Guardando...' : 'Guardar'}
                   </button>
                 ) : (
-                  <button onClick={() => setEditMode(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium hover:bg-slate-200 transition-colors">
-                    <Edit3 className="w-3.5 h-3.5" />Editar
-                  </button>
+                  <>
+                    <button onClick={() => setEditMode(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium hover:bg-slate-200 transition-colors">
+                      <Edit3 className="w-3.5 h-3.5" />Editar
+                    </button>
+                    <button onClick={() => handleDelete(selectedClient.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />Eliminar
+                    </button>
+                  </>
                 )}
                 <button onClick={() => setSelectedClient(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                   <X className="w-4 h-4" />
@@ -334,6 +362,12 @@ export function Clients() {
           </div>
         )}
       </div>
+
+      <NewContactModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={loadClients}
+      />
     </div>
   );
 }
