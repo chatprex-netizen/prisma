@@ -220,7 +220,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
                 <select 
@@ -234,21 +234,11 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Presupuesto Mínimo</label>
+                <label className="block text-[11px] font-medium text-slate-700">Presupuesto Estimado</label>
                 <input 
                   type="number" 
                   value={formData.budgetMin}
                   onChange={e => setFormData({...formData, budgetMin: e.target.value})}
-                  placeholder="0"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Presupuesto Máximo</label>
-                <input 
-                  type="number" 
-                  value={formData.budgetMax}
-                  onChange={e => setFormData({...formData, budgetMax: e.target.value})}
                   placeholder="0"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 />
