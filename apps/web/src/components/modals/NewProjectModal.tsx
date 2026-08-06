@@ -124,6 +124,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
                 <option value="TERRENO_COMERCIAL">Terreno Comercial</option>
                 <option value="CENTRO_COMERCIAL">Centro Comercial</option>
                 <option value="OFICINAS_CORPORATIVAS">Oficinas Corporativas</option>
+                <option value="HABILITACION_URBANA">Habilitación Urbana</option>
                 <option value="MIXTO">Mixto</option>
               </select>
             </div>

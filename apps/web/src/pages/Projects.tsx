@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<string, string> = {
   TERRENO_COMERCIAL: 'Terreno Comercial',
   CENTRO_COMERCIAL: 'Centro Comercial',
   OFICINAS_CORPORATIVAS: 'Oficinas',
+  HABILITACION_URBANA: 'Habilitación Urbana',
   MIXTO: 'Mixto',
 };
 
