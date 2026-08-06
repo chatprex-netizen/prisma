@@ -128,4 +128,23 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response): Promise
   }
 });
 
+// OBTENER TODOS LOS USUARIOS (para selectores de asesores)
+router.get('/users', authenticate, async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+      where: { isActive: true },
+      orderBy: { firstName: 'asc' }
+    });
+    res.json({ success: true, data: users });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;

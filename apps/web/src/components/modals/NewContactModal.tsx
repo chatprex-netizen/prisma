@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createContact, updateContact } from '../../lib/api';
+import { createContact, updateContact, getProjects, getUsers } from '../../lib/api';
 
 interface NewContactModalProps {
   isOpen: boolean;
@@ -11,6 +11,9 @@ interface NewContactModalProps {
 
 export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: NewContactModalProps) {
   const [loading, setLoading] = useState(false);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,6 +32,14 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
   });
 
   useEffect(() => {
+    if (isOpen) {
+      // Load real projects and users from the backend
+      getProjects().then(res => setProjects(res?.data || [])).catch(console.error);
+      getUsers().then(res => setUsers(res?.data || [])).catch(console.error);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (initialData) {
       setFormData({
         firstName: initialData.firstName || '',
@@ -42,7 +53,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         budgetMax: initialData.budgetMax ? String(initialData.budgetMax) : '',
         currency: initialData.currency || 'USD',
         projectOfInterest: initialData.projectOfInterest || '',
-        assignedUserId: initialData.assignedUserId || '',
+        assignedUserId: initialData.assignedTo || initialData.assignedUserId || '',
         tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
         notes: initialData.notes || ''
       });
@@ -200,9 +211,9 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   <option value="">Ninguno específico</option>
-                  <option value="Torre Marina">Torre Marina</option>
-                  <option value="Condominio El Bosque">Condominio El Bosque</option>
-                  <option value="Residencial Los Olivos">Residencial Los Olivos</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.name}>{p.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-1">
@@ -213,9 +224,9 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   <option value="">Sin asignar (Libre)</option>
-                  <option value="user1">Juan Pérez (Tú)</option>
-                  <option value="user2">María García</option>
-                  <option value="user3">Carlos Asesor</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.firstName} {u.lastName || ''}</option>
+                  ))}
                 </select>
               </div>
             </div>

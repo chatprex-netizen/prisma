@@ -125,5 +125,8 @@ export const seedTemplates = () => fetchApi('/templates/seed', { method: 'POST' 
 export const getCampaigns = () => fetchApi('/campaigns');
 export const getCampaign = (id: string) => fetchApi(`/campaigns/${id}`);
 export const createCampaign = (data: { name: string; templateId: string; contactIds: string[]; scheduledAt?: string }) => fetchApi('/campaigns', { method: 'POST', body: JSON.stringify(data) });
+
+// Users
+export const getUsers = () => fetchApi('/auth/users');
 export const sendCampaign = (id: string) => fetchApi(`/campaigns/${id}/send`, { method: 'POST' });
 
