@@ -1,4 +1,15 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+function getApiUrl(): string {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host.includes('prexup.com')) {
+      return 'https://api.prexup.com/api';
+    }
+  }
+  return 'http://localhost:3001/api';
+}
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
@@ -16,14 +27,21 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     headers,
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, config);
-  const data = await response.json();
+  try {
+    const response = await fetch(`${getApiUrl()}${endpoint}`, config);
+    const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(data.error || 'API Error');
+    if (!response.ok) {
+      throw new Error(data.message || data.error || `Error ${response.status}`);
+    }
+
+    return data;
+  } catch (err: any) {
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      throw new Error('No se pudo conectar con el servidor backend (https://api.prexup.com). Verifica que la API esté activa.');
+    }
+    throw err;
   }
-
-  return data;
 }
 
 // Contacts
