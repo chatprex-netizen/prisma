@@ -54,7 +54,11 @@ router.delete('/projects/:id', async (req: AuthRequest, res: Response) => {
 router.get('/properties', async (req: AuthRequest, res: Response) => {
   try {
     const properties = await prisma.property.findMany({
-      include: { project: true },
+      include: { 
+        project: {
+          include: { developer: true }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     });
     res.json({ success: true, data: properties });
