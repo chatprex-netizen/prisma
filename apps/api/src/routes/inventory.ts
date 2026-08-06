@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // ─── PROJECTS ───
 
-router.get('/projects', async (req: Request, res: Response) => {
+router.get('/projects', async (req: AuthRequest, res: Response) => {
   try {
     const projects = await prisma.project.findMany({
       include: { developer: true },
@@ -18,7 +19,7 @@ router.get('/projects', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/projects', async (req: Request, res: Response) => {
+router.post('/projects', async (req: AuthRequest, res: Response) => {
   try {
     const project = await prisma.project.create({ data: req.body });
     res.status(201).json({ success: true, data: project });
@@ -27,7 +28,7 @@ router.post('/projects', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/projects/:id', async (req: Request, res: Response) => {
+router.put('/projects/:id', async (req: AuthRequest, res: Response) => {
   try {
     const project = await prisma.project.update({
       where: { id: req.params.id },
@@ -39,7 +40,7 @@ router.put('/projects/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/projects/:id', async (req: Request, res: Response) => {
+router.delete('/projects/:id', async (req: AuthRequest, res: Response) => {
   try {
     await prisma.project.delete({ where: { id: req.params.id } });
     res.json({ success: true, message: 'Project deleted successfully' });
@@ -50,7 +51,7 @@ router.delete('/projects/:id', async (req: Request, res: Response) => {
 
 // ─── PROPERTIES ───
 
-router.get('/properties', async (req: Request, res: Response) => {
+router.get('/properties', async (req: AuthRequest, res: Response) => {
   try {
     const properties = await prisma.property.findMany({
       include: { project: true },
@@ -62,9 +63,22 @@ router.get('/properties', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/properties', async (req: Request, res: Response) => {
+router.post('/properties', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const property = await prisma.property.create({ data: req.body });
+    const agentId = req.user?.id;
+    if (!agentId) {
+      return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
+    }
+
+    const { unitCode, title, ...restOfData } = req.body;
+    const property = await prisma.property.create({ 
+      data: {
+        ...restOfData,
+        unitCode,
+        title: title || unitCode, // Default title to unitCode if not provided
+        agentId
+      }
+    });
     res.status(201).json({ success: true, data: property });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
