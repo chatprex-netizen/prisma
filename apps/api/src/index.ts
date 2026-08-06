@@ -40,6 +40,10 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Propify CRM API is running' });
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Propify CRM API running on http://localhost:${port}`);
+app.get('/', (req: Request, res: Response) => {
+  res.send('Propify CRM API is up and running!');
+});
+
+app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`🚀 Propify CRM API running on http://0.0.0.0:${port}`);
 });
