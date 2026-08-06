@@ -85,10 +85,10 @@ export function Projects() {
         ) : projects.map(project => (
           <div key={project.id} className="bg-white rounded-xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow group cursor-pointer flex flex-col">
             {/* Top Image Placeholder */}
-            <div className="h-32 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-slate-300" />
-              <div className="absolute top-3 right-3">
-                <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wide ${STATUS_COLORS[project.status]}`}>
+            <div className="h-14 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-slate-300" />
+              <div className="absolute top-2.5 right-3">
+                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${STATUS_COLORS[project.status]}`}>
                   {project.status.replace('_', ' ')}
                 </span>
               </div>
