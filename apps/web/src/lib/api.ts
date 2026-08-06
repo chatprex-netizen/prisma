@@ -74,9 +74,26 @@ export const getPipeline = () => fetchApi('/pipeline');
 export const createOpportunity = (data: any) => fetchApi('/pipeline', { method: 'POST', body: JSON.stringify(data) });
 export const updateOpportunityStage = (id: string, stage: string) => fetchApi(`/pipeline/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) });
 
-// Finances
-export const getTransactions = () => fetchApi('/finances/transactions');
-export const createTransaction = (data: any) => fetchApi('/finances/transactions', { method: 'POST', body: JSON.stringify(data) });
+// Clients (Gestión de Clientes)
+export const getClients = () => fetchApi('/clients');
+export const getClient = (id: string) => fetchApi(`/clients/${id}`);
+export const updateClient = (id: string, data: any) => fetchApi(`/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+// Finances - Accounts
+export const getAccounts = () => fetchApi('/finances/accounts');
+export const createAccount = (data: any) => fetchApi('/finances/accounts', { method: 'POST', body: JSON.stringify(data) });
+
+// Finances - Incomes
+export const getIncomes = () => fetchApi('/finances/incomes');
+export const createIncome = (data: any) => fetchApi('/finances/incomes', { method: 'POST', body: JSON.stringify(data) });
+
+// Finances - Expenses
+export const getExpenses = () => fetchApi('/finances/expenses');
+export const createExpense = (data: any) => fetchApi('/finances/expenses', { method: 'POST', body: JSON.stringify(data) });
+
+// Finances - Journal Entries
+export const getJournalEntries = () => fetchApi('/finances/journal-entries');
+export const createJournalEntry = (data: any) => fetchApi('/finances/journal-entries', { method: 'POST', body: JSON.stringify(data) });
 
 // Appointments
 export const getAppointments = () => fetchApi('/appointments');

@@ -12,6 +12,7 @@ import { Settings } from './pages/Settings';
 import { Campaigns } from './pages/Campaigns';
 import { Users } from './pages/Users';
 import { Finances } from './pages/Finances';
+import { Clients } from './pages/Clients';
 import { AIAssistants } from './pages/AIAssistants';
 import { Conversations } from './pages/Conversations';
 import { AuthProvider } from './contexts/AuthContext';
@@ -35,7 +36,11 @@ function App() {
             <Route path="/calendar" element={<MainLayout><Calendar /></MainLayout>} />
             <Route path="/conversations" element={<MainLayout><Conversations /></MainLayout>} />
             <Route path="/campaigns" element={<MainLayout><Campaigns /></MainLayout>} />
+            <Route path="/clients" element={<MainLayout><Clients /></MainLayout>} />
             <Route path="/finances" element={<MainLayout><Finances /></MainLayout>} />
+            <Route path="/finances/incomes" element={<MainLayout><Finances /></MainLayout>} />
+            <Route path="/finances/expenses" element={<MainLayout><Finances /></MainLayout>} />
+            <Route path="/finances/accounts" element={<MainLayout><Finances /></MainLayout>} />
             <Route path="/ai-assistants" element={<MainLayout><AIAssistants /></MainLayout>} />
             <Route path="/users" element={<MainLayout><Users /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />

@@ -18,7 +18,11 @@ import {
   Sparkles,
   ChevronDown,
   ChevronRight,
-  Bot
+  Bot,
+  UserCheck,
+  Receipt,
+  TrendingUp,
+  BookOpen
 } from 'lucide-react';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -37,11 +41,38 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
     items: [
       { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
       { icon: MessageCircle, label: 'Mensajes', path: '/conversations' },
-      { icon: GitBranch, label: 'Pipeline', path: '/pipeline' },
-      { icon: Users, label: 'Contactos', path: '/contacts' },
       { icon: Calendar, label: 'Agenda', path: '/calendar' },
+    ]
+  },
+  {
+    title: 'GESTIÓN COMERCIAL',
+    items: [
+      { icon: GitBranch, label: 'Embudo', path: '/pipeline' },
+      { icon: Users, label: 'Contactos', path: '/contacts' },
+      { icon: Megaphone, label: 'Campañas', path: '/campaigns' },
+    ]
+  },
+  {
+    title: 'CLIENTES',
+    items: [
+      { icon: UserCheck, label: 'Clientes', path: '/clients' },
       { icon: FileText, label: 'Contratos', path: '/contracts' },
-      { icon: Wallet, label: 'Finanzas', path: '/finances' },
+    ]
+  },
+  {
+    title: 'ADMINISTRACIÓN',
+    items: [
+      {
+        icon: Wallet,
+        label: 'Finanzas',
+        id: 'finanzas',
+        subItems: [
+          { icon: TrendingUp, label: 'Dashboard', path: '/finances' },
+          { icon: Receipt, label: 'Ingresos', path: '/finances/incomes' },
+          { icon: Receipt, label: 'Egresos', path: '/finances/expenses' },
+          { icon: BookOpen, label: 'Plan Contable', path: '/finances/accounts' },
+        ]
+      },
     ]
   },
   {
@@ -60,7 +91,6 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
         id: 'automatizaciones',
         subItems: [
           { icon: Bot, label: 'Asistentes IA', path: '/ai-assistants' },
-          { icon: Megaphone, label: 'Campañas', path: '/campaigns' },
         ]
       },
       { 
@@ -85,7 +115,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     automatizaciones: false,
-    configuracion: false
+    configuracion: false,
+    finanzas: false
   });
 
   const toggleMenu = (id: string) => {
