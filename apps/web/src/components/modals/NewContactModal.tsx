@@ -69,8 +69,8 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
-    if (!formData.firstName || !formData.lastName || !formData.phone) {
-      alert('El Nombre, Apellido y Teléfono son obligatorios');
+    if (!formData.firstName || !formData.phone) {
+      alert('El Nombre y Teléfono son obligatorios');
       return;
     }
 
@@ -124,7 +124,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         {/* Body */}
         <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
           
-          {/* Row 1: Nombre and Apellido */}
+          {/* Row 1: Nombre and Teléfono */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Nombre *</label>
@@ -135,34 +135,6 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 placeholder="Ej. Carlos"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Apellido *</label>
-              <input 
-                type="text" 
-                value={formData.lastName}
-                onChange={e => setFormData({...formData, lastName: e.target.value})}
-                placeholder="Ej. Ramírez"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Tipo de Contacto and Teléfono */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Contacto *</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
-              >
-                <option value="CLIENTE">Cliente</option>
-                <option value="INVERSIONISTA">Inversionista</option>
-                <option value="PROPIETARIO">Propietario</option>
-                <option value="DESARROLLADOR">Desarrollador</option>
-                <option value="REFERIDO">Referido</option>
-              </select>
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Teléfono *</label>
