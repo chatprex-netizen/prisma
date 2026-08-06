@@ -13,6 +13,7 @@ export default {
         brand: {
           dark: '#1A222C',     // The deep navy/slate of the sidebar
           green: '#22C55E',    // The vivid green accent
+          greenLight: '#4ADE80', // Light green for active sub-items & accents
           greenHover: '#16A34A',
           bg: '#F8FAFC',       // The light gray app background
         }
