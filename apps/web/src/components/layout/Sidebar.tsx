@@ -71,6 +71,7 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
     items: [
       { icon: Building2, label: 'Proyectos', path: '/projects' },
       { icon: Home, label: 'Unidades', path: '/units' },
+      { icon: Building2, label: 'Desarrolladoras', path: '/developers' },
     ]
   },
   {

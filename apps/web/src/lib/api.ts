@@ -66,6 +66,9 @@ export const createProject = (data: any) => fetchApi('/inventory/projects', { me
 export const updateProject = (id: string, data: any) => fetchApi(`/inventory/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteProject = (id: string) => fetchApi(`/inventory/projects/${id}`, { method: 'DELETE' });
 export const getDevelopers = () => fetchApi('/inventory/developers');
+export const createDeveloper = (data: any) => fetchApi('/inventory/developers', { method: 'POST', body: JSON.stringify(data) });
+export const updateDeveloper = (id: string, data: any) => fetchApi(`/inventory/developers/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteDeveloper = (id: string) => fetchApi(`/inventory/developers/${id}`, { method: 'DELETE' });
 
 export const getProperties = () => fetchApi('/inventory/properties');
 export const createProperty = (data: any) => fetchApi('/inventory/properties', { method: 'POST', body: JSON.stringify(data) });

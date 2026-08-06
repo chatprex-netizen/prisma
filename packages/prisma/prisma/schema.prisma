@@ -39,18 +39,19 @@ enum Role {
 
 // ─── DESARROLLADORES INMOBILIARIOS ───
 model Developer {
-  id        String   @id @default(uuid())
-  name      String
-  legalName String?
-  ruc       String?  @unique
-  email     String?
-  phone     String?
-  address   String?
-  website   String?
-  logo      String?
-  notes     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  name        String
+  legalName   String?
+  ruc         String?  @unique
+  email       String?
+  phone       String?
+  contactName String?
+  address     String?
+  website     String?
+  logo        String?
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   projects Project[]
 }

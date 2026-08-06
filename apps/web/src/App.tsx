@@ -15,6 +15,7 @@ import { Finances } from './pages/Finances';
 import { Clients } from './pages/Clients';
 import { AIAssistants } from './pages/AIAssistants';
 import { Conversations } from './pages/Conversations';
+import { Developers } from './pages/Developers';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -32,6 +33,7 @@ function App() {
             <Route path="/pipeline" element={<MainLayout><Pipeline /></MainLayout>} />
             <Route path="/projects" element={<MainLayout><Projects /></MainLayout>} />
             <Route path="/units" element={<MainLayout><Units /></MainLayout>} />
+            <Route path="/developers" element={<MainLayout><Developers /></MainLayout>} />
             <Route path="/contacts" element={<MainLayout><Contacts /></MainLayout>} />
             <Route path="/calendar" element={<MainLayout><Calendar /></MainLayout>} />
             <Route path="/conversations" element={<MainLayout><Conversations /></MainLayout>} />

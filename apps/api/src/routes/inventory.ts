@@ -91,4 +91,41 @@ router.get('/developers', async (req: Request, res: Response) => {
   }
 });
 
+// POST /developers
+router.post('/developers', async (req: Request, res: Response) => {
+  try {
+    const developer = await prisma.developer.create({
+      data: req.body
+    });
+    res.status(201).json({ success: true, data: developer });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /developers/:id
+router.put('/developers/:id', async (req: Request, res: Response) => {
+  try {
+    const developer = await prisma.developer.update({
+      where: { id: req.params.id },
+      data: req.body
+    });
+    res.json({ success: true, data: developer });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /developers/:id
+router.delete('/developers/:id', async (req: Request, res: Response) => {
+  try {
+    await prisma.developer.delete({
+      where: { id: req.params.id }
+    });
+    res.json({ success: true, message: 'Developer deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 export default router;
