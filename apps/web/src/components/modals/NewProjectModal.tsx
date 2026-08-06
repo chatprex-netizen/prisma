@@ -71,21 +71,22 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-lg font-semibold text-slate-900">Nuevo Proyecto Inmobiliario</h2>
+        <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h2 className="text-base font-semibold text-slate-900">Nuevo Proyecto Inmobiliario</h2>
           <button 
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
+          {/* Row 1: Nombre and Desarrolladora */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Nombre del Proyecto *</label>
               <input 
@@ -111,7 +112,8 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Row 2: Tipo and Estado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Tipo de Proyecto *</label>
               <select 
@@ -142,17 +144,20 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="col-span-3 space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Dirección</label>
-              <input 
-                type="text" 
-                value={formData.address}
-                onChange={e => setFormData({...formData, address: e.target.value})}
-                placeholder="Av. Principal 123"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
-              />
-            </div>
+          {/* Row 3: Dirección */}
+          <div className="space-y-1">
+            <label className="block text-[11px] font-medium text-slate-700">Dirección</label>
+            <input 
+              type="text" 
+              value={formData.address}
+              onChange={e => setFormData({...formData, address: e.target.value})}
+              placeholder="Av. Principal 123"
+              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+            />
+          </div>
+
+          {/* Row 4: Ciudad and Provincia */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Ciudad</label>
               <input 
@@ -173,18 +178,10 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">País</label>
-              <input 
-                type="text" 
-                value={formData.country}
-                onChange={e => setFormData({...formData, country: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
-              />
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Row 5: Total Unidades and Fecha Entrega */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Total Unidades</label>
               <input 
@@ -206,6 +203,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             </div>
           </div>
           
+          {/* Row 6: URL Brochure */}
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">URL del Brochure</label>
             <input 
@@ -217,31 +215,32 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             />
           </div>
 
+          {/* Row 7: Descripción */}
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Descripción / Notas</label>
             <textarea 
-              rows={3}
+              rows={2}
               value={formData.description}
               onChange={e => setFormData({...formData, description: e.target.value})}
               placeholder="Detalles sobre amenidades, acabados..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
-            ></textarea>
+            />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+            className="px-4 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
           >
             {loading ? 'Creando...' : 'Crear Proyecto'}
           </button>
