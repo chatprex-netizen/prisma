@@ -1,14 +1,24 @@
 function getApiUrl(): string {
+  let baseUrl = 'http://localhost:3001';
+  
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  if (typeof window !== 'undefined') {
+    baseUrl = import.meta.env.VITE_API_URL;
+  } else if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host.includes('prexup.com')) {
-      return 'https://api.prexup.com/api';
+      baseUrl = 'https://api.prexup.com';
     }
   }
-  return 'http://localhost:3001/api';
+  
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  
+  if (!baseUrl.endsWith('/api')) {
+    baseUrl += '/api';
+  }
+  
+  return baseUrl;
 }
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
