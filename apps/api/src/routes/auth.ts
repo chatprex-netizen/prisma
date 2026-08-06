@@ -50,9 +50,9 @@ router.post('/register', async (req: Request, res: Response): Promise<any> => {
         role: user.role,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: error?.message || 'Error en el servidor al registrar usuario' });
   }
 });
 
@@ -91,9 +91,9 @@ router.post('/login', async (req: Request, res: Response): Promise<any> => {
         role: user.role,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: error?.message || 'Error en el servidor al iniciar sesión' });
   }
 });
 
