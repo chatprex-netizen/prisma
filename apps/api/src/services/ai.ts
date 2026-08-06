@@ -2,9 +2,17 @@ import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+
+// Lazy initialization — only creates client when actually needed
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'not-configured',
+    });
+  }
+  return _openai;
+}
 
 export async function generateAIResponse(
   userText: string, 
@@ -12,6 +20,11 @@ export async function generateAIResponse(
   chatId: string
 ): Promise<string | null> {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('⚠️ OPENAI_API_KEY not configured, skipping AI response');
+      return null;
+    }
+
     // 1. Fetch conversation history for context
     const recentMessages = await prisma.message.findMany({
       where: { chatId },
@@ -35,13 +48,11 @@ ${assistantConfig.knowledgeBase || 'No additional knowledge base provided.'}
       `.trim()
     };
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: assistantConfig.model || 'gpt-4o-mini',
       messages: [systemMessage, ...messages],
       temperature: 0.7,
       max_tokens: 250,
-      // Tools setup for Orchestrator/Transfer could be added here
-      // tools: [ ... ] 
     });
 
     return completion.choices[0].message.content;
@@ -51,3 +62,4 @@ ${assistantConfig.knowledgeBase || 'No additional knowledge base provided.'}
     return null;
   }
 }
+
