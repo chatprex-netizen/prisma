@@ -40,6 +40,21 @@ router.get('/:id', authenticate, async (req: Request, res: Response): Promise<an
   }
 });
 
+// Create new client
+router.post('/', authenticate, async (req: Request, res: Response) => {
+  try {
+    const client = await prisma.contact.create({
+      data: {
+        ...req.body,
+        type: 'CLIENTE' // Enforce type CLIENTE
+      }
+    });
+    res.status(201).json(client);
+  } catch (error: any) {
+    res.status(400).json({ message: error?.message || 'Error creating client' });
+  }
+});
+
 // Update client
 router.put('/:id', authenticate, async (req: Request, res: Response): Promise<any> => {
   try {
@@ -53,6 +68,16 @@ router.put('/:id', authenticate, async (req: Request, res: Response): Promise<an
     res.json(client);
   } catch (error: any) {
     res.status(500).json({ message: error?.message || 'Error updating client' });
+  }
+});
+
+// Delete client
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    await prisma.contact.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Client deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ message: error?.message || 'Error deleting client' });
   }
 });
 

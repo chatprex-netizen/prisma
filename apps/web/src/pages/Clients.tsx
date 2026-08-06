@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserCheck, Search, Filter, ChevronDown, ChevronRight, X, Edit3, FileText, Phone, Mail, MapPin, Heart, Save, Plus, Trash2 } from 'lucide-react';
-import { getClients, updateClient, deleteContact } from '../lib/api';
-import { NewContactModal } from '../components/modals/NewContactModal';
+import { getClients, updateClient, deleteClient } from '../lib/api';
+import { NewClientModal } from '../components/modals/NewClientModal';
 
 type MaritalStatus = 'SOLTERO' | 'CASADO' | 'DIVORCIADO' | 'VIUDO' | 'CONVIVIENTE';
 
@@ -99,7 +99,7 @@ export function Clients() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar permanentemente este cliente?')) return;
     try {
-      await deleteContact(id);
+      await deleteClient(id);
       setSelectedClient(null);
       loadClients();
     } catch (err) {
@@ -363,7 +363,7 @@ export function Clients() {
         )}
       </div>
 
-      <NewContactModal
+      <NewClientModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={loadClients}

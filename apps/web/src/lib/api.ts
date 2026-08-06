@@ -81,7 +81,9 @@ export const updateOpportunityStage = (id: string, stage: string) => fetchApi(`/
 // Clients (Gestión de Clientes)
 export const getClients = () => fetchApi('/clients');
 export const getClient = (id: string) => fetchApi(`/clients/${id}`);
+export const createClient = (data: any) => fetchApi('/clients', { method: 'POST', body: JSON.stringify(data) });
 export const updateClient = (id: string, data: any) => fetchApi(`/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteClient = (id: string) => fetchApi(`/clients/${id}`, { method: 'DELETE' });
 
 // Finances - Accounts
 export const getAccounts = () => fetchApi('/finances/accounts');
