@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2, PieChart as PieIcon } from 'lucide-react';
-import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource } from '../lib/api';
+import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource, getPipelineStages, updatePipelineStage } from '../lib/api';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-type TabType = 'perfil' | 'empresa' | 'apariencia' | 'whatsapp' | 'integraciones' | 'seguridad' | 'origenes';
+type TabType = 'perfil' | 'empresa' | 'apariencia' | 'whatsapp' | 'integraciones' | 'seguridad' | 'origenes' | 'etapas';
 
 // WhatsApp Connection Tab Component
 function WhatsAppConnectionTab() {
@@ -377,6 +377,7 @@ export function Settings() {
             { id: 'integraciones', icon: Link2, label: 'Integraciones' },
             { id: 'seguridad', icon: Shield, label: 'Seguridad y Permisos' },
             { id: 'origenes', icon: PieIcon, label: 'Orígenes de Leads' },
+            { id: 'etapas', icon: SettingsIcon, label: 'Etapas de Pipeline' },
           ].map(({ id, icon: Icon, label, badge }) => (
             <button
               key={id}
@@ -615,6 +616,11 @@ export function Settings() {
             <LeadSourcesTab />
           )}
 
+          {/* TAB: ETAPAS */}
+          {activeTab === 'etapas' && (
+            <PipelineStagesTab />
+          )}
+
         </div>
       </div>
     </div>
@@ -788,6 +794,146 @@ function LeadSourcesTab() {
                     </div>
                   </>
                 )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PipelineStagesTab() {
+  const [loading, setLoading] = useState(false);
+  const [stages, setStages] = useState<any[]>([]);
+
+  const fetchStages = async () => {
+    try {
+      setLoading(true);
+      const res = await getPipelineStages();
+      setStages(res.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStages();
+  }, []);
+
+  const handleFieldChange = (index: number, field: string, value: any) => {
+    const updated = [...stages];
+    updated[index] = { ...updated[index], [field]: value };
+    setStages(updated);
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      for (const stage of stages) {
+        await updatePipelineStage(stage.id, {
+          name: stage.name,
+          details: stage.details,
+          color: stage.color,
+          isVisible: stage.isVisible
+        });
+      }
+      alert('Configuración de etapas guardada con éxito.');
+    } catch (error) {
+      console.error(error);
+      alert('Error al guardar la configuración de etapas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 text-left font-sans">
+      <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div>
+          <h2 className="text-base font-bold text-slate-900">Gestión de Etapas del Pipeline</h2>
+          <p className="text-xxs text-slate-500 mt-0.5">Configura nombres, descripciones, colores y visibilidad de las etapas de tu embudo de ventas.</p>
+        </div>
+        <button 
+          onClick={handleSave}
+          disabled={loading}
+          className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm shadow-brand-green/20 flex items-center gap-1.5"
+        >
+          <Save className="w-3.5 h-3.5" />
+          {loading ? 'Guardando...' : 'Guardar Etapas'}
+        </button>
+      </div>
+
+      <div className="space-y-3 max-w-4xl">
+        {loading && stages.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-sm">Cargando etapas...</div>
+        ) : (
+          <div className="space-y-2">
+            {stages.map((stage, idx) => (
+              <div key={stage.id} className="p-3 bg-slate-50/50 hover:bg-slate-100/10 rounded-xl border border-slate-200/60 flex items-center gap-4 transition-colors bg-white">
+                {/* Color Picker (Stylized circle) */}
+                <div className="relative shrink-0 flex items-center">
+                  <input 
+                    type="color" 
+                    value={stage.color || '#64748b'} 
+                    onChange={e => handleFieldChange(idx, 'color', e.target.value)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    title="Elegir color de la etapa"
+                  />
+                  <div 
+                    className="w-5 h-5 rounded-full border border-slate-300 shadow-inner cursor-pointer"
+                    style={{ backgroundColor: stage.color || '#64748b' }}
+                  />
+                </div>
+
+                {/* Custom Name */}
+                <div className="w-1/4 min-w-0">
+                  <input 
+                    type="text" 
+                    value={stage.name}
+                    onChange={e => handleFieldChange(idx, 'name', e.target.value)}
+                    placeholder="Nombre de etapa"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-bold text-slate-800"
+                  />
+                </div>
+
+                {/* Details / Description */}
+                <div className="flex-1 min-w-0">
+                  <input 
+                    type="text" 
+                    value={stage.details || ''}
+                    onChange={e => handleFieldChange(idx, 'details', e.target.value)}
+                    placeholder="Detalle o descripción..."
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white text-slate-500 font-medium"
+                  />
+                </div>
+
+                {/* Visibility Toggle */}
+                <div className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleFieldChange(idx, 'isVisible', !stage.isVisible)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xxs font-bold border transition-all ${
+                      stage.isVisible 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                        : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                    }`}
+                  >
+                    {stage.isVisible ? (
+                      <>
+                        <Eye className="w-3.5 h-3.5" />
+                        Visible
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="w-3.5 h-3.5" />
+                        Oculto
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

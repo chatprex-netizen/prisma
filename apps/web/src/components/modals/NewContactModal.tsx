@@ -139,7 +139,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
 
         {/* Body */}
         <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
-          {/* Row 1: Nombre, Teléfono and Email */}
+          {/* Row 1: Nombre, Apellido, Tipo */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Nombre *</label>
@@ -151,6 +151,31 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-slate-700">Apellido</label>
+              <input 
+                type="text" 
+                value={formData.lastName}
+                onChange={e => setFormData({...formData, lastName: e.target.value})}
+                placeholder="Ej. Mendoza"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-slate-700">Tipo de Contacto</label>
+              <select 
+                value={formData.type}
+                onChange={e => setFormData({...formData, type: e.target.value})}
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+              >
+                <option value="LEAD">Lead</option>
+                <option value="CLIENTE">Cliente</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 2: Teléfono, Email, VIP */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Teléfono *</label>
               <input 
@@ -170,6 +195,17 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 placeholder="correo@ejemplo.com"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
+            </div>
+            <div className="flex items-center pt-5 pl-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={formData.isVip}
+                  onChange={e => setFormData({...formData, isVip: e.target.checked})}
+                  className="w-4 h-4 text-brand-green border-slate-300 rounded focus:ring-brand-green/20"
+                />
+                <span className="text-xs font-semibold text-slate-700">¿Es Cliente VIP? (Trato Especial)</span>
+              </label>
             </div>
           </div>
 

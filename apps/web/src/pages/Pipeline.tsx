@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, List, Kanban, Tag, DollarSign, Bot, Edit, Trash2 } from 'lucide-react';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
-import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
 import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity, toggleChatBot } from '../lib/api';
 
 export function Pipeline() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isStagesModalOpen, setIsStagesModalOpen] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
   const [draggedOverStage, setDraggedOverStage] = useState<string | null>(null);
+  const [activeMobileMenuId, setActiveMobileMenuId] = useState<string | null>(null);
   
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [stages, setStages] = useState<any[]>([]);
@@ -113,13 +111,6 @@ export function Pipeline() {
             </button>
           </div>
 
-          <button 
-            onClick={() => setIsStagesModalOpen(true)}
-            className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
-          >
-            <Settings className="w-4 h-4 text-slate-500" />
-            <span className="hidden sm:inline">Gestionar Etapas</span>
-          </button>
           <button 
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 md:flex-none bg-white border text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm ${showFilters ? 'bg-slate-100 border-slate-300 font-bold' : 'border-slate-200'}`}
@@ -279,87 +270,168 @@ export function Pipeline() {
                               {getElapsedTime(opp.createdAt)}
                             </span>
                             
-                            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
-                              {opp.contact?.phone && (
-                                <>
+                            <div className="relative" onClick={e => e.stopPropagation()}>
+                              {/* Desktop Actions (Shown on sm and above) */}
+                              <div className="hidden sm:flex items-center gap-1.5">
+                                {opp.contact?.phone && (
+                                  <>
+                                    <a 
+                                      href={`tel:${opp.contact.phone}`}
+                                      className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                                      title="Llamar"
+                                    >
+                                      <Phone className="w-3.5 h-3.5" />
+                                    </a>
+                                    <a 
+                                      href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                      title="WhatsApp"
+                                    >
+                                      <MessageSquare className="w-3.5 h-3.5" />
+                                    </a>
+                                  </>
+                                )}
+                                {opp.contact?.email && (
                                   <a 
-                                    href={`tel:${opp.contact.phone}`}
-                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
-                                    title="Llamar"
+                                    href={`mailto:${opp.contact.email}`}
+                                    className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
+                                    title="Enviar correo"
                                   >
-                                    <Phone className="w-3.5 h-3.5" />
+                                    <Mail className="w-3.5 h-3.5" />
                                   </a>
-                                  <a 
-                                    href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
-                                    title="WhatsApp"
-                                  >
-                                    <MessageSquare className="w-3.5 h-3.5" />
-                                  </a>
-                                </>
-                              )}
-                              {opp.contact?.email && (
-                                <a 
-                                  href={`mailto:${opp.contact.email}`}
-                                  className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
-                                  title="Enviar correo"
-                                >
-                                  <Mail className="w-3.5 h-3.5" />
-                                </a>
-                              )}
+                                )}
 
-                              {/* Bot Toggle Button in List View */}
-                              {opp.contact?.chats?.[0] ? (
+                                {/* Bot Toggle Button in List View */}
+                                {opp.contact?.chats?.[0] ? (
+                                  <button
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      try {
+                                        const chat = opp.contact.chats[0];
+                                        await toggleChatBot(chat.id, !chat.isBotActive);
+                                        fetchPipeline();
+                                      } catch (err: any) {
+                                        alert(err.message || 'Error al alternar bot');
+                                      }
+                                    }}
+                                    className={`p-1.5 rounded-lg border transition-all ${
+                                      opp.contact.chats[0].isBotActive 
+                                        ? 'bg-rose-50 text-rose-600 border-rose-150' 
+                                        : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
+                                    }`}
+                                    title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
+                                  >
+                                    <Bot className="w-3.5 h-3.5" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    disabled
+                                    className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
+                                    title="Sin chat de WhatsApp activo"
+                                  >
+                                    <Bot className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+
+                                {/* Edit / Delete actions */}
+                                <div className="flex items-center gap-1 pl-1 border-l border-slate-200 ml-1">
+                                  <button 
+                                    onClick={() => setSelectedOpp(opp)}
+                                    className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                                    title="Editar"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteOpportunity(opp.id)}
+                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                    title="Eliminar"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Mobile Actions Dropdown Trigger (Shown only on mobile) */}
+                              <div className="block sm:hidden relative">
                                 <button
                                   type="button"
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      const chat = opp.contact.chats[0];
-                                      await toggleChatBot(chat.id, !chat.isBotActive);
-                                      fetchPipeline();
-                                    } catch (err: any) {
-                                      alert(err.message || 'Error al alternar bot');
-                                    }
-                                  }}
-                                  className={`p-1.5 rounded-lg border transition-all ${
-                                    opp.contact.chats[0].isBotActive 
-                                      ? 'bg-rose-50 text-rose-600 border-rose-150' 
-                                      : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
-                                  }`}
-                                  title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
+                                  onClick={() => setActiveMobileMenuId(activeMobileMenuId === opp.id ? null : opp.id)}
+                                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
                                 >
-                                  <Bot className="w-3.5 h-3.5" />
+                                  <MoreHorizontal className="w-4 h-4" />
                                 </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  disabled
-                                  className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
-                                  title="Sin chat de WhatsApp activo"
-                                >
-                                  <Bot className="w-3.5 h-3.5" />
-                                </button>
-                              )}
 
-                              {/* Edit / Delete actions */}
-                              <div className="flex items-center gap-1 pl-1 border-l border-slate-200 ml-1">
-                                <button 
-                                  onClick={() => setSelectedOpp(opp)}
-                                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
-                                  title="Editar"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteOpportunity(opp.id)}
-                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                                  title="Eliminar"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                                {activeMobileMenuId === opp.id && (
+                                  <div className="absolute right-0 top-8 bg-white border border-slate-200 shadow-lg rounded-xl py-1.5 z-30 w-36 flex flex-col font-semibold text-[10px] text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+                                    {opp.contact?.phone && (
+                                      <>
+                                        <a 
+                                          href={`tel:${opp.contact.phone}`}
+                                          className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                                        >
+                                          <Phone className="w-3.5 h-3.5 text-emerald-500" />
+                                          Llamar
+                                        </a>
+                                        <a 
+                                          href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                                        >
+                                          <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+                                          WhatsApp
+                                        </a>
+                                      </>
+                                    )}
+                                    {opp.contact?.chats?.[0] && (
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          try {
+                                            const chat = opp.contact.chats[0];
+                                            await toggleChatBot(chat.id, !chat.isBotActive);
+                                            fetchPipeline();
+                                          } catch (err: any) {
+                                            alert(err.message || 'Error');
+                                          } finally {
+                                            setActiveMobileMenuId(null);
+                                          }
+                                        }}
+                                        className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-left w-full text-slate-700"
+                                      >
+                                        <Bot className={`w-3.5 h-3.5 ${opp.contact.chats[0].isBotActive ? 'text-pink-500' : 'text-slate-400'}`} />
+                                        {opp.contact.chats[0].isBotActive ? 'Desactivar Bot' : 'Activar Bot'}
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedOpp(opp);
+                                        setActiveMobileMenuId(null);
+                                      }}
+                                      className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-left w-full text-slate-700"
+                                    >
+                                      <Edit className="w-3.5 h-3.5 text-slate-500" />
+                                      Ver Detalle
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handleDeleteOpportunity(opp.id);
+                                        setActiveMobileMenuId(null);
+                                      }}
+                                      className="px-3 py-2 hover:bg-rose-50 hover:text-rose-600 flex items-center gap-2 text-left w-full text-rose-500 border-t border-slate-100 mt-1 pt-1.5"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      Eliminar
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -587,11 +659,7 @@ export function Pipeline() {
         opportunity={selectedOpp}
       />
 
-      <PipelineStagesModal
-        isOpen={isStagesModalOpen}
-        onClose={() => setIsStagesModalOpen(false)}
-        onSuccess={() => { fetchPipeline(); fetchStages(); }}
-      />
+
     </div>
   );
 }

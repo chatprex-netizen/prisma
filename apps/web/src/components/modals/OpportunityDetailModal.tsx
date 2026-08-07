@@ -73,14 +73,6 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-extrabold text-slate-950">{opportunity.title}</h2>
-              <button
-                onClick={() => setIsEditContactOpen(true)}
-                className="px-2 py-0.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-md text-[9px] font-bold flex items-center gap-1 transition-colors bg-white shrink-0"
-                title="Editar información de contacto"
-              >
-                <Edit3 className="w-2.5 h-2.5" />
-                Editar Contacto
-              </button>
             </div>
             <div className="flex items-center gap-2 mt-0.5 text-xxs text-slate-500 font-semibold">
               <span className="flex items-center gap-0.5">
@@ -132,6 +124,17 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               <FileSignature className="w-3.5 h-3.5" />
               Registrar Contrato
             </button>
+
+            <div className="pt-2 mt-auto border-t border-slate-200/60">
+              <button
+                type="button"
+                onClick={() => setIsEditContactOpen(true)}
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-brand-green hover:bg-brand-greenHover text-white rounded-lg text-xxs font-bold transition-all shadow-xs shadow-brand-green/20"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Editar Contacto
+              </button>
+            </div>
           </div>
 
           {/* Main Content Area */}

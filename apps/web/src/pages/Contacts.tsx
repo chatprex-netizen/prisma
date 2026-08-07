@@ -108,6 +108,8 @@ export function Contacts() {
                 <th className="px-6 py-4">Nombre Completo</th>
                 <th className="px-6 py-4">Información de Contacto</th>
                 <th className="px-6 py-4">Origen</th>
+                <th className="px-6 py-4">Presupuesto</th>
+                <th className="px-6 py-4">Estado / Etapa</th>
                 <th className="px-6 py-4">Etiquetas</th>
                 <th className="px-6 py-4 text-right">Acciones</th>
               </tr>
@@ -115,13 +117,13 @@ export function Contacts() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
                     Cargando contactos...
                   </td>
                 </tr>
               ) : filteredContacts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
                     No se encontraron contactos que coincidan con la búsqueda.
                   </td>
                 </tr>
@@ -167,6 +169,24 @@ export function Contacts() {
                         {contact.source ? contact.source.replace('_', ' ') : 'Desconocido'}
                       </span>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {contact.budgetMin ? (
+                      <span className="font-extrabold text-slate-800 text-xs">
+                        {contact.currency === 'EUR' ? '€' : contact.currency === 'PEN' ? 'S/' : '$'} {Number(contact.budgetMin).toLocaleString('es-PE')}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 text-xs">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {contact.opportunities?.[0]?.stage ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-50 text-slate-700 border-slate-200 uppercase">
+                        {contact.opportunities[0].stage.replace('_', ' ')}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-semibold bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-full inline-block">Sin oportunidad</span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1 max-w-[200px]">
