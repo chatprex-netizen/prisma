@@ -10,6 +10,10 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
   try {
     const clients = await prisma.contact.findMany({
       where: { type: 'CLIENTE' },
+      include: {
+        buyerContracts: true,
+        incomes: true
+      },
       orderBy: { createdAt: 'desc' },
     });
     res.json(clients);
