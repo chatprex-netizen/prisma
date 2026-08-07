@@ -259,9 +259,10 @@ export function Finances() {
                 <h3 className="text-sm font-semibold text-slate-900">Cuentas por Cobrar (Ingresos)</h3>
                 <button 
                   onClick={() => setIsIncomeModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
                 >
-                  <Plus className="w-3.5 h-3.5" />Nuevo Ingreso
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">Nuevo Ingreso</span>
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -320,9 +321,10 @@ export function Finances() {
                 <h3 className="text-sm font-semibold text-slate-900">Cuentas por Pagar (Egresos)</h3>
                 <button 
                   onClick={() => setIsExpenseModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
                 >
-                  <Plus className="w-3.5 h-3.5" />Nuevo Egreso
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">Nuevo Egreso</span>
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -381,9 +383,10 @@ export function Finances() {
                 <h3 className="text-sm font-semibold text-slate-900">Plan de Cuentas Contable</h3>
                 <button 
                   onClick={() => setIsAccountModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors"
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
                 >
-                  <Plus className="w-3.5 h-3.5" />Nueva Cuenta
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">Nueva Cuenta</span>
                 </button>
               </div>
               <div className="overflow-x-auto">

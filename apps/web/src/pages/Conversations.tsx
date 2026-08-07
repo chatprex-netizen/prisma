@@ -125,7 +125,7 @@ export function Conversations() {
   const activeChat = chats.find(c => c.id === activeChatId);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)] bg-white overflow-hidden rounded-none md:rounded-2xl border-0 md:border border-slate-200 shadow-sm md:m-4 lg:m-8">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)] bg-white overflow-hidden rounded-none md:rounded-2xl border-0 md:border border-slate-200 shadow-sm md:m-4 lg:m-8 animate-fade-in">
       
       {/* Sidebar de Chats */}
       <div className={`w-full md:w-80 flex-shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/30 ${activeChatId ? 'hidden md:flex' : 'flex'}`}>

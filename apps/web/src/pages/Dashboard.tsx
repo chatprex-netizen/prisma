@@ -194,7 +194,7 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="p-3 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-3 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
         <div>

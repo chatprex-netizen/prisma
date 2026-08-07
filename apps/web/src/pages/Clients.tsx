@@ -134,10 +134,10 @@ export function Clients() {
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
+            className="flex bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
           >
             <Plus className="w-4 h-4" />
-            Nuevo Cliente
+            <span className="hidden md:inline">Nuevo Cliente</span>
           </button>
         </div>
       </div>

@@ -5,7 +5,7 @@ export function AIAssistants() {
   const [activeTab, setActiveTab] = useState<'PERSONALIDAD' | 'MOTOR_IA' | 'CONOCIMIENTO' | 'AJUSTES_PRO'>('PERSONALIDAD');
 
   return (
-    <div className="p-4 md:p-8 max-w-[1400px] mx-auto h-[calc(100vh-4rem)] flex gap-6">
+    <div className="p-4 md:p-8 max-w-[1400px] mx-auto h-[calc(100vh-4rem)] flex gap-6 animate-fade-in">
 
       {/* Sidebar de Asistentes */}
       <div className="w-72 flex-shrink-0 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

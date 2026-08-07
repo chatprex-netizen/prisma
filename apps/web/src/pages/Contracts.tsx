@@ -56,7 +56,7 @@ export function Contracts() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
         <div>
@@ -70,10 +70,10 @@ export function Contracts() {
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
+            className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
           >
             <Plus className="w-4 h-4" />
-            Nuevo Contrato
+            <span className="hidden md:inline">Nuevo Contrato</span>
           </button>
         </div>
       </div>

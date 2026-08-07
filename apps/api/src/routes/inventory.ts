@@ -89,6 +89,34 @@ router.post('/properties', authenticate, async (req: AuthRequest, res: Response)
   }
 });
 
+router.put('/properties/:id', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { unitCode, title, ...restOfData } = req.body;
+    const property = await prisma.property.update({
+      where: { id: req.params.id },
+      data: {
+        ...restOfData,
+        unitCode,
+        title: title || unitCode
+      }
+    });
+    res.json({ success: true, data: property });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.delete('/properties/:id', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.property.delete({
+      where: { id: req.params.id }
+    });
+    res.json({ success: true, message: 'Property deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 // GET /developers
 router.get('/developers', async (req: Request, res: Response) => {
   try {

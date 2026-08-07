@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2, PieChart as PieIcon } from 'lucide-react';
+import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2, PieChart as PieIcon, Plus } from 'lucide-react';
 import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource, getPipelineStages, updatePipelineStage } from '../lib/api';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -353,7 +353,7 @@ export function Settings() {
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
         <div>
@@ -725,9 +725,10 @@ function LeadSourcesTab() {
         </div>
         <button 
           type="submit" 
-          className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+          className="bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-1.5 shrink-0"
         >
-          Agregar
+          <Plus className="w-4 h-4" />
+          <span className="hidden md:inline">Agregar</span>
         </button>
       </form>
 

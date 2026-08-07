@@ -76,6 +76,8 @@ export const deleteDeveloper = (id: string) => fetchApi(`/inventory/developers/$
 
 export const getProperties = () => fetchApi('/inventory/properties');
 export const createProperty = (data: any) => fetchApi('/inventory/properties', { method: 'POST', body: JSON.stringify(data) });
+export const updateProperty = (id: string, data: any) => fetchApi(`/inventory/properties/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteProperty = (id: string) => fetchApi(`/inventory/properties/${id}`, { method: 'DELETE' });
 
 // Pipeline
 export const getPipeline = () => fetchApi('/pipeline');

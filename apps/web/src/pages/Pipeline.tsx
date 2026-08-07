@@ -85,7 +85,7 @@ export function Pipeline() {
   });
 
   return (
-    <div className="p-4 md:p-6 max-w-[1600px] mx-auto h-[calc(100vh-80px)] flex flex-col overflow-hidden font-sans">
+    <div className="p-4 md:p-6 max-w-[1600px] mx-auto h-[calc(100vh-80px)] flex flex-col overflow-hidden font-sans animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0 mb-6">
         <div>
