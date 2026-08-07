@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, List, Kanban, Tag, DollarSign, Bot, Edit, Trash2 } from 'lucide-react';
-import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
 import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
 import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity, toggleChatBot } from '../lib/api';
@@ -107,13 +106,6 @@ export function Pipeline() {
           <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">Filtros</span>
-          </button>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Oportunidad
           </button>
         </div>
       </div>
@@ -493,11 +485,6 @@ export function Pipeline() {
         )}
       </div>
 
-      <NewOpportunityModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={fetchPipeline}
-      />
       
       <OpportunityDetailModal
         isOpen={!!selectedOpp}
