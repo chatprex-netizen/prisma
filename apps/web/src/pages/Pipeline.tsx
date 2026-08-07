@@ -148,8 +148,20 @@ export function Pipeline() {
                   {/* Rows */}
                   <div className="divide-y divide-slate-100">
                     {stageOpps.map((opp) => {
-                      const oppDays = Math.floor((new Date().getTime() - new Date(opp.createdAt).getTime()) / (1000 * 3600 * 24));
                       const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}` : 'Sin Contacto';
+                      
+                      const getElapsedTime = (createdAtString: string) => {
+                        const diffMs = new Date().getTime() - new Date(createdAtString).getTime();
+                        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        let parts = [];
+                        if (days > 0) parts.push(`${days}d`);
+                        if (hours > 0) parts.push(`${hours}h`);
+                        parts.push(`${minutes}m`);
+                        return parts.join(' ');
+                      };
 
                       return (
                         <div 
@@ -157,33 +169,28 @@ export function Pipeline() {
                           onDoubleClick={() => setSelectedOpp(opp)}
                           className="p-2.5 flex items-center justify-between hover:bg-slate-50/30 transition-colors cursor-pointer gap-4"
                         >
-                          <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                          <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 font-sans">
                             {/* Client Name & Project */}
-                            <div className="min-w-0 sm:w-1/3">
+                            <div className="min-w-0 sm:w-1/2">
                               <span className="text-xs font-bold text-slate-900 block truncate">{contactName}</span>
-                              <span className="text-[10px] text-slate-400 font-medium truncate block sm:hidden">
+                              <span className="text-[9px] text-slate-400 font-semibold truncate block sm:hidden">
                                 {opp.project?.name || 'Sin Proyecto'}
                               </span>
                             </div>
 
                             {/* Project Name (Desktop Only) */}
-                            <div className="hidden sm:block min-w-0 sm:w-1/3">
-                              <span className="text-xs text-slate-500 font-semibold truncate block">
+                            <div className="hidden sm:block min-w-0 sm:w-1/2">
+                              <span className="text-[10px] text-slate-500 font-semibold truncate block">
                                 {opp.project?.name || 'Sin Proyecto'}
-                              </span>
-                            </div>
-
-                            {/* Budget */}
-                            <div className="sm:w-1/3">
-                              <span className="text-xs font-extrabold text-slate-800">
-                                {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || opp.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                               </span>
                             </div>
                           </div>
 
                           {/* Date and Quick Actions */}
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-[10px] text-slate-400 font-medium">{oppDays}d</span>
+                            <span className="text-[9px] text-slate-400 font-semibold bg-slate-50 border border-slate-200/60 px-1 py-0.5 rounded shrink-0" title="Tiempo transcurrido">
+                              {getElapsedTime(opp.createdAt)}
+                            </span>
                             
                             <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                               {opp.contact?.phone && (
@@ -339,9 +346,21 @@ export function Pipeline() {
                       }`}
                     >
                       {stageOpps.map((opp) => {
-                        const oppDays = Math.floor((new Date().getTime() - new Date(opp.createdAt).getTime()) / (1000 * 3600 * 24));
                         const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}` : 'Sin Contacto';
                         
+                        const getElapsedTime = (createdAtString: string) => {
+                          const diffMs = new Date().getTime() - new Date(createdAtString).getTime();
+                          const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                          const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                          
+                          let parts = [];
+                          if (days > 0) parts.push(`${days}d`);
+                          if (hours > 0) parts.push(`${hours}h`);
+                          parts.push(`${minutes}m`);
+                          return parts.join(' ');
+                        };
+
                         return (
                           <div 
                             key={opp.id} 
@@ -351,46 +370,40 @@ export function Pipeline() {
                               e.dataTransfer.effectAllowed = 'move';
                             }}
                             onDoubleClick={() => setSelectedOpp(opp)}
-                            className="bg-white p-3.5 rounded-2xl border border-slate-150 shadow-xs cursor-pointer hover:border-brand-green/20 hover:shadow-md transition-all group select-none space-y-3 relative text-left"
+                            className="bg-white p-3 rounded-xl border border-slate-200/60 shadow-xs cursor-pointer hover:border-brand-green/20 hover:shadow-md transition-all group select-none space-y-2.5 relative text-left"
                           >
-                            {/* Row 1: Name and Probability Badge */}
+                            {/* Row 1: Name and Probability / Elapsed Time Badge */}
                             <div className="flex justify-between items-center gap-2">
-                              <span className="text-sm font-bold text-slate-900 group-hover:text-brand-green transition-colors truncate">
+                              <span className="text-xs font-bold text-slate-900 group-hover:text-brand-green transition-colors truncate">
                                 {contactName}
                               </span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 flex items-center gap-1 shrink-0">
-                                🎯 {opp.probability || 0}%
-                              </span>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <span className="text-[9px] text-slate-400 font-semibold bg-slate-50 border border-slate-200/60 px-1 py-0.5 rounded" title="Tiempo transcurrido">
+                                  {getElapsedTime(opp.createdAt)}
+                                </span>
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 flex items-center gap-0.5">
+                                  🎯 {opp.probability || 0}%
+                                </span>
+                              </div>
                             </div>
 
                             {/* Row 2: Phone number with green icon */}
                             {opp.contact?.phone && (
-                              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                              <div className="flex items-center gap-2 text-xxs font-semibold text-slate-500">
+                                <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
                                 <span>{opp.contact.phone}</span>
                               </div>
                             )}
 
                             {/* Row 3: Project with tag icon */}
-                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                              <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <div className="flex items-center gap-2 text-xxs font-semibold text-slate-600">
+                              <Tag className="w-3 h-3 text-slate-400 shrink-0" />
                               <span className="truncate">
                                 {opp.project?.name || 'Sin Proyecto'}
                               </span>
                             </div>
 
-                            {/* Row 4: Budget amount with money icon */}
-                            <div className="flex items-center justify-between pt-1 border-t border-slate-100/50">
-                              <div className="flex items-center gap-1 text-xs font-extrabold text-slate-900">
-                                <DollarSign className="w-3.5 h-3.5 text-brand-green shrink-0" />
-                                <span>
-                                  {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || opp.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                </span>
-                              </div>
-                              <span className="text-[9px] text-slate-400 font-medium shrink-0">{oppDays}d activo</span>
-                            </div>
-
-                            <hr className="border-slate-100/80 my-1.5" />
+                            <hr className="border-slate-100/80 my-1" />
 
                             {/* Bottom row: Call, Message, Bot and Edit/Delete */}
                             <div className="flex items-center justify-between gap-2 pt-1" onClick={e => e.stopPropagation()}>
