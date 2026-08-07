@@ -19,7 +19,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const opportunities = await prisma.opportunity.findMany({
       include: {
-        contact: { select: { id: true, firstName: true, lastName: true, phone: true } },
+        contact: { select: { id: true, firstName: true, lastName: true, phone: true, email: true, currency: true, budgetMin: true } },
         property: { select: { id: true, unitCode: true, title: true } },
         project: { select: { id: true, name: true } },
         agent: { select: { id: true, firstName: true, lastName: true, avatar: true } }
@@ -85,6 +85,18 @@ router.patch('/:id/stage', async (req: Request, res: Response) => {
       data: { stage }
     });
     res.json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Delete Opportunity
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    await prisma.opportunity.delete({
+      where: { id: req.params.id }
+    });
+    res.json({ success: true, message: 'Opportunity deleted successfully' });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
   }

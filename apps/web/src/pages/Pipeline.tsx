@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, List, Kanban } from 'lucide-react';
+import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, List, Kanban, Tag, DollarSign, Bot, Edit, Trash2 } from 'lucide-react';
 import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
 import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
-import { getPipeline, getPipelineStages, updateOpportunityStage } from '../lib/api';
+import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity } from '../lib/api';
 
 export function Pipeline() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +38,17 @@ export function Pipeline() {
       setStages(res.data || []);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleDeleteOpportunity = async (oppId: string) => {
+    if (!window.confirm('¿Confirmas que deseas eliminar esta oportunidad?')) return;
+    try {
+      await deleteOpportunity(oppId);
+      fetchPipeline();
+    } catch (error: any) {
+      console.error(error);
+      alert('Error al eliminar la oportunidad');
     }
   };
 
@@ -288,36 +299,55 @@ export function Pipeline() {
                               e.dataTransfer.effectAllowed = 'move';
                             }}
                             onDoubleClick={() => setSelectedOpp(opp)}
-                            className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-sm cursor-pointer hover:border-brand-green/30 hover:shadow-md transition-all group select-none space-y-2 relative"
+                            className="bg-white p-3.5 rounded-2xl border border-slate-150 shadow-xs cursor-pointer hover:border-brand-green/20 hover:shadow-md transition-all group select-none space-y-3 relative text-left"
                           >
-                            <div className="flex justify-between items-start gap-2">
-                              <span className="text-xxs font-semibold text-slate-500 uppercase tracking-wider block truncate max-w-[80%]">
+                            {/* Row 1: Name and Probability Badge */}
+                            <div className="flex justify-between items-center gap-2">
+                              <span className="text-sm font-bold text-slate-900 group-hover:text-brand-green transition-colors truncate">
+                                {contactName}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 flex items-center gap-1 shrink-0">
+                                🎯 {opp.probability || 0}%
+                              </span>
+                            </div>
+
+                            {/* Row 2: Phone number with green icon */}
+                            {opp.contact?.phone && (
+                              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                                <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                <span>{opp.contact.phone}</span>
+                              </div>
+                            )}
+
+                            {/* Row 3: Project with tag icon */}
+                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                              <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span className="truncate">
                                 {opp.project?.name || 'Sin Proyecto'}
                               </span>
-                              <span className="text-[9px] text-slate-400 font-medium shrink-0">{oppDays}d</span>
                             </div>
 
-                            <div>
-                              <p className="text-sm font-bold text-slate-950 group-hover:text-brand-green transition-colors truncate">
-                                {contactName}
-                              </p>
-                              {opp.title && opp.title !== opp.contact?.firstName && (
-                                <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{opp.title}</p>
-                              )}
+                            {/* Row 4: Budget amount with money icon */}
+                            <div className="flex items-center justify-between pt-1 border-t border-slate-100/50">
+                              <div className="flex items-center gap-1 text-xs font-extrabold text-slate-900">
+                                <DollarSign className="w-3.5 h-3.5 text-brand-green shrink-0" />
+                                <span>
+                                  {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || opp.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                </span>
+                              </div>
+                              <span className="text-[9px] text-slate-400 font-medium shrink-0">{oppDays}d activo</span>
                             </div>
 
-                            <div className="pt-2 border-t border-slate-100/70 flex justify-between items-center gap-2">
-                              <span className="text-xs font-extrabold text-slate-900">
-                                {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                              </span>
-                              
-                              {/* Action Buttons to the right */}
-                              <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                {opp.contact?.phone && (
+                            <hr className="border-slate-100/80 my-1.5" />
+
+                            {/* Bottom row: Call, Message, Bot and Edit/Delete */}
+                            <div className="flex items-center justify-between gap-2 pt-1" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center gap-1.5">
+                                {opp.contact?.phone ? (
                                   <>
                                     <a 
                                       href={`tel:${opp.contact.phone}`}
-                                      className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                      className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
                                       title="Llamar"
                                     >
                                       <Phone className="w-3.5 h-3.5" />
@@ -326,22 +356,39 @@ export function Pipeline() {
                                       href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                                      title="WhatsApp"
+                                      className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                      title="Chat de WhatsApp"
                                     >
                                       <MessageSquare className="w-3.5 h-3.5" />
                                     </a>
                                   </>
+                                ) : (
+                                  <div className="w-16 h-7" /> // Spacer
                                 )}
-                                {opp.contact?.email && (
-                                  <a 
-                                    href={`mailto:${opp.contact.email}`}
-                                    className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                    title="Enviar correo"
-                                  >
-                                    <Mail className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
+                                <button
+                                  type="button"
+                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors"
+                                  title="Asistente de IA (Bot)"
+                                >
+                                  <Bot className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => setSelectedOpp(opp)}
+                                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded transition-colors"
+                                  title="Editar"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteOpportunity(opp.id)}
+                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
                           </div>

@@ -83,6 +83,7 @@ export const getPipelineStages = () => fetchApi('/pipeline/stages');
 export const updatePipelineStage = (id: string, data: any) => fetchApi(`/pipeline/stages/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const createOpportunity = (data: any) => fetchApi('/pipeline', { method: 'POST', body: JSON.stringify(data) });
 export const updateOpportunityStage = (id: string, stage: string) => fetchApi(`/pipeline/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) });
+export const deleteOpportunity = (id: string) => fetchApi(`/pipeline/${id}`, { method: 'DELETE' });
 
 // Clients (Gestión de Clientes)
 export const getClients = () => fetchApi('/clients');

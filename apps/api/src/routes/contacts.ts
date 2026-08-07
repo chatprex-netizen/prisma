@@ -67,7 +67,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
           stage: 'PROSPECCION',
           agentId: contact.assignedTo || agentId,
           projectId: projectId,
-          notes: contact.notes
+          notes: contact.notes,
+          value: contact.budgetMin
         }
       });
     }
