@@ -3,7 +3,7 @@ import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, Lis
 import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
 import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
-import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity } from '../lib/api';
+import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity, toggleChatBot } from '../lib/api';
 
 export function Pipeline() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -176,7 +176,7 @@ export function Pipeline() {
                             {/* Budget */}
                             <div className="sm:w-1/3">
                               <span className="text-xs font-extrabold text-slate-800">
-                                {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || opp.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                               </span>
                             </div>
                           </div>
@@ -185,12 +185,12 @@ export function Pipeline() {
                           <div className="flex items-center gap-3 shrink-0">
                             <span className="text-[10px] text-slate-400 font-medium">{oppDays}d</span>
                             
-                            <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                               {opp.contact?.phone && (
                                 <>
                                   <a 
                                     href={`tel:${opp.contact.phone}`}
-                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
                                     title="Llamar"
                                   >
                                     <Phone className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export function Pipeline() {
                                     href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                    className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
                                     title="WhatsApp"
                                   >
                                     <MessageSquare className="w-3.5 h-3.5" />
@@ -209,12 +209,64 @@ export function Pipeline() {
                               {opp.contact?.email && (
                                 <a 
                                   href={`mailto:${opp.contact.email}`}
-                                  className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
                                   title="Enviar correo"
                                 >
                                   <Mail className="w-3.5 h-3.5" />
                                 </a>
                               )}
+
+                              {/* Bot Toggle Button in List View */}
+                              {opp.contact?.chats?.[0] ? (
+                                <button
+                                  type="button"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const chat = opp.contact.chats[0];
+                                      await toggleChatBot(chat.id, !chat.isBotActive);
+                                      fetchPipeline();
+                                    } catch (err: any) {
+                                      alert(err.message || 'Error al alternar bot');
+                                    }
+                                  }}
+                                  className={`p-1.5 rounded-lg border transition-all ${
+                                    opp.contact.chats[0].isBotActive 
+                                      ? 'bg-rose-50 text-rose-600 border-rose-150' 
+                                      : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
+                                  }`}
+                                  title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
+                                >
+                                  <Bot className="w-3.5 h-3.5" />
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
+                                  title="Sin chat de WhatsApp activo"
+                                >
+                                  <Bot className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+
+                              {/* Edit / Delete actions */}
+                              <div className="flex items-center gap-1 pl-1 border-l border-slate-200 ml-1">
+                                <button 
+                                  onClick={() => setSelectedOpp(opp)}
+                                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                                  title="Editar"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteOpportunity(opp.id)}
+                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -365,13 +417,38 @@ export function Pipeline() {
                                 ) : (
                                   <div className="w-16 h-7" /> // Spacer
                                 )}
-                                <button
-                                  type="button"
-                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors"
-                                  title="Asistente de IA (Bot)"
-                                >
-                                  <Bot className="w-3.5 h-3.5" />
-                                </button>
+                                {opp.contact?.chats?.[0] ? (
+                                  <button
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      try {
+                                        const chat = opp.contact.chats[0];
+                                        await toggleChatBot(chat.id, !chat.isBotActive);
+                                        fetchPipeline();
+                                      } catch (err: any) {
+                                        alert(err.message || 'Error al alternar bot');
+                                      }
+                                    }}
+                                    className={`p-1.5 rounded-lg border transition-all ${
+                                      opp.contact.chats[0].isBotActive 
+                                        ? 'bg-rose-50 text-rose-600 border-rose-150' 
+                                        : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
+                                    }`}
+                                    title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
+                                  >
+                                    <Bot className="w-3.5 h-3.5" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    disabled
+                                    className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
+                                    title="Sin chat de WhatsApp activo"
+                                  >
+                                    <Bot className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </div>
 
                               <div className="flex items-center gap-2">
