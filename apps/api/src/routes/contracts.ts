@@ -30,7 +30,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
     }
 
-    const { agentId: bodyAgentId, ...restOfData } = req.body;
+    const { agentId: bodyAgentId, notes, ...restOfData } = req.body;
     const finalAgentId = bodyAgentId || agentId;
 
     // Generate fallback unique contract number if missing
@@ -54,10 +54,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       `;
     }
 
+    // Merge notes into terms JSON object so we don't lose it
+    const finalTerms = {
+      ...(restOfData.terms || {}),
+      ...(notes ? { notes } : {})
+    };
+
     const contract = await prisma.contract.create({
       data: {
         ...restOfData,
-        agentId: finalAgentId
+        agentId: finalAgentId,
+        terms: Object.keys(finalTerms).length > 0 ? finalTerms : undefined
       }
     });
 
