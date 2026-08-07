@@ -275,6 +275,173 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
             )}
 
+            {/* TAB: CONTRATO (REGISTRAR CIERRE / VENTA) */}
+            {activeTab === 'CONTRATO' && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xl text-left">
+                <h3 className="text-base font-bold text-slate-900 mb-2">Registrar Venta / Firma de Contrato</h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Completa los datos de la unidad vendida para registrar el contrato y marcar esta oportunidad como <strong>CIERRE GANADO</strong> de forma automática.
+                </p>
+
+                {/* Form */}
+                <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                  {/* Selectors */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Desarrollador</label>
+                      <select
+                        value={selectedDevId}
+                        onChange={e => {
+                          setSelectedDevId(e.target.value);
+                          setSelectedProjId('');
+                          setContractData(prev => ({ ...prev, propertyId: '' }));
+                        }}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                      >
+                        <option value="">Selecciona...</option>
+                        {Array.from(new Map(properties.map(p => p.project?.developer).filter(Boolean).map(d => [d.id, d])).values()).map((d: any) => (
+                          <option key={d.id} value={d.id}>{d.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Proyecto</label>
+                      <select
+                        value={selectedProjId}
+                        onChange={e => {
+                          setSelectedProjId(e.target.value);
+                          setContractData(prev => ({ ...prev, propertyId: '' }));
+                        }}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                      >
+                        <option value="">Selecciona...</option>
+                        {Array.from(new Map(properties.filter(p => !selectedDevId || p.project?.developerId === selectedDevId).map(p => p.project).filter(Boolean).map(pr => [pr.id, pr])).values()).map((pr: any) => (
+                          <option key={pr.id} value={pr.id}>{pr.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Unidad/Propiedad *</label>
+                      <select
+                        value={contractData.propertyId}
+                        onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                        required
+                      >
+                        <option value="">Selecciona Unidad...</option>
+                        {properties
+                          .filter(p => p.status === 'DISPONIBLE' && (!selectedProjId || p.projectId === selectedProjId) && (!selectedDevId || p.project?.developerId === selectedDevId))
+                          .map(p => (
+                            <option key={p.id} value={p.id}>{p.unitCode} - {p.title || 'Sin Título'}</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Price and Type */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Tipo de Documento</label>
+                      <select
+                        value={contractData.type}
+                        onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                      >
+                        <option value="COMPRAVENTA">Compraventa</option>
+                        <option value="SEPARACION">Separación</option>
+                        <option value="ALQUILER">Alquiler</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Precio Venta (Monto)</label>
+                      <input
+                        type="number"
+                        value={contractData.amount}
+                        onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
+                        placeholder="Monto"
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">Moneda</label>
+                      <select
+                        value={contractData.currency}
+                        onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                      >
+                        <option value="USD">Dólares ($)</option>
+                        <option value="PEN">Soles (S/)</option>
+                        <option value="EUR">Euros (€)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-semibold text-slate-700">Comentarios de Cierre</label>
+                    <textarea
+                      value={contractData.notes}
+                      onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Indica condiciones adicionales de la venta..."
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white resize-none h-16"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!contractData.propertyId) {
+                          alert('Por favor selecciona la unidad vendida.');
+                          return;
+                        }
+                        if (!contractData.amount) {
+                          alert('Por favor indica el precio de venta.');
+                          return;
+                        }
+                        try {
+                          setSubmittingContract(true);
+                          
+                          // 1. Create the contract
+                          await createContract({
+                            buyerId: opportunity.contactId,
+                            propertyId: contractData.propertyId,
+                            type: contractData.type,
+                            status: 'FIRMADO',
+                            amount: contractData.amount,
+                            currency: contractData.currency,
+                            notes: contractData.notes,
+                            agentId: opportunity.agentId || opportunity.contact?.assignedTo
+                          });
+
+                          // 2. Mark opportunity as CIERRE_GANADO
+                          await updateOpportunityStage(opportunity.id, 'CIERRE_GANADO');
+
+                          alert('🎉 ¡Venta registrada y contrato guardado con éxito!');
+                          onClose();
+                          window.location.reload(); // Quick refresh
+                        } catch (err: any) {
+                          alert(err.message || 'Error al registrar el contrato');
+                        } finally {
+                          setSubmittingContract(false);
+                        }
+                      }}
+                      disabled={submittingContract}
+                      className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-brand-green/20"
+                    >
+                      {submittingContract ? 'Registrando...' : 'Confirmar Venta y Registrar Contrato'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
