@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createAppointment, getContacts, getProjects } from '../../lib/api';
+import { createAppointment, updateAppointment, getContacts, getProjects } from '../../lib/api';
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export function NewAppointmentModal({ isOpen, onClose, onSuccess }: NewAppointmentModalProps) {
+export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }: NewAppointmentModalProps) {
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -26,12 +27,49 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess }: NewAppointme
     agentId: 'user1' // default for now until auth is fully setup
   });
 
+  // Convert ISO date string to datetime-local format (YYYY-MM-DDTHH:MM)
+  const formatDateTimeLocal = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const pad = (num: number) => String(num).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   useEffect(() => {
     if (isOpen) {
       getContacts().then(res => setContacts(res.data || [])).catch(console.error);
       getProjects().then(res => setProjects(res.data || [])).catch(console.error);
+
+      if (initialData) {
+        setFormData({
+          title: initialData.title || '',
+          type: initialData.type || 'VISITA_PROYECTO',
+          status: initialData.status || 'PENDIENTE',
+          startAt: formatDateTimeLocal(initialData.startAt),
+          endAt: formatDateTimeLocal(initialData.endAt),
+          contactId: initialData.contactId || '',
+          projectId: initialData.projectId || '',
+          location: initialData.location || '',
+          notes: initialData.notes || '',
+          agentId: initialData.agentId || 'user1'
+        });
+      } else {
+        setFormData({
+          title: '',
+          type: 'VISITA_PROYECTO',
+          status: 'PENDIENTE',
+          startAt: '',
+          endAt: '',
+          contactId: '',
+          projectId: '',
+          location: '',
+          notes: '',
+          agentId: 'user1'
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -40,15 +78,43 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess }: NewAppointme
       alert('Título, fechas de inicio y fin, y el contacto son obligatorios');
       return;
     }
-    if (!window.confirm('¿Confirmas que deseas agendar esta cita?')) return;
+
+    const startDateTime = new Date(formData.startAt);
+    const endDateTime = new Date(formData.endAt);
+    const now = new Date();
+
+    // Validate past dates (allow 5 min tolerance)
+    if (startDateTime < new Date(now.getTime() - 5 * 60 * 1000)) {
+      alert('Error: No se pueden agendar citas o tareas en fechas pasadas.');
+      return;
+    }
+
+    if (endDateTime < startDateTime) {
+      alert('Error: La fecha de fin no puede ser anterior a la de inicio.');
+      return;
+    }
+
+    const confirmMsg = initialData 
+      ? '¿Confirmas que deseas guardar los cambios de esta cita?' 
+      : '¿Confirmas que deseas agendar esta cita?';
+      
+    if (!window.confirm(confirmMsg)) return;
+
     try {
       setLoading(true);
-      await createAppointment({
+      const payload = {
         ...formData,
-        startAt: new Date(formData.startAt),
-        endAt: new Date(formData.endAt),
+        startAt: startDateTime.toISOString(),
+        endAt: endDateTime.toISOString(),
         projectId: formData.projectId || null
-      });
+      };
+
+      if (initialData?.id) {
+        await updateAppointment(initialData.id, payload);
+      } else {
+        await createAppointment(payload);
+      }
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
@@ -64,7 +130,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess }: NewAppointme
       <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-lg font-semibold text-slate-900">Nueva Cita / Evento</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{initialData ? 'Editar Cita / Agenda' : 'Nueva Cita / Evento'}</h2>
           <button 
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
@@ -216,7 +282,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess }: NewAppointme
             disabled={loading}
             className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
           >
-            {loading ? 'Guardando...' : 'Agendar Cita'}
+            {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Agendar Cita')}
           </button>
         </div>
       </div>

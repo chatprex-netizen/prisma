@@ -9,6 +9,7 @@ const HOURS = Array.from({ length: 11 }, (_, i) => i + 8); // 8 AM to 6 PM
 
 export function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<any>(null);
   const [view, setView] = useState<'day' | 'week' | 'month'>('month');
   const [appointments, setAppointments] = useState<any[]>([]);
 
@@ -17,14 +18,11 @@ export function Calendar() {
       const res = await getAppointments();
       if (res.data) {
         const mapped = res.data.map((app: any) => ({
-          id: app.id,
-          title: app.title,
-          type: app.type,
-          status: app.status,
+          ...app,
           day: new Date(app.startAt).getDate(),
           startHour: new Date(app.startAt).getHours(),
           duration: (new Date(app.endAt).getTime() - new Date(app.startAt).getTime()) / (1000 * 60 * 60),
-          contact: app.contact ? `${app.contact.firstName} ${app.contact.lastName}` : 'Sin contacto',
+          contactName: app.contact ? `${app.contact.firstName} ${app.contact.lastName}` : 'Sin contacto',
           color: 'bg-blue-100 border-blue-200 text-blue-800',
         }));
         setAppointments(mapped);
@@ -85,6 +83,7 @@ export function Calendar() {
                 return (
                   <div 
                     key={event.id}
+                    onClick={() => { setSelectedApp(event); setIsModalOpen(true); }}
                     className={`absolute w-[95%] left-[2.5%] rounded-md border p-3 shadow-sm pointer-events-auto cursor-pointer hover:shadow-md transition-shadow overflow-hidden flex flex-col group/event ${event.color}`}
                     style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                   >
@@ -99,7 +98,7 @@ export function Calendar() {
                       {event.startHour}:00 - {event.startHour + event.duration}:00
                     </div>
                     <div className="text-xs opacity-80 truncate">
-                      Contacto: {event.contact}
+                      Contacto: {event.contactName}
                     </div>
                   </div>
                 );
@@ -158,6 +157,7 @@ export function Calendar() {
                     return (
                       <div 
                         key={event.id}
+                        onClick={() => { setSelectedApp(event); setIsModalOpen(true); }}
                         className={`absolute w-[95%] left-[2.5%] rounded-md border p-2 shadow-sm pointer-events-auto cursor-pointer hover:shadow-md transition-shadow overflow-hidden flex flex-col group/event ${event.color}`}
                         style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                       >
@@ -225,7 +225,11 @@ export function Calendar() {
                 
                 <div className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1">
                   {dayEvents.map(ev => (
-                    <div key={ev.id} className={`px-2 py-1 text-xs truncate rounded border font-medium flex justify-between items-center group/event ${ev.color}`}>
+                    <div 
+                      key={ev.id} 
+                      onClick={(e) => { e.stopPropagation(); setSelectedApp(ev); setIsModalOpen(true); }}
+                      className={`px-2 py-1 text-xs truncate rounded border font-medium flex justify-between items-center group/event ${ev.color} cursor-pointer`}
+                    >
                       <span>{ev.startHour}:00 - {ev.title}</span>
                       <button onClick={(e) => handleDelete(e, ev.id)} className="opacity-0 group-hover/event:opacity-100 text-red-500 hover:bg-red-50 rounded shrink-0 ml-1">
                         <Trash2 className="w-3 h-3" />
@@ -273,7 +277,7 @@ export function Calendar() {
             <option value="day">Diario</option>
           </select>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => { setSelectedApp(null); setIsModalOpen(true); }}
             className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
           >
             <Plus className="w-4 h-4" />
@@ -291,8 +295,9 @@ export function Calendar() {
 
       <NewAppointmentModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => { setIsModalOpen(false); setSelectedApp(null); }} 
         onSuccess={fetchAppointmentsData}
+        initialData={selectedApp}
       />
     </div>
   );

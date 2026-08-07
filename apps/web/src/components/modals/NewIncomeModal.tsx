@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, DollarSign, FileText, User, Building } from 'lucide-react';
-import { createIncome, getContacts, getProjects, getProperties } from '../../lib/api';
+import { createIncome, updateIncome, getContacts, getProjects, getProperties } from '../../lib/api';
 
 interface NewIncomeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export function NewIncomeModal({ isOpen, onClose, onSuccess }: NewIncomeModalProps) {
+export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewIncomeModalProps) {
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -40,20 +41,35 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess }: NewIncomeModalPro
         setProperties(propRes?.data || []);
       });
 
-      setFormData({
-        description: '',
-        type: 'VENTA_PROPIEDAD',
-        amount: '',
-        currency: 'PEN',
-        date: new Date().toISOString().substring(0, 10),
-        contactId: '',
-        projectId: '',
-        propertyId: '',
-        paymentMethod: 'TRANSFERENCIA',
-        status: 'PENDIENTE',
-      });
+      if (initialData) {
+        setFormData({
+          description: initialData.description || '',
+          type: initialData.type || 'VENTA_PROPIEDAD',
+          amount: String(initialData.amount || ''),
+          currency: initialData.currency || 'PEN',
+          date: initialData.date ? new Date(initialData.date).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10),
+          contactId: initialData.contactId || '',
+          projectId: initialData.projectId || '',
+          propertyId: initialData.propertyId || '',
+          paymentMethod: initialData.paymentMethod || 'TRANSFERENCIA',
+          status: initialData.status || 'PENDIENTE',
+        });
+      } else {
+        setFormData({
+          description: '',
+          type: 'VENTA_PROPIEDAD',
+          amount: '',
+          currency: 'PEN',
+          date: new Date().toISOString().substring(0, 10),
+          contactId: '',
+          projectId: '',
+          propertyId: '',
+          paymentMethod: 'TRANSFERENCIA',
+          status: 'PENDIENTE',
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -75,12 +91,17 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess }: NewIncomeModalPro
         date: new Date(formData.date).toISOString(),
       };
 
-      await createIncome(payload);
+      if (initialData?.id) {
+        await updateIncome(initialData.id, payload);
+      } else {
+        await createIncome(payload);
+      }
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || 'Error al crear el ingreso');
+      alert(err.message || 'Error al guardar el ingreso');
     } finally {
       setLoading(false);
     }
@@ -91,7 +112,7 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess }: NewIncomeModalPro
       <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">Registrar Nuevo Ingreso</h2>
+          <h2 className="text-base font-semibold text-slate-900">{initialData ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200/50 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -261,7 +282,7 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess }: NewIncomeModalPro
               disabled={loading}
               className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
             >
-              {loading ? 'Guardando...' : 'Guardar Ingreso'}
+              {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Guardar Ingreso')}
             </button>
           </div>
         </form>

@@ -25,7 +25,7 @@ router.get('/', async (req: Request, res: Response) => {
           }
         },
         property: { select: { id: true, unitCode: true, title: true } },
-        project: { select: { id: true, name: true } },
+        project: { select: { id: true, name: true, developer: { select: { id: true, name: true } } } },
         agent: { select: { id: true, firstName: true, lastName: true, avatar: true } },
         activities: {
           include: {

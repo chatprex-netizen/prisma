@@ -47,6 +47,15 @@ router.get('/:id', authenticate, async (req: Request, res: Response): Promise<an
 // Create new client
 router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
+    if (req.body.dni) {
+      const existing = await prisma.contact.findFirst({
+        where: { dni: req.body.dni }
+      });
+      if (existing) {
+        return res.status(400).json({ message: 'El documento de identidad (DNI/RUC) ya está registrado en otro cliente.' });
+      }
+    }
+
     const client = await prisma.contact.create({
       data: {
         ...req.body,
@@ -64,6 +73,18 @@ router.put('/:id', authenticate, async (req: Request, res: Response): Promise<an
   try {
     const { id } = req.params;
     const updateData = req.body;
+
+    if (updateData.dni) {
+      const existing = await prisma.contact.findFirst({
+        where: {
+          dni: updateData.dni,
+          id: { not: id }
+        }
+      });
+      if (existing) {
+        return res.status(400).json({ message: 'El documento de identidad (DNI/RUC) ya está registrado en otro cliente.' });
+      }
+    }
 
     const client = await prisma.contact.update({
       where: { id },

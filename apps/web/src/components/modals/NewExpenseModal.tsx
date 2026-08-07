@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, DollarSign, FileText, Building, FileSpreadsheet } from 'lucide-react';
-import { createExpense, getProjects, getProperties } from '../../lib/api';
+import { createExpense, updateExpense, getProjects, getProperties } from '../../lib/api';
 
 interface NewExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export function NewExpenseModal({ isOpen, onClose, onSuccess }: NewExpenseModalProps) {
+export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: NewExpenseModalProps) {
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
@@ -42,26 +43,47 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess }: NewExpenseModalP
         setProperties(propRes?.data || []);
       });
 
-      setFormData({
-        description: '',
-        category: 'PUBLICIDAD_MARKETING',
-        amount: '',
-        taxAmount: '0',
-        totalAmount: '',
-        currency: 'PEN',
-        date: new Date().toISOString().substring(0, 10),
-        vendorName: '',
-        vendorRuc: '',
-        vendorPhone: '',
-        docType: 'FACTURA',
-        docNumber: '',
-        projectId: '',
-        propertyId: '',
-        paymentMethod: 'TRANSFERENCIA',
-        status: 'PENDIENTE',
-      });
+      if (initialData) {
+        setFormData({
+          description: initialData.description || '',
+          category: initialData.category || 'PUBLICIDAD_MARKETING',
+          amount: String(initialData.amount || ''),
+          taxAmount: String(initialData.taxAmount || '0'),
+          totalAmount: String(initialData.totalAmount || ''),
+          currency: initialData.currency || 'PEN',
+          date: initialData.date ? new Date(initialData.date).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10),
+          vendorName: initialData.vendorName || '',
+          vendorRuc: initialData.vendorRuc || '',
+          vendorPhone: initialData.vendorPhone || '',
+          docType: initialData.docType || 'FACTURA',
+          docNumber: initialData.docNumber || '',
+          projectId: initialData.projectId || '',
+          propertyId: initialData.propertyId || '',
+          paymentMethod: initialData.paymentMethod || 'TRANSFERENCIA',
+          status: initialData.status || 'PENDIENTE',
+        });
+      } else {
+        setFormData({
+          description: '',
+          category: 'PUBLICIDAD_MARKETING',
+          amount: '',
+          taxAmount: '0',
+          totalAmount: '',
+          currency: 'PEN',
+          date: new Date().toISOString().substring(0, 10),
+          vendorName: '',
+          vendorRuc: '',
+          vendorPhone: '',
+          docType: 'FACTURA',
+          docNumber: '',
+          projectId: '',
+          propertyId: '',
+          paymentMethod: 'TRANSFERENCIA',
+          status: 'PENDIENTE',
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -105,12 +127,17 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess }: NewExpenseModalP
         date: new Date(formData.date).toISOString(),
       };
 
-      await createExpense(payload);
+      if (initialData?.id) {
+        await updateExpense(initialData.id, payload);
+      } else {
+        await createExpense(payload);
+      }
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || 'Error al crear el egreso');
+      alert(err.message || 'Error al guardar el egreso');
     } finally {
       setLoading(false);
     }
@@ -121,7 +148,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess }: NewExpenseModalP
       <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">Registrar Nuevo Egreso</h2>
+          <h2 className="text-base font-semibold text-slate-900">{initialData ? 'Editar Egreso' : 'Registrar Nuevo Egreso'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200/50 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -342,7 +369,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess }: NewExpenseModalP
               disabled={loading}
               className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
             >
-              {loading ? 'Guardando...' : 'Guardar Egreso'}
+              {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Guardar Egreso')}
             </button>
           </div>
         </form>

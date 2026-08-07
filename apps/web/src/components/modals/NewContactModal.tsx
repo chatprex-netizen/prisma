@@ -30,7 +30,17 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
     projectOfInterest: '',
     assignedUserId: '',
     tags: '',
-    notes: ''
+    notes: '',
+    dni: '',
+    address: '',
+    city: '',
+    district: '',
+    department: '',
+    maritalStatus: 'SOLTERO',
+    spouseName: '',
+    spouseDni: '',
+    spouseEmail: '',
+    spousePhone: ''
   });
 
   useEffect(() => {
@@ -59,7 +69,17 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         projectOfInterest: initialData.projectOfInterest || initialData.interests?.[0] || '',
         assignedUserId: initialData.assignedTo || initialData.assignedUserId || '',
         tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
-        notes: initialData.notes || ''
+        notes: initialData.notes || '',
+        dni: initialData.dni || '',
+        address: initialData.address || '',
+        city: initialData.city || '',
+        district: initialData.district || '',
+        department: initialData.department || '',
+        maritalStatus: initialData.maritalStatus || 'SOLTERO',
+        spouseName: initialData.spouseName || '',
+        spouseDni: initialData.spouseDni || '',
+        spouseEmail: initialData.spouseEmail || '',
+        spousePhone: initialData.spousePhone || ''
       });
     } else {
       setFormData({
@@ -77,7 +97,17 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         projectOfInterest: '',
         assignedUserId: '',
         tags: '',
-        notes: ''
+        notes: '',
+        dni: '',
+        address: '',
+        city: '',
+        district: '',
+        department: '',
+        maritalStatus: 'SOLTERO',
+        spouseName: '',
+        spouseDni: '',
+        spouseEmail: '',
+        spousePhone: ''
       });
     }
   }, [initialData, isOpen]);
@@ -307,6 +337,134 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               />
             </div>
           </div>
+
+          {/* Client Specific Fields in Modal */}
+          {formData.type === 'CLIENTE' && (
+            <div className="border border-slate-100 rounded-lg p-3 bg-slate-50/50 space-y-3 pt-2 text-left animate-slide-down">
+              <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Datos de Cliente / Facturación</span>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">DNI / Documento</label>
+                  <input 
+                    type="text" 
+                    value={formData.dni}
+                    onChange={e => setFormData({...formData, dni: e.target.value})}
+                    placeholder="Ej. 12345678"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">Dirección</label>
+                  <input 
+                    type="text" 
+                    value={formData.address}
+                    onChange={e => setFormData({...formData, address: e.target.value})}
+                    placeholder="Av. Larco 456"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">Ciudad</label>
+                  <input 
+                    type="text" 
+                    value={formData.city}
+                    onChange={e => setFormData({...formData, city: e.target.value})}
+                    placeholder="Ej. Lima"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">Distrito</label>
+                  <input 
+                    type="text" 
+                    value={formData.district}
+                    onChange={e => setFormData({...formData, district: e.target.value})}
+                    placeholder="Ej. Miraflores"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">Región/Dpto</label>
+                  <input 
+                    type="text" 
+                    value={formData.department}
+                    onChange={e => setFormData({...formData, department: e.target.value})}
+                    placeholder="Ej. Lima"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium text-slate-700">Estado Civil</label>
+                <select 
+                  value={formData.maritalStatus}
+                  onChange={e => setFormData({...formData, maritalStatus: e.target.value})}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
+                >
+                  <option value="SOLTERO">Soltero(a)</option>
+                  <option value="CASADO">Casado(a)</option>
+                  <option value="DIVORCIADO">Divorciado(a)</option>
+                  <option value="VIUDO">Viudo(a)</option>
+                  <option value="CONVIVIENTE">Conviviente</option>
+                </select>
+              </div>
+
+              {(formData.maritalStatus === 'CASADO' || formData.maritalStatus === 'CONVIVIENTE') && (
+                <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-3">
+                  <span className="text-xs font-bold text-slate-600 block">Datos del Cónyuge</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-medium text-slate-700">Nombre Completo</label>
+                      <input 
+                        type="text" 
+                        value={formData.spouseName}
+                        onChange={e => setFormData({...formData, spouseName: e.target.value})}
+                        placeholder="Ej. María López"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-medium text-slate-700">DNI Cónyuge</label>
+                      <input 
+                        type="text" 
+                        value={formData.spouseDni}
+                        onChange={e => setFormData({...formData, spouseDni: e.target.value})}
+                        placeholder="Ej. 87654321"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-medium text-slate-700">Teléfono</label>
+                      <input 
+                        type="text" 
+                        value={formData.spousePhone}
+                        onChange={e => setFormData({...formData, spousePhone: e.target.value})}
+                        placeholder="Ej. 912345678"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-medium text-slate-700">Email</label>
+                      <input 
+                        type="email" 
+                        value={formData.spouseEmail}
+                        onChange={e => setFormData({...formData, spouseEmail: e.target.value})}
+                        placeholder="maria@correo.com"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Notas</label>

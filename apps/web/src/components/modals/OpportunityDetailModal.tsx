@@ -221,8 +221,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               <h2 className="text-sm font-extrabold text-slate-955 truncate max-w-[50vw]">{opportunity.title}</h2>
             </div>
             <div className="flex items-center gap-2 mt-0.5 text-xxs text-slate-500 font-semibold">
-              <span className="flex items-center gap-0.5 truncate">
-                <User className="w-3 h-3 text-slate-400" />
+              <span className="flex items-center gap-0.5 truncate font-extrabold text-slate-900">
+                <User className="w-3.5 h-3.5 text-slate-500" />
                 {contactName}
               </span>
               <span>•</span>
@@ -240,47 +240,50 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
         </div>
  
          <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-           {/* Sidebar / Topbar Tabs */}
-           <div className="w-full md:w-44 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-100 flex flex-row md:flex-col shrink-0 p-2 md:p-3.5 gap-1.5 md:space-y-2.5 overflow-x-auto md:overflow-x-visible custom-scrollbar items-center md:items-stretch">
+           {/* Mobile Tab Selector (Select Dropdown for phone view) */}
+           <div className="block md:hidden w-full bg-slate-50 border-b border-slate-100 p-2 shrink-0">
+             <select
+               value={activeTab}
+               onChange={e => setActiveTab(e.target.value as any)}
+               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xxs bg-white font-bold text-slate-800 focus:outline-none"
+             >
+               <option value="TAREAS">📅 Tareas y Citas</option>
+               <option value="NOTAS">📝 Notas Libres</option>
+               <option value="HISTORIAL">⏱️ Historial</option>
+               <option value="CONTRATO">✍️ Registrar Contrato</option>
+             </select>
+           </div>
+ 
+           {/* Sidebar Tabs (Desktop only) */}
+           <div className="hidden md:flex w-44 bg-slate-50 border-r border-slate-100 flex-col shrink-0 p-3.5 space-y-2.5">
              <button
                onClick={() => setActiveTab('TAREAS')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all shrink-0 ${activeTab === 'TAREAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'TAREAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
              >
                <Calendar className="w-3.5 h-3.5" />
                Tareas y Citas
              </button>
              <button
                onClick={() => setActiveTab('NOTAS')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all shrink-0 ${activeTab === 'NOTAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'NOTAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
              >
                <AlignLeft className="w-3.5 h-3.5" />
                Notas Libres
              </button>
              <button
                onClick={() => setActiveTab('HISTORIAL')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all shrink-0 ${activeTab === 'HISTORIAL' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'HISTORIAL' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
              >
                <History className="w-3.5 h-3.5" />
                Historial
              </button>
              <button
                onClick={() => setActiveTab('CONTRATO')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all shrink-0 ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
              >
                <FileSignature className="w-3.5 h-3.5" />
                Registrar Contrato
              </button>
- 
-             <div className="md:pt-2 md:mt-auto md:border-t border-slate-200/60 shrink-0">
-               <button
-                 type="button"
-                 onClick={() => setIsEditContactOpen(true)}
-                 className="flex md:w-full items-center justify-center gap-1.5 py-2 px-3 bg-brand-green hover:bg-brand-greenHover text-white rounded-lg text-xxs font-bold transition-all shadow-xs shadow-brand-green/20 shrink-0"
-               >
-                 <Edit3 className="w-3.5 h-3.5" />
-                 Editar Contacto
-               </button>
-             </div>
            </div>
  
            {/* Main Content Area */}

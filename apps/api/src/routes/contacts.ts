@@ -50,7 +50,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 
     mapSourceToDb(req.body);
-    const { stage, ...contactData } = req.body;
+    const { stage, currency, ...contactData } = req.body;
+
+    if (contactData.phone) {
+      const existingPhone = await prisma.contact.findFirst({
+        where: { phone: contactData.phone }
+      });
+      if (existingPhone) {
+        return res.status(400).json({ success: false, error: 'El número de celular ya está registrado en otro contacto.' });
+      }
+    }
+
     const contact = await prisma.contact.create({
       data: contactData
     });
@@ -87,7 +97,20 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     mapSourceToDb(req.body);
-    const { stage, ...contactData } = req.body;
+    const { stage, currency, ...contactData } = req.body;
+
+    if (contactData.phone) {
+      const existingPhone = await prisma.contact.findFirst({
+        where: {
+          phone: contactData.phone,
+          id: { not: req.params.id }
+        }
+      });
+      if (existingPhone) {
+        return res.status(400).json({ success: false, error: 'El número de celular ya está registrado en otro contacto.' });
+      }
+    }
+
     const contact = await prisma.contact.update({
       where: { id: req.params.id },
       data: contactData

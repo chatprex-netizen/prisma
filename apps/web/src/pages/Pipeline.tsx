@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings, List, Kanban, Tag, DollarSign, Bot, Edit, Trash2 } from 'lucide-react';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
+import { NewContactModal } from '../components/modals/NewContactModal';
 import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity, toggleChatBot } from '../lib/api';
 
 export function Pipeline() {
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
+  const [editingContact, setEditingContact] = useState<any>(null);
   const [draggedOverStage, setDraggedOverStage] = useState<string | null>(null);
   const [activeMobileMenuId, setActiveMobileMenuId] = useState<string | null>(null);
   
@@ -187,9 +189,9 @@ export function Pipeline() {
                 <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 sticky top-0 z-10 text-xs">
                   <tr>
                     <th className="px-4 py-3">Cliente</th>
-                    <th className="px-4 py-3 hidden md:table-cell">Proyecto</th>
-                    <th className="px-4 py-3 hidden lg:table-cell">Origen / Fuente</th>
+                    <th className="px-4 py-3 hidden md:table-cell">Proyecto / Presupuesto / Asesor</th>
                     <th className="px-4 py-3">Etapa</th>
+                    <th className="px-4 py-3 hidden lg:table-cell">Origen / Fuente</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Antigüedad</th>
                     <th className="px-4 py-3 text-right">Acciones</th>
                   </tr>
@@ -232,15 +234,29 @@ export function Pipeline() {
                           </td>
                           {/* Proyecto */}
                           <td className="px-4 py-3.5 hidden md:table-cell">
-                            <span className="text-slate-600 font-semibold text-xs">
+                            <div className="font-semibold text-slate-900 text-xs">
                               {opp.project?.name || 'Sin Proyecto'}
-                            </span>
-                          </td>
-                          {/* Origen */}
-                          <td className="px-4 py-3.5 hidden lg:table-cell">
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 text-slate-500">
-                              {opp.contact?.source || 'Sin Origen'}
-                            </span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-1 space-y-0.5 font-medium leading-normal">
+                              {opp.project?.developer?.name && (
+                                <div>
+                                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[8px] mr-1">Desarrollador:</span>
+                                  <span className="text-slate-700 font-semibold">{opp.project.developer.name}</span>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-slate-400 font-bold uppercase tracking-wider text-[8px] mr-1">Asesor:</span>
+                                <span className="text-slate-700 font-semibold">{opp.agent ? `${opp.agent.firstName} ${opp.agent.lastName || ''}`.trim() : 'Sin Asesor'}</span>
+                              </div>
+                              {opp.value !== null && opp.value !== undefined && (
+                                <div>
+                                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[8px] mr-1">Presupuesto:</span>
+                                  <span className="text-brand-green font-bold">
+                                    S/ {Number(opp.value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </td>
                           {/* Etapa */}
                           <td className="px-4 py-3.5">
@@ -253,6 +269,12 @@ export function Pipeline() {
                               }}
                             >
                               {stageConfig.name}
+                            </span>
+                          </td>
+                          {/* Origen */}
+                          <td className="px-4 py-3.5 hidden lg:table-cell">
+                            <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 text-slate-500">
+                              {opp.contact?.source || 'Sin Origen'}
                             </span>
                           </td>
                           {/* Antigüedad */}
@@ -281,15 +303,6 @@ export function Pipeline() {
                                     <MessageSquare className="w-3.5 h-3.5" />
                                   </a>
                                 </>
-                              )}
-                              {opp.contact?.email && (
-                                <a 
-                                  href={`mailto:${opp.contact.email}`}
-                                  className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
-                                  title="Enviar correo"
-                                >
-                                  <Mail className="w-3.5 h-3.5" />
-                                </a>
                               )}
 
                               {opp.contact?.chats?.[0] ? (
@@ -324,23 +337,6 @@ export function Pipeline() {
                                   <Bot className="w-3.5 h-3.5" />
                                 </button>
                               )}
-
-                              <div className="flex items-center gap-1 pl-1.5 border-l border-slate-200 ml-1">
-                                <button 
-                                  onClick={() => setSelectedOpp(opp)}
-                                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
-                                  title="Editar"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteOpportunity(opp.id)}
-                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                                  title="Eliminar"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
                             </div>
                           </td>
                         </tr>
@@ -350,7 +346,7 @@ export function Pipeline() {
                 </tbody>
               </table>
             </div>
-            <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 shrink-0 font-medium">
+            <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 shrink-0 font-medium font-sans">
               <span>Mostrando {filteredOpportunities.length} oportunidades</span>
             </div>
           </div>
@@ -536,9 +532,9 @@ export function Pipeline() {
 
                               <div className="flex items-center gap-2">
                                 <button 
-                                  onClick={() => setSelectedOpp(opp)}
+                                  onClick={() => setEditingContact(opp.contact)}
                                   className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded transition-colors"
-                                  title="Editar"
+                                  title="Editar Contacto"
                                 >
                                   <Edit className="w-3.5 h-3.5" />
                                 </button>
@@ -569,6 +565,18 @@ export function Pipeline() {
         onClose={() => setSelectedOpp(null)}
         opportunity={selectedOpp}
       />
+
+      {editingContact && (
+        <NewContactModal
+          isOpen={!!editingContact}
+          onClose={() => setEditingContact(null)}
+          initialData={editingContact}
+          onSuccess={() => {
+            setEditingContact(null);
+            fetchPipeline();
+          }}
+        />
+      )}
 
 
     </div>

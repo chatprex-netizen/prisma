@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Receipt, BookOpen, Plus, Search, DollarSign, ChevronRight, Trash2 } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Receipt, BookOpen, Plus, Search, DollarSign, ChevronRight, Trash2, Edit } from 'lucide-react';
 import { getIncomes, getExpenses, getAccounts, deleteIncome, deleteExpense, deleteAccount } from '../lib/api';
 import { NewIncomeModal } from '../components/modals/NewIncomeModal';
 import { NewExpenseModal } from '../components/modals/NewExpenseModal';
@@ -68,10 +68,13 @@ export function Finances() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modals visibility states
+  // Modals visibility and edit states
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState<any>(null);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
 
   useEffect(() => {
     setActiveTab(getTabFromPath());
@@ -96,7 +99,8 @@ export function Finances() {
   };
 
   const handleDeleteIncome = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este ingreso?')) return;
+    const confirmText = window.prompt('¡ADVERTENCIA! Esta acción afectará los reportes financieros. Para confirmar la eliminación de este ingreso, escribe "ELIMINAR":');
+    if (confirmText !== 'ELIMINAR') return;
     try {
       await deleteIncome(id);
       loadAll();
@@ -107,7 +111,8 @@ export function Finances() {
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este egreso?')) return;
+    const confirmText = window.prompt('¡ADVERTENCIA! Esta acción afectará los reportes financieros. Para confirmar la eliminación de este egreso, escribe "ELIMINAR":');
+    if (confirmText !== 'ELIMINAR') return;
     try {
       await deleteExpense(id);
       loadAll();
@@ -118,7 +123,8 @@ export function Finances() {
   };
 
   const handleDeleteAccount = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar esta cuenta contable?')) return;
+    const confirmText = window.prompt('¡ADVERTENCIA! Esta acción puede alterar la integridad del plan contable. Para confirmar la eliminación de esta cuenta, escribe "ELIMINAR":');
+    if (confirmText !== 'ELIMINAR') return;
     try {
       await deleteAccount(id);
       loadAll();
@@ -254,51 +260,60 @@ export function Finances() {
 
           {/* Incomes Tab */}
           {activeTab === 'incomes' && (
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-sm font-semibold text-slate-900">Cuentas por Cobrar (Ingresos)</h3>
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden text-left">
+              <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Cuentas por Cobrar (Ingresos)</h3>
                 <button 
-                  onClick={() => setIsIncomeModalOpen(true)}
-                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
+                  onClick={() => { setEditingIncome(null); setIsIncomeModalOpen(true); }}
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-bold hover:bg-brand-greenHover transition-colors shrink-0 shadow-sm shadow-brand-green/10"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Nuevo Ingreso</span>
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Nro.</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Fecha</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Descripción</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Tipo</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Cliente</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Método</th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Monto</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
-                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Nro.</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Fecha</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Tipo</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Cliente</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Método</th>
+                      <th className="text-right py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Monto</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                      <th className="text-center py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-100">
                     {incomes.map(inc => (
-                      <tr key={inc.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 text-slate-500 font-mono text-xs">{inc.number}</td>
-                        <td className="py-3 px-4 text-slate-600 text-xs">{new Date(inc.date).toLocaleDateString('es-PE')}</td>
-                        <td className="py-3 px-4 font-medium text-slate-900">{inc.description?.substring(0, 50) || '—'}</td>
-                        <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-medium">{incomeTypeLabels[inc.type] || inc.type}</span></td>
-                        <td className="py-3 px-4 text-slate-600">{inc.contact ? `${inc.contact.firstName} ${inc.contact.lastName || ''}` : '—'}</td>
-                        <td className="py-3 px-4 text-slate-500 text-xs">{paymentMethodLabels[inc.paymentMethod] || inc.paymentMethod}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-emerald-600">S/ {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-4"><StatusBadge status={inc.status} /></td>
-                        <td className="py-3 px-4 text-center">
-                          <button 
-                            onClick={() => handleDeleteIncome(inc.id)}
-                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                            title="Eliminar Ingreso"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                      <tr key={inc.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-2 px-3 text-slate-500 font-mono text-[10px]">{inc.number}</td>
+                        <td className="py-2 px-3 text-slate-600 text-[11px]">{new Date(inc.date).toLocaleDateString('es-PE')}</td>
+                        <td className="py-2 px-3 font-semibold text-slate-900 text-xs">{inc.description?.substring(0, 50) || '—'}</td>
+                        <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">{incomeTypeLabels[inc.type] || inc.type}</span></td>
+                        <td className="py-2 px-3 text-slate-700 font-medium">{inc.contact ? `${inc.contact.firstName} ${inc.contact.lastName || ''}` : '—'}</td>
+                        <td className="py-2 px-3 text-slate-500 text-[11px]">{paymentMethodLabels[inc.paymentMethod] || inc.paymentMethod}</td>
+                        <td className="py-2 px-3 text-right font-bold text-emerald-600">S/ {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-2 px-3"><StatusBadge status={inc.status} /></td>
+                        <td className="py-2 px-3 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button 
+                              onClick={() => { setEditingIncome(inc); setIsIncomeModalOpen(true); }}
+                              className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                              title="Editar Ingreso"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteIncome(inc.id)}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Eliminar Ingreso"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -316,51 +331,60 @@ export function Finances() {
 
           {/* Expenses Tab */}
           {activeTab === 'expenses' && (
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-sm font-semibold text-slate-900">Cuentas por Pagar (Egresos)</h3>
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden text-left">
+              <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Cuentas por Pagar (Egresos)</h3>
                 <button 
-                  onClick={() => setIsExpenseModalOpen(true)}
-                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
+                  onClick={() => { setEditingExpense(null); setIsExpenseModalOpen(true); }}
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-bold hover:bg-brand-greenHover transition-colors shrink-0 shadow-sm shadow-brand-green/10"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Nuevo Egreso</span>
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Nro.</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Fecha</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Descripción</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Categoría</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Proveedor</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Doc. Tipo</th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Total</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
-                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Nro.</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Fecha</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Categoría</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Proveedor</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Doc. Tipo</th>
+                      <th className="text-right py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                      <th className="text-center py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-100">
                     {expenses.map(exp => (
-                      <tr key={exp.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 text-slate-500 font-mono text-xs">{exp.number}</td>
-                        <td className="py-3 px-4 text-slate-600 text-xs">{new Date(exp.date).toLocaleDateString('es-PE')}</td>
-                        <td className="py-3 px-4 font-medium text-slate-900">{exp.description?.substring(0, 50) || '—'}</td>
-                        <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{expenseCategoryLabels[exp.category] || exp.category}</span></td>
-                        <td className="py-3 px-4 text-slate-600">{exp.vendorName || '—'}</td>
-                        <td className="py-3 px-4 text-slate-500 text-xs">{exp.docType}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-red-500">S/ {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-4"><StatusBadge status={exp.status} /></td>
-                        <td className="py-3 px-4 text-center">
-                          <button 
-                            onClick={() => handleDeleteExpense(exp.id)}
-                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                            title="Eliminar Egreso"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                      <tr key={exp.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-2 px-3 text-slate-500 font-mono text-[10px]">{exp.number}</td>
+                        <td className="py-2 px-3 text-slate-600 text-[11px]">{new Date(exp.date).toLocaleDateString('es-PE')}</td>
+                        <td className="py-2 px-3 font-semibold text-slate-900 text-xs">{exp.description?.substring(0, 50) || '—'}</td>
+                        <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">{expenseCategoryLabels[exp.category] || exp.category}</span></td>
+                        <td className="py-2 px-3 text-slate-700 font-medium">{exp.vendorName || '—'}</td>
+                        <td className="py-2 px-3 text-slate-500 text-[11px]">{exp.docType}</td>
+                        <td className="py-2 px-3 text-right font-bold text-red-500">S/ {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-2 px-3"><StatusBadge status={exp.status} /></td>
+                        <td className="py-2 px-3 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button 
+                              onClick={() => { setEditingExpense(exp); setIsExpenseModalOpen(true); }}
+                              className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                              title="Editar Egreso"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteExpense(exp.id)}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Eliminar Egreso"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -378,59 +402,68 @@ export function Finances() {
 
           {/* Accounts Tab */}
           {activeTab === 'accounts' && (
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-sm font-semibold text-slate-900">Plan de Cuentas Contable</h3>
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden text-left">
+              <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Plan de Cuentas Contable</h3>
                 <button 
-                  onClick={() => setIsAccountModalOpen(true)}
-                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shrink-0"
+                  onClick={() => { setEditingAccount(null); setIsAccountModalOpen(true); }}
+                  className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-1.5 rounded-lg bg-brand-green text-white text-xs font-bold hover:bg-brand-greenHover transition-colors shrink-0 shadow-sm shadow-brand-green/10"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Nueva Cuenta</span>
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Código</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Nombre</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Tipo</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Subtipo</th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500">Saldo</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500">Estado</th>
-                      <th className="text-center py-3 px-4 text-xs font-semibold text-slate-500">Acciones</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Código</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Nombre</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Tipo</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Subtipo</th>
+                      <th className="text-right py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Saldo</th>
+                      <th className="text-left py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                      <th className="text-center py-2 px-3 text-xxs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-100">
                     {accounts.map(acc => (
-                      <tr key={acc.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-mono text-xs text-slate-600">{acc.code}</td>
-                        <td className="py-3 px-4 font-medium text-slate-900">{acc.name}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <tr key={acc.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-2 px-3 font-mono text-[10px] text-slate-600">{acc.code}</td>
+                        <td className="py-2 px-3 font-semibold text-slate-900 text-xs">{acc.name}</td>
+                        <td className="py-2 px-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             acc.type === 'ACTIVO' ? 'bg-blue-50 text-blue-600' :
                             acc.type === 'PASIVO' ? 'bg-orange-50 text-orange-600' :
                             acc.type === 'PATRIMONIO' ? 'bg-purple-50 text-purple-600' :
                             acc.type === 'INGRESO' ? 'bg-emerald-50 text-emerald-600' :
-                            'bg-red-50 text-red-600'
+                            'bg-red-50 text-red-650'
                           }`}>{acc.type}</span>
                         </td>
-                        <td className="py-3 px-4 text-slate-500 text-xs">{acc.subtype?.replace(/_/g, ' ')}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-slate-900 font-mono">S/ {Number(acc.currentBalance || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${acc.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                        <td className="py-2 px-3 text-slate-500 text-[11px]">{acc.subtype?.replace(/_/g, ' ')}</td>
+                        <td className="py-2 px-3 text-right font-bold text-slate-900 font-mono">S/ {Number(acc.currentBalance || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-2 px-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${acc.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                             {acc.isActive ? 'Activa' : 'Inactiva'}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          <button 
-                            onClick={() => handleDeleteAccount(acc.id)}
-                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                            title="Eliminar Cuenta"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <td className="py-2 px-3 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button 
+                              onClick={() => { setEditingAccount(acc); setIsAccountModalOpen(true); }}
+                              className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                              title="Editar Cuenta"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteAccount(acc.id)}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Eliminar Cuenta"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -451,20 +484,23 @@ export function Finances() {
 
       <NewIncomeModal 
         isOpen={isIncomeModalOpen}
-        onClose={() => setIsIncomeModalOpen(false)}
+        onClose={() => { setIsIncomeModalOpen(false); setEditingIncome(null); }}
         onSuccess={loadAll}
+        initialData={editingIncome}
       />
 
       <NewExpenseModal 
         isOpen={isExpenseModalOpen}
-        onClose={() => setIsExpenseModalOpen(false)}
+        onClose={() => { setIsExpenseModalOpen(false); setEditingExpense(null); }}
         onSuccess={loadAll}
+        initialData={editingExpense}
       />
 
       <NewAccountModal 
         isOpen={isAccountModalOpen}
-        onClose={() => setIsAccountModalOpen(false)}
+        onClose={() => { setIsAccountModalOpen(false); setEditingAccount(null); }}
         onSuccess={loadAll}
+        initialData={editingAccount}
       />
     </div>
   );
@@ -473,23 +509,23 @@ export function Finances() {
 // ─── Helper Components ───
 function KpiCard({ title, value, color, icon, subtitle }: { title: string; value: number; color: string; icon: React.ReactNode; subtitle?: string }) {
   const colorMap: Record<string, { bg: string; text: string; iconBg: string }> = {
-    blue: { bg: 'bg-white', text: 'text-blue-600', iconBg: 'bg-blue-50' },
-    green: { bg: 'bg-white', text: 'text-emerald-600', iconBg: 'bg-emerald-50' },
-    red: { bg: 'bg-white', text: 'text-red-600', iconBg: 'bg-red-50' },
-    amber: { bg: 'bg-white', text: 'text-amber-600', iconBg: 'bg-amber-50' },
+    blue: { bg: 'bg-white border-blue-100', text: 'text-blue-600', iconBg: 'bg-blue-50/50' },
+    green: { bg: 'bg-white border-emerald-100', text: 'text-emerald-600', iconBg: 'bg-emerald-50/50' },
+    red: { bg: 'bg-white border-red-100', text: 'text-red-650', iconBg: 'bg-red-50/50' },
+    amber: { bg: 'bg-white border-amber-100', text: 'text-amber-600', iconBg: 'bg-amber-50/50' },
   };
   const c = colorMap[color] || colorMap.blue;
 
   return (
-    <div className={`${c.bg} rounded-xl border border-slate-100 p-4 shadow-sm`}>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs text-slate-500 font-medium">{title}</p>
-        <div className={`w-8 h-8 rounded-full ${c.iconBg} flex items-center justify-center ${c.text}`}>{icon}</div>
+    <div className={`${c.bg} rounded-xl border p-3 shadow-xs hover:shadow-sm transition-all text-left`}>
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{title}</p>
+        <div className={`w-7 h-7 rounded-full ${c.iconBg} flex items-center justify-center ${c.text}`}>{icon}</div>
       </div>
-      <p className={`text-xl font-bold ${value >= 0 ? 'text-slate-900' : 'text-red-600'}`}>
+      <p className={`text-base sm:text-lg font-bold leading-tight ${value >= 0 ? 'text-slate-900' : 'text-red-650'}`}>
         S/ {value.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
       </p>
-      {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{subtitle}</p>}
     </div>
   );
 }

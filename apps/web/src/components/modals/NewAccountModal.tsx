@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, BookOpen, Key, DollarSign } from 'lucide-react';
-import { createAccount } from '../../lib/api';
+import { createAccount, updateAccount } from '../../lib/api';
 
 interface NewAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalProps) {
+export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: NewAccountModalProps) {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -23,17 +24,29 @@ export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalP
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        code: '',
-        name: '',
-        type: 'ACTIVO',
-        subtype: 'CAJA',
-        currency: 'PEN',
-        initialBalance: '0',
-        description: '',
-      });
+      if (initialData) {
+        setFormData({
+          code: initialData.code || '',
+          name: initialData.name || '',
+          type: initialData.type || 'ACTIVO',
+          subtype: initialData.subtype || 'CAJA',
+          currency: initialData.currency || 'PEN',
+          initialBalance: String(initialData.initialBalance || '0'),
+          description: initialData.description || '',
+        });
+      } else {
+        setFormData({
+          code: '',
+          name: '',
+          type: 'ACTIVO',
+          subtype: 'CAJA',
+          currency: 'PEN',
+          initialBalance: '0',
+          description: '',
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -49,15 +62,20 @@ export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalP
       const payload = {
         ...formData,
         initialBalance: Number(formData.initialBalance),
-        currentBalance: Number(formData.initialBalance), // Set initial current balance
+        currentBalance: initialData ? Number(initialData.currentBalance) : Number(formData.initialBalance),
       };
 
-      await createAccount(payload);
+      if (initialData?.id) {
+        await updateAccount(initialData.id, payload);
+      } else {
+        await createAccount(payload);
+      }
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || 'Error al crear la cuenta contable');
+      alert(err.message || 'Error al guardar la cuenta contable');
     } finally {
       setLoading(false);
     }
@@ -85,7 +103,7 @@ export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalP
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
           <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-brand-green" />
-            Nueva Cuenta Contable
+            {initialData ? 'Editar Cuenta Contable' : 'Nueva Cuenta Contable'}
           </h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200/50 transition-colors">
             <X className="w-5 h-5" />
@@ -247,7 +265,7 @@ export function NewAccountModal({ isOpen, onClose, onSuccess }: NewAccountModalP
               disabled={loading}
               className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
             >
-              {loading ? 'Guardando...' : 'Crear Cuenta'}
+              {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Crear Cuenta')}
             </button>
           </div>
         </form>

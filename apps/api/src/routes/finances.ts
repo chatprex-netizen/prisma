@@ -159,4 +159,65 @@ router.delete('/accounts/:id', authenticate, async (req: Request, res: Response)
   }
 });
 
+// PUT update income
+router.put('/incomes/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { contact, project, property, ...updateData } = req.body;
+    const income = await prisma.income.update({
+      where: { id: req.params.id },
+      data: {
+        ...updateData,
+        amount: Number(updateData.amount),
+        contactId: updateData.contactId || null,
+        projectId: updateData.projectId || null,
+        propertyId: updateData.propertyId || null,
+        date: new Date(updateData.date).toISOString()
+      }
+    });
+    res.json(income);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// PUT update expense
+router.put('/expenses/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { project, property, ...updateData } = req.body;
+    const expense = await prisma.expense.update({
+      where: { id: req.params.id },
+      data: {
+        ...updateData,
+        amount: Number(updateData.amount),
+        taxAmount: updateData.taxAmount ? Number(updateData.taxAmount) : null,
+        totalAmount: Number(updateData.totalAmount),
+        projectId: updateData.projectId || null,
+        propertyId: updateData.propertyId || null,
+        date: new Date(updateData.date).toISOString()
+      }
+    });
+    res.json(expense);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// PUT update account
+router.put('/accounts/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { children, ...updateData } = req.body;
+    const account = await prisma.account.update({
+      where: { id: req.params.id },
+      data: {
+        ...updateData,
+        initialBalance: Number(updateData.initialBalance),
+        currentBalance: Number(updateData.currentBalance)
+      }
+    });
+    res.json(account);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 export default router;

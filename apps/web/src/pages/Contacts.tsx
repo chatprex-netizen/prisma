@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Mail, Phone, MoreHorizontal, Eye, Edit3, Trash2, Tag, Star, X, Save, User, Building2, Wallet, Calendar, ClipboardList } from 'lucide-react';
+import { Plus, Search, Filter, Mail, Phone, MoreHorizontal, Eye, Edit3, Trash2, Tag, Star, X, Save, User, Building2, Wallet, Calendar, ClipboardList, MapPin } from 'lucide-react';
 import { NewContactModal } from '../components/modals/NewContactModal';
 import { getContacts, deleteContact, updateContact, getProjects, getUsers, getLeadSources } from '../lib/api';
 
@@ -57,7 +57,17 @@ export function Contacts() {
       ...contact,
       projectOfInterest: contact.interests?.[0] || '',
       assignedUserId: contact.assignedTo || contact.assignedUserId || '',
-      tags: Array.isArray(contact.tags) ? contact.tags.join(', ') : contact.tags || ''
+      tags: Array.isArray(contact.tags) ? contact.tags.join(', ') : contact.tags || '',
+      dni: contact.dni || '',
+      address: contact.address || '',
+      city: contact.city || '',
+      district: contact.district || '',
+      department: contact.department || '',
+      maritalStatus: contact.maritalStatus || 'SOLTERO',
+      spouseName: contact.spouseName || '',
+      spouseDni: contact.spouseDni || '',
+      spouseEmail: contact.spouseEmail || '',
+      spousePhone: contact.spousePhone || '',
     });
     setEditMode(false);
     setActiveTab('personal');
@@ -84,7 +94,17 @@ export function Contacts() {
           : [],
         interests: editData.projectOfInterest ? [editData.projectOfInterest] : [],
         assignedTo: editData.assignedUserId || null,
-        notes: editData.notes || ''
+        notes: editData.notes || '',
+        dni: editData.dni || null,
+        address: editData.address || null,
+        city: editData.city || null,
+        district: editData.district || null,
+        department: editData.department || null,
+        maritalStatus: editData.maritalStatus || null,
+        spouseName: editData.spouseName || null,
+        spouseDni: editData.spouseDni || null,
+        spouseEmail: editData.spouseEmail || null,
+        spousePhone: editData.spousePhone || null,
       };
 
       await updateContact(selectedContact.id, payload);
@@ -100,9 +120,9 @@ export function Contacts() {
         opportunities: selectedContact.opportunities // Preserve nested relations
       });
       setEditMode(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving contact:', err);
-      alert('Error al guardar el contacto');
+      alert(err?.message || 'Error al guardar el contacto');
     } finally {
       setSaving(false);
     }
@@ -244,8 +264,13 @@ export function Contacts() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors truncate">
+                          <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors truncate flex items-center gap-1.5">
                             {contact.firstName} {contact.lastName || ''}
+                            {contact.type === 'CLIENTE' && (
+                              <span className="bg-emerald-50 text-emerald-600 text-[9px] px-1.5 py-0.2 rounded border border-emerald-250 font-bold uppercase shrink-0 animate-fade-in">
+                                Cliente
+                              </span>
+                            )}
                           </div>
                           <span className="text-[10px] text-slate-400 font-medium block truncate md:hidden">{contact.phone}</span>
                         </div>
@@ -313,7 +338,14 @@ export function Contacts() {
             {/* Panel Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
               <div className="min-w-0">
-                <h2 className="font-bold text-slate-900 truncate">{selectedContact.firstName} {selectedContact.lastName || ''}</h2>
+                <h2 className="font-bold text-slate-900 truncate flex items-center gap-1.5">
+                  {selectedContact.firstName} {selectedContact.lastName || ''}
+                  {selectedContact.type === 'CLIENTE' && (
+                    <span className="bg-emerald-50 text-emerald-600 text-xxs px-2 py-0.5 rounded border border-emerald-250 font-bold uppercase shrink-0">
+                      Cliente
+                    </span>
+                  )}
+                </h2>
                 <p className="text-xs text-slate-400 truncate">{selectedContact.phone}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -398,6 +430,57 @@ export function Contacts() {
                         </span>
                       )}
                     </div>
+
+                    {/* Additional Client Fields */}
+                    {editData.type === 'CLIENTE' && (
+                      <div className="col-span-1 sm:col-span-2 border border-slate-100 rounded-lg p-3 bg-slate-50/50 space-y-3 pt-2 text-left animate-slide-down">
+                        <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Datos de Cliente / Facturación</span>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <FieldGroup label="DNI / Documento" value={editData.dni} field="dni" editMode={editMode} onChange={(v) => setEditData({...editData, dni: v})} icon={<ClipboardList className="w-3.5 h-3.5 text-slate-400" />} />
+                          <FieldGroup label="Dirección" value={editData.address} field="address" editMode={editMode} onChange={(v) => setEditData({...editData, address: v})} icon={<MapPin className="w-3.5 h-3.5 text-slate-400" />} />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <FieldGroup label="Distrito" value={editData.district} field="district" editMode={editMode} onChange={(v) => setEditData({...editData, district: v})} />
+                          <FieldGroup label="Ciudad" value={editData.city} field="city" editMode={editMode} onChange={(v) => setEditData({...editData, city: v})} />
+                          <FieldGroup label="Departamento" value={editData.department} field="department" editMode={editMode} onChange={(v) => setEditData({...editData, department: v})} />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">Estado Civil</label>
+                          {editMode ? (
+                            <select
+                              value={editData.maritalStatus || 'SOLTERO'}
+                              onChange={e => setEditData({...editData, maritalStatus: e.target.value})}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+                            >
+                              <option value="SOLTERO">Soltero(a)</option>
+                              <option value="CASADO">Casado(a)</option>
+                              <option value="DIVORCIADO">Divorciado(a)</option>
+                              <option value="VIUDO">Viudo(a)</option>
+                              <option value="CONVIVIENTE">Conviviente</option>
+                            </select>
+                          ) : (
+                            <span className="text-sm text-slate-900 font-semibold">{editData.maritalStatus || 'SOLTERO'}</span>
+                          )}
+                        </div>
+
+                        {(editData.maritalStatus === 'CASADO' || editData.maritalStatus === 'CONVIVIENTE') && (
+                          <div className="border border-slate-200 rounded-lg p-2.5 bg-white space-y-2">
+                            <span className="text-xxs font-bold text-slate-500 uppercase tracking-wider block">Datos del Cónyuge</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <FieldGroup label="Nombre Cónyuge" value={editData.spouseName} field="spouseName" editMode={editMode} onChange={(v) => setEditData({...editData, spouseName: v})} />
+                              <FieldGroup label="DNI Cónyuge" value={editData.spouseDni} field="spouseDni" editMode={editMode} onChange={(v) => setEditData({...editData, spouseDni: v})} />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <FieldGroup label="Teléfono Cónyuge" value={editData.spousePhone} field="spousePhone" editMode={editMode} onChange={(v) => setEditData({...editData, spousePhone: v})} />
+                              <FieldGroup label="Email Cónyuge" value={editData.spouseEmail} field="spouseEmail" editMode={editMode} onChange={(v) => setEditData({...editData, spouseEmail: v})} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Origen del Lead</label>
