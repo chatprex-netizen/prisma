@@ -20,7 +20,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
     phone: '',
     email: '',
     type: 'LEAD',
-    source: 'FACEBOOK',
+    source: 'REDES_SOCIALES',
     isVip: false,
     budgetMin: '',
     budgetMax: '',
@@ -47,7 +47,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         phone: initialData.phone || '',
         email: initialData.email || '',
         type: initialData.type || 'LEAD',
-        source: initialData.source || 'FACEBOOK',
+        source: initialData.source || 'REDES_SOCIALES',
         isVip: !!initialData.isVip,
         budgetMin: initialData.budgetMin ? String(initialData.budgetMin) : '',
         budgetMax: initialData.budgetMax ? String(initialData.budgetMax) : '',
@@ -63,8 +63,8 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         lastName: '',
         phone: '',
         email: '',
-        type: 'CLIENTE',
-        source: 'FACEBOOK',
+        type: 'LEAD',
+        source: 'REDES_SOCIALES',
         isVip: false,
         budgetMin: '',
         budgetMax: '',
@@ -177,12 +177,13 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 value={formData.source}
                 onChange={e => setFormData({...formData, source: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
-                <option value="FACEBOOK">Facebook</option>
-                <option value="INSTAGRAM">Instagram</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="TIK_TOK">Tik Tok</option>
-                <option value="YOUTUBE">YouTube</option>
-                <option value="GOOGLE_ADS">Google Ads</option>
+                <option value="REDES_SOCIALES">Redes Sociales (FB, IG, TikTok, etc.)</option>
+                <option value="WEB">Sitio Web</option>
+                <option value="PORTAL_INMOBILIARIO">Portal Inmobiliario</option>
+                <option value="REFERIDO">Referido</option>
+                <option value="EVENTO">Evento</option>
+                <option value="CALL_CENTER">Call Center</option>
+                <option value="VISITA_OFICINA">Visita a Oficina</option>
                 <option value="OTRO">Otro</option>
               </select>
             </div>
