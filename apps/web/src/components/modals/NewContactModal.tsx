@@ -56,7 +56,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         budgetMax: initialData.budgetMax ? String(initialData.budgetMax) : '',
         currency: initialData.currency || 'USD',
         stage: initialData.opportunities?.[0]?.stage || 'PROSPECCION',
-        projectOfInterest: initialData.projectOfInterest || '',
+        projectOfInterest: initialData.projectOfInterest || initialData.interests?.[0] || '',
         assignedUserId: initialData.assignedTo || initialData.assignedUserId || '',
         tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
         notes: initialData.notes || ''

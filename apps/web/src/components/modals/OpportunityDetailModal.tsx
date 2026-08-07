@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User, DollarSign, Building, Edit3 } from 'lucide-react';
-import { getProperties, createContract, updateOpportunityStage } from '../../lib/api';
+import { getProperties, createContract, updateOpportunityStage, getAppointments, createAppointment, updateAppointment, updateContact } from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
 
 interface OpportunityDetailModalProps {
@@ -27,6 +27,19 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   const [selectedDevId, setSelectedDevId] = useState('');
   const [selectedProjId, setSelectedProjId] = useState('');
   
+  // New States for dynamic tasks/appointments and notes
+  const [taskType, setTaskType] = useState('LLAMADA');
+  const [taskDate, setTaskDate] = useState('');
+  const [taskTime, setTaskTime] = useState('');
+  const [taskDetails, setTaskDetails] = useState('');
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loadingAppts, setLoadingAppts] = useState(false);
+  
+  const [newNote, setNewNote] = useState('');
+  const [notesText, setNotesText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const [savingTask, setSavingTask] = useState(false);
+
   const [contractData, setContractData] = useState({
     propertyId: '',
     type: 'COMPRAVENTA',
@@ -37,11 +50,37 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   });
   const [submittingContract, setSubmittingContract] = useState(false);
 
+  const fetchAppointments = async () => {
+    if (!opportunity?.contactId) return;
+    try {
+      setLoadingAppts(true);
+      const res = await getAppointments();
+      const contactAppts = (res?.data || []).filter((a: any) => a.contactId === opportunity.contactId);
+      setAppointments(contactAppts);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+    } finally {
+      setLoadingAppts(false);
+    }
+  };
+
   useEffect(() => {
     if (isOpen && activeTab === 'CONTRATO') {
       getProperties().then(res => setProperties(res.data || [])).catch(console.error);
     }
   }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (isOpen && opportunity) {
+      fetchAppointments();
+      setNotesText(opportunity.contact?.notes || '');
+      setTaskType('LLAMADA');
+      setTaskDate('');
+      setTaskTime('');
+      setTaskDetails('');
+      setNewNote('');
+    }
+  }, [isOpen, opportunity]);
 
   useEffect(() => {
     if (opportunity) {
@@ -61,8 +100,115 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   if (!isOpen || !opportunity) return null;
 
   const contactName = opportunity.contact?.firstName 
-    ? `${opportunity.contact.firstName} ${opportunity.contact.lastName || ''}`
+    ? `${opportunity.contact.firstName} ${opportunity.contact.lastName || ''}`.trim()
     : 'Sin Contacto';
+
+  // Helper to parse notes history
+  const parseNotes = (text: string) => {
+    if (!text) return [];
+    return text.split('\n\n').filter(Boolean).map(block => {
+      const lines = block.split('\n');
+      const header = lines[0] || '';
+      const content = lines.slice(1).join('\n') || '';
+      const displayHeader = header.replace(/^\[|\]$/g, '');
+      return { header: displayHeader, content };
+    });
+  };
+
+  const handleAddNote = async () => {
+    if (!newNote.trim() || !opportunity.contactId) return;
+    setSavingNote(true);
+    try {
+      const now = new Date();
+      const dateStr = now.toLocaleString('es-PE', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      const noteHeader = `[Nota del ${dateStr}]`;
+      const formattedNote = `${noteHeader}\n${newNote.trim()}\n\n`;
+      const updatedNotes = formattedNote + notesText;
+      
+      await updateContact(opportunity.contactId, { notes: updatedNotes });
+      setNotesText(updatedNotes);
+      setNewNote('');
+      if (opportunity.contact) {
+        opportunity.contact.notes = updatedNotes;
+      }
+    } catch (err) {
+      console.error('Error saving note:', err);
+      alert('Error al guardar la nota');
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const handleSaveTask = async () => {
+    if (!taskDate || !taskTime) {
+      alert('Por favor selecciona la fecha y hora de la actividad.');
+      return;
+    }
+    setSavingTask(true);
+    try {
+      let mappedType = 'LLAMADA';
+      let typeLabel = 'Llamada';
+      if (taskType === 'VISITA') {
+        mappedType = 'VISITA_PROYECTO';
+        typeLabel = 'Visita a Proyecto';
+      } else if (taskType === 'FIRMA') {
+        mappedType = 'PRESENTACION';
+        typeLabel = 'Firma de Contrato';
+      } else if (taskType === 'OFICINA') {
+        mappedType = 'REUNION';
+        typeLabel = 'Cita en Oficina';
+      } else if (taskType === 'VIRTUAL') {
+        mappedType = 'REUNION';
+        typeLabel = 'Reunión Virtual';
+      } else if (taskType === 'WHATSAPP') {
+        mappedType = 'LLAMADA';
+        typeLabel = 'Seguimiento WhatsApp';
+      }
+
+      const startDateTimeStr = `${taskDate}T${taskTime}`;
+      const startAt = new Date(startDateTimeStr);
+      const endAt = new Date(startAt.getTime() + 30 * 60 * 1000); // 30 mins duration
+
+      await createAppointment({
+        type: mappedType,
+        title: `${typeLabel} - ${contactName}`,
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
+        notes: taskDetails || '',
+        contactId: opportunity.contactId,
+        projectId: opportunity.projectId || null,
+        propertyId: opportunity.propertyId || null,
+        agentId: opportunity.agentId || opportunity.contact?.assignedTo || 'agent-id'
+      });
+
+      await fetchAppointments();
+      setTaskDate('');
+      setTaskTime('');
+      setTaskDetails('');
+      alert('¡Actividad programada con éxito!');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error al programar la actividad');
+    } finally {
+      setSavingTask(false);
+    }
+  };
+
+  const handleCompleteAppointment = async (apptId: string) => {
+    try {
+      await updateAppointment(apptId, { status: 'COMPLETADA' });
+      await fetchAppointments();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error al completar la actividad');
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -92,208 +238,260 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             <X className="w-4 h-4" />
           </button>
         </div>
+ 
+         <div className="flex flex-1 overflow-hidden">
+           {/* Sidebar Tabs */}
+           <div className="w-44 bg-slate-50 border-r border-slate-100 flex flex-col shrink-0 p-3.5 space-y-2.5">
+             <button
+               onClick={() => setActiveTab('TAREAS')}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'TAREAS' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
+             >
+               <Calendar className="w-3.5 h-3.5" />
+               Tareas y Citas
+             </button>
+             <button
+               onClick={() => setActiveTab('NOTAS')}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'NOTAS' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
+             >
+               <AlignLeft className="w-3.5 h-3.5" />
+               Notas Libres
+             </button>
+             <button
+               onClick={() => setActiveTab('HISTORIAL')}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'HISTORIAL' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
+             >
+               <History className="w-3.5 h-3.5" />
+               Historial
+             </button>
+             <button
+               onClick={() => setActiveTab('CONTRATO')}
+               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
+             >
+               <FileSignature className="w-3.5 h-3.5" />
+               Registrar Contrato
+             </button>
+ 
+             <div className="pt-2 mt-auto border-t border-slate-200/60">
+               <button
+                 type="button"
+                 onClick={() => setIsEditContactOpen(true)}
+                 className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-brand-green hover:bg-brand-greenHover text-white rounded-lg text-xxs font-bold transition-all shadow-xs shadow-brand-green/20"
+               >
+                 <Edit3 className="w-3.5 h-3.5" />
+                 Editar Contacto
+               </button>
+             </div>
+           </div>
+ 
+           {/* Main Content Area */}
+           <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-5">
+             
+             {/* TAB: TAREAS Y CITAS */}
+             {activeTab === 'TAREAS' && (
+               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left">
+                 <h3 className="text-xs font-bold text-slate-900 mb-2.5">Programar Actividad</h3>
+                 
+                 {/* Formulario */}
+                 <div className="bg-white border border-slate-200/80 p-4 rounded-xl shadow-xs mb-5">
+                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+                     {TASK_TYPES.map((type) => (
+                       <label key={type.id} className="relative cursor-pointer">
+                         <input 
+                           type="radio" 
+                           name="taskType" 
+                           value={type.id} 
+                           className="peer sr-only" 
+                           checked={taskType === type.id}
+                           onChange={() => setTaskType(type.id)}
+                         />
+                         <div className="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xxs font-bold text-slate-600 hover:bg-slate-50 peer-checked:border-brand-green peer-checked:bg-brand-green/10 peer-checked:text-brand-green transition-all">
+                           <type.icon className="w-3.5 h-3.5 shrink-0" />
+                           {type.label}
+                         </div>
+                       </label>
+                     ))}
+                   </div>
+ 
+                   <div className="grid grid-cols-2 gap-3 mb-3">
+                     <div className="space-y-0.5">
+                       <label className="block text-[10px] font-bold text-slate-700">Fecha *</label>
+                       <div className="relative">
+                         <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                         <input 
+                           type="date" 
+                           value={taskDate}
+                           onChange={e => setTaskDate(e.target.value)}
+                           className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" 
+                         />
+                       </div>
+                     </div>
+                     <div className="space-y-0.5">
+                       <label className="block text-[10px] font-bold text-slate-700">Hora *</label>
+                       <div className="relative">
+                         <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                         <input 
+                           type="time" 
+                           value={taskTime}
+                           onChange={e => setTaskTime(e.target.value)}
+                           className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" 
+                         />
+                       </div>
+                     </div>
+                   </div>
+ 
+                   <div className="space-y-0.5 mb-3">
+                     <label className="block text-[10px] font-bold text-slate-700">Detalles de la tarea</label>
+                     <textarea 
+                       value={taskDetails}
+                       onChange={e => setTaskDetails(e.target.value)}
+                       placeholder="Ej. Revisar el contrato de compraventa y explicar facilidades de pago."
+                       className="w-full p-2.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-14 bg-white"
+                     />
+                   </div>
+ 
+                   <div className="flex justify-end">
+                     <button 
+                       onClick={handleSaveTask}
+                       disabled={savingTask}
+                       className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors disabled:opacity-50"
+                     >
+                       {savingTask ? 'Guardando...' : 'Guardar Tarea'}
+                     </button>
+                   </div>
+                 </div>
+ 
+                 <h3 className="text-xs font-bold text-slate-900 mb-2.5">Próximas Actividades</h3>
+                 
+                 {/* Lista real de tareas */}
+                 <div className="space-y-2">
+                   {loadingAppts ? (
+                     <div className="text-center py-4">
+                       <div className="w-5 h-5 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
+                     </div>
+                   ) : appointments.length === 0 ? (
+                     <p className="text-xxs text-slate-400 text-center py-4">No hay tareas o citas programadas.</p>
+                   ) : (
+                     appointments.map((appt) => {
+                       const isCompleted = appt.status === 'COMPLETADA';
+                       const formattedDate = new Date(appt.startAt).toLocaleString('es-PE', {
+                         day: 'numeric',
+                         month: 'short',
+                         hour: '2-digit',
+                         minute: '2-digit'
+                       });
+                       
+                       let Icon = Calendar;
+                       if (appt.type === 'LLAMADA') Icon = Phone;
+                       else if (appt.type === 'VISITA_PROYECTO' || appt.type === 'VISITA_UNIDAD') Icon = MapPin;
+                       else if (appt.type === 'PRESENTACION') Icon = FileSignature;
+                       else if (appt.type === 'REUNION') Icon = User;
+ 
+                       return (
+                         <div key={appt.id} className={`p-3 border rounded-xl bg-white flex items-start gap-3 shadow-xs transition-colors ${isCompleted ? 'border-slate-100 opacity-60' : 'border-slate-200/80 hover:border-brand-green/30'}`}>
+                           <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted ? 'bg-slate-100 text-slate-400' : 'bg-brand-green/10 text-brand-green'}`}>
+                             <Icon className="w-4 h-4" />
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <div className="flex justify-between items-start">
+                               <h4 className={`text-xs font-bold text-slate-900 truncate ${isCompleted ? 'line-through text-slate-400' : ''}`}>{appt.title}</h4>
+                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 shrink-0 ${isCompleted ? 'bg-slate-100 text-slate-400' : 'text-brand-green bg-brand-green/10'}`}>
+                                 {formattedDate}
+                               </span>
+                             </div>
+                             <p className={`text-xxs text-slate-500 mt-0.5 leading-relaxed truncate ${isCompleted ? 'line-through text-slate-400' : ''}`}>{appt.notes || 'Sin detalles.'}</p>
+                           </div>
+                           {!isCompleted ? (
+                             <button 
+                               onClick={() => handleCompleteAppointment(appt.id)}
+                               className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-green hover:border-brand-green hover:bg-brand-green/5 transition-all shrink-0"
+                               title="Marcar como completada"
+                             >
+                               <CheckCircle2 className="w-4 h-4" />
+                             </button>
+                           ) : (
+                             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-1" />
+                           )}
+                         </div>
+                       );
+                     })
+                   )}
+                 </div>
+ 
+               </div>
+             )}
+ 
+             {/* TAB: NOTAS */}
+             {activeTab === 'NOTAS' && (
+               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl h-full flex flex-col text-left">
+                 <div className="mb-4 shrink-0">
+                   <textarea 
+                     value={newNote}
+                     onChange={e => setNewNote(e.target.value)}
+                     placeholder="Escribe una nota importante sobre el cliente o la negociación..."
+                     className="w-full p-3 rounded-xl border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-20 shadow-xs mb-2 bg-yellow-50/15"
+                   />
+                   <div className="flex justify-end">
+                     <button 
+                       onClick={handleAddNote}
+                       disabled={savingNote}
+                       className="bg-slate-950 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors disabled:opacity-50"
+                     >
+                       {savingNote ? 'Añadiendo...' : 'Añadir Nota'}
+                     </button>
+                   </div>
+                 </div>
+ 
+                 <div className="space-y-2.5 flex-1 overflow-y-auto">
+                   <h3 className="text-xs font-bold text-slate-900 sticky top-0 bg-white py-1 z-10">Notas Anteriores</h3>
+                   
+                   {parseNotes(notesText).length === 0 ? (
+                     <p className="text-xxs text-slate-400 text-center py-4">No hay notas guardadas para este cliente.</p>
+                   ) : (
+                     parseNotes(notesText).map((note, idx) => (
+                       <div key={idx} className="p-3 bg-yellow-50/60 border border-yellow-100 rounded-xl relative text-left">
+                         <p className="text-xxs text-slate-800 leading-relaxed whitespace-pre-wrap">{note.content}</p>
+                         <span className="text-[9px] text-slate-400 mt-1.5 block font-semibold">{note.header}</span>
+                       </div>
+                     ))
+                   )}
+                 </div>
+               </div>
+             )}
+ 
+             {/* TAB: HISTORIAL */}
+             {activeTab === 'HISTORIAL' && (
+               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left font-sans">
+                 <h3 className="text-xs font-bold text-slate-900 mb-4">Registro de Actividad</h3>
+                 
+                 <div className="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-3">
+                   {(!opportunity.activities || opportunity.activities.length === 0) ? (
+                     <div className="relative pl-5">
+                       <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-brand-green ring-4 ring-white"></div>
+                       <p className="text-xs font-bold text-slate-900">Oportunidad Creada</p>
+                       <p className="text-xxs text-slate-500 mt-0.5">La oportunidad fue registrada en el sistema.</p>
+                       <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">
+                         {new Date(opportunity.createdAt).toLocaleString('es-PE')}
+                       </span>
+                     </div>
+                   ) : (
+                     opportunity.activities.map((act: any) => (
+                       <div key={act.id} className="relative pl-5">
+                         <div className={`absolute -left-[7px] top-1 w-3 h-3 rounded-full ring-4 ring-white ${act.type === 'CAMBIO_ETAPA' ? 'bg-brand-green' : act.type === 'CONTRATO_FIRMADO' || act.type === 'CONTRATO_CREADO' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
+                         <p className="text-xs font-bold text-slate-900">{act.description}</p>
+                         <p className="text-xxs text-slate-500 mt-0.5">
+                           Registrado por {act.user?.firstName} {act.user?.lastName || ''}
+                         </p>
+                         <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">
+                           {new Date(act.createdAt).toLocaleString('es-PE')}
+                         </span>
+                       </div>
+                     ))
+                   )}
+                 </div>
+               </div>
+             )}
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar Tabs */}
-          <div className="w-44 bg-slate-50 border-r border-slate-100 flex flex-col shrink-0 p-3.5 space-y-2.5">
-            <button
-              onClick={() => setActiveTab('TAREAS')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'TAREAS' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              Tareas y Citas
-            </button>
-            <button
-              onClick={() => setActiveTab('NOTAS')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'NOTAS' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <AlignLeft className="w-3.5 h-3.5" />
-              Notas Libres
-            </button>
-            <button
-              onClick={() => setActiveTab('HISTORIAL')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'HISTORIAL' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <History className="w-3.5 h-3.5" />
-              Historial
-            </button>
-            <button
-              onClick={() => setActiveTab('CONTRATO')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <FileSignature className="w-3.5 h-3.5" />
-              Registrar Contrato
-            </button>
-
-            <div className="pt-2 mt-auto border-t border-slate-200/60">
-              <button
-                type="button"
-                onClick={() => setIsEditContactOpen(true)}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-brand-green hover:bg-brand-greenHover text-white rounded-lg text-xxs font-bold transition-all shadow-xs shadow-brand-green/20"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                Editar Contacto
-              </button>
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-5">
-            
-            {/* TAB: TAREAS Y CITAS */}
-            {activeTab === 'TAREAS' && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left">
-                <h3 className="text-xs font-bold text-slate-900 mb-2.5">Programar Actividad</h3>
-                
-                {/* Formulario */}
-                <div className="bg-white border border-slate-200/80 p-4 rounded-xl shadow-xs mb-5">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-                    {TASK_TYPES.map((type) => (
-                      <label key={type.id} className="relative cursor-pointer">
-                        <input type="radio" name="taskType" value={type.id} className="peer sr-only" defaultChecked={type.id === 'LLAMADA'} />
-                        <div className="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xxs font-bold text-slate-600 hover:bg-slate-50 peer-checked:border-brand-green peer-checked:bg-brand-green/10 peer-checked:text-brand-green transition-all">
-                          <type.icon className="w-3.5 h-3.5 shrink-0" />
-                          {type.label}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="space-y-0.5">
-                      <label className="block text-[10px] font-bold text-slate-700">Fecha *</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <input type="date" className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" />
-                      </div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="block text-[10px] font-bold text-slate-700">Hora *</label>
-                      <div className="relative">
-                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <input type="time" className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-0.5 mb-3">
-                    <label className="block text-[10px] font-bold text-slate-700">Detalles de la tarea</label>
-                    <textarea 
-                      placeholder="Ej. Revisar el contrato de compraventa y explicar facilidades de pago."
-                      className="w-full p-2.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-14 bg-white"
-                    />
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors">
-                      Guardar Tarea
-                    </button>
-                  </div>
-                </div>
-
-                <h3 className="text-xs font-bold text-slate-900 mb-2.5">Próximas Actividades</h3>
-                
-                {/* Lista mock de tareas */}
-                <div className="space-y-2">
-                  <div className="p-3 border border-slate-200/80 rounded-xl bg-white flex items-start gap-3 shadow-xs hover:border-brand-green/30 transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">Visita al Piloto</h4>
-                        <span className="text-[9px] font-bold text-brand-green bg-brand-green/10 px-1.5 py-0.5 rounded ml-2 shrink-0">Mañana, 10:00 AM</span>
-                      </div>
-                      <p className="text-xxs text-slate-500 mt-0.5 leading-relaxed truncate">Mostrar el dpto modelo de 2 habitaciones. Llevar brochure impreso.</p>
-                    </div>
-                    <button className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-green hover:border-brand-green hover:bg-brand-green/5 transition-all shrink-0">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  <div className="p-3 border border-slate-200/80 rounded-xl bg-white flex items-start gap-3 shadow-xs hover:border-brand-green/30 transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">Llamada de seguimiento</h4>
-                        <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded ml-2 shrink-0">Viernes, 4:30 PM</span>
-                      </div>
-                      <p className="text-xxs text-slate-500 mt-0.5 leading-relaxed truncate">Preguntar si logró conseguir la pre-aprobación del crédito hipotecario.</p>
-                    </div>
-                    <button className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-green hover:border-brand-green hover:bg-brand-green/5 transition-all shrink-0">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* TAB: NOTAS */}
-            {activeTab === 'NOTAS' && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl h-full flex flex-col text-left">
-                <div className="mb-4 shrink-0">
-                  <textarea 
-                    placeholder="Escribe una nota importante sobre el cliente o la negociación..."
-                    className="w-full p-3 rounded-xl border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-20 shadow-xs mb-2 bg-yellow-50/15"
-                  />
-                  <div className="flex justify-end">
-                    <button className="bg-slate-950 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors">
-                      Añadir Nota
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 flex-1 overflow-y-auto">
-                  <h3 className="text-xs font-bold text-slate-900 sticky top-0 bg-white py-1 z-10">Notas Anteriores</h3>
-                  
-                  <div className="p-3 bg-yellow-50/60 border border-yellow-100 rounded-xl relative text-left">
-                    <p className="text-xxs text-slate-800 leading-relaxed">El cliente está muy interesado pero tiene que consultar la compra con su esposa el fin de semana. No presionarlo hasta el Lunes.</p>
-                    <span className="text-[9px] text-slate-400 mt-1.5 block font-semibold">12 de Octubre, 2:15 PM por Asesor Venta</span>
-                  </div>
-                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl relative text-left">
-                    <p className="text-xxs text-slate-800 leading-relaxed">Cliente ingresó por pauta de Facebook Ads de la campaña 'Octubre Mes Morado'. Busca algo menor a $100k.</p>
-                    <span className="text-[9px] text-slate-400 mt-1.5 block font-semibold">10 de Octubre, 9:00 AM por Asistente IA</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB: HISTORIAL */}
-            {activeTab === 'HISTORIAL' && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left font-sans">
-                <h3 className="text-xs font-bold text-slate-900 mb-4">Registro de Actividad</h3>
-                
-                <div className="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-3">
-                  
-                  <div className="relative pl-5">
-                    <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-brand-green ring-4 ring-white"></div>
-                    <p className="text-xs font-bold text-slate-900">Etapa cambiada a 'Visita'</p>
-                    <p className="text-xxs text-slate-500 mt-0.5">Movido desde 'Calificación' por Juan Asesor</p>
-                    <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">Hoy, 10:45 AM</span>
-                  </div>
-
-                  <div className="relative pl-5">
-                    <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
-                    <p className="text-xs font-bold text-slate-900">Tarea completada: 'Llamada inicial'</p>
-                    <p className="text-xxs text-slate-500 mt-0.5">Se logró contactar al cliente con éxito.</p>
-                    <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">Ayer, 3:30 PM</span>
-                  </div>
-
-                  <div className="relative pl-5">
-                    <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
-                    <p className="text-xs font-bold text-slate-900">Oportunidad Creada</p>
-                    <p className="text-xxs text-slate-500 mt-0.5">Creado automáticamente por Asistente IA desde WhatsApp</p>
-                    <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">10 de Octubre, 9:15 AM</span>
-                  </div>
-
-                </div>
-              </div>
-            )}
-
-            {/* TAB: CONTRATO (REGISTRAR CIERRE / VENTA) */}
+             {/* TAB: CONTRATO (REGISTRAR CIERRE / VENTA) */}
             {activeTab === 'CONTRATO' && (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-xl text-left">
                 <h3 className="text-xs font-bold text-slate-900 mb-1">Registrar Venta / Firma de Contrato</h3>

@@ -180,32 +180,31 @@ export function Pipeline() {
         {loading && stages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-slate-500">Cargando oportunidades...</div>
         ) : viewMode === 'list' ? (
-          /* List View (Ultra Compact) */
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            {visibleStages.map((stage) => {
-              const stageOpps = filteredOpportunities.filter(o => o.stage === stage.key);
-              if (stageOpps.length === 0) return null;
-
-              return (
-                <div key={stage.id} className="bg-white rounded-xl border border-slate-200/50 overflow-hidden shadow-xs">
-                  {/* Stage Header */}
-                  <div 
-                    className="px-3.5 py-2 bg-slate-50/50 flex justify-between items-center border-b border-slate-100"
-                    style={{ borderLeft: `4px solid ${stage.color}` }}
-                  >
-                    <h3 className="text-xs font-bold flex items-center gap-1.5" style={{ color: stage.color }}>
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stage.color }}></div>
-                      {stage.name}
-                    </h3>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {stageOpps.length} op. · S/ {stageOpps.reduce((acc, curr) => acc + Number(curr.value || 0), 0).toLocaleString('es-PE')}
-                    </span>
-                  </div>
-
-                  {/* Rows */}
-                  <div className="divide-y divide-slate-100">
-                    {stageOpps.map((opp) => {
-                      const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}` : 'Sin Contacto';
+          /* List View - Single Flat Table with Headers */
+          <div className="flex-1 overflow-hidden bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col animate-fade-in text-left">
+            <div className="overflow-y-auto flex-1 custom-scrollbar">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 sticky top-0 z-10 text-xs">
+                  <tr>
+                    <th className="px-4 py-3">Cliente</th>
+                    <th className="px-4 py-3 hidden md:table-cell">Proyecto</th>
+                    <th className="px-4 py-3 hidden lg:table-cell">Origen / Fuente</th>
+                    <th className="px-4 py-3">Etapa</th>
+                    <th className="px-4 py-3 hidden sm:table-cell">Antigüedad</th>
+                    <th className="px-4 py-3 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {filteredOpportunities.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-slate-400">
+                        No se encontraron oportunidades en el listado.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOpportunities.map((opp) => {
+                      const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}`.trim() : 'Sin Contacto';
+                      const stageConfig = stages.find(s => s.key === opp.stage) || { name: opp.stage, color: '#475569' };
                       
                       const getElapsedTime = (createdAtString: string) => {
                         const diffMs = new Date().getTime() - new Date(createdAtString).getTime();
@@ -221,227 +220,139 @@ export function Pipeline() {
                       };
 
                       return (
-                        <div 
-                          key={opp.id}
-                          onDoubleClick={() => setSelectedOpp(opp)}
-                          className="p-2.5 flex items-center justify-between hover:bg-slate-50/30 transition-colors cursor-pointer gap-4"
+                        <tr 
+                          key={opp.id} 
+                          onClick={() => setSelectedOpp(opp)}
+                          className="hover:bg-slate-50/50 cursor-pointer transition-colors group"
                         >
-                          <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 font-sans">
-                            {/* Client Name & Project */}
-                            <div className="min-w-0 sm:w-1/4">
-                              <span className="text-xs font-bold text-slate-900 block truncate">{contactName}</span>
-                              <span className="text-[9px] text-slate-400 font-semibold truncate block sm:hidden">
-                                {opp.project?.name || 'Sin Proyecto'} · {opp.contact?.source || 'Sin Origen'}
-                              </span>
-                            </div>
-
-                            {/* Project Name (Desktop Only) */}
-                            <div className="hidden sm:block min-w-0 sm:w-1/4">
-                              <span className="text-[10px] text-slate-500 font-semibold truncate block">
-                                {opp.project?.name || 'Sin Proyecto'}
-                              </span>
-                            </div>
-
-                            {/* Lead Source (Desktop Only) */}
-                            <div className="hidden sm:block min-w-0 sm:w-1/4">
-                              <span className="text-[10px] text-slate-400 font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 inline-block truncate max-w-[90%]">
-                                {opp.contact?.source || 'Sin Origen'}
-                              </span>
-                            </div>
-
-                            {/* Stage/Estado (Desktop Only) */}
-                            <div className="hidden sm:block min-w-0 sm:w-1/4">
-                              <span 
-                                className="text-[9px] font-bold px-2 py-0.5 rounded-full border inline-block"
-                                style={{ 
-                                  color: stage.color || '#475569', 
-                                  backgroundColor: `${stage.color}12` || '#f1f5f9',
-                                  borderColor: `${stage.color}25` || '#e2e8f0'
-                                }}
-                              >
-                                {stage.name}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Date and Quick Actions */}
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-[9px] text-slate-400 font-semibold bg-slate-50 border border-slate-200/60 px-1 py-0.5 rounded shrink-0" title="Tiempo transcurrido">
-                              {getElapsedTime(opp.createdAt)}
+                          {/* Cliente */}
+                          <td className="px-4 py-3.5">
+                            <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors">{contactName}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{opp.contact?.phone || opp.contact?.email || 'Sin datos de contacto'}</div>
+                          </td>
+                          {/* Proyecto */}
+                          <td className="px-4 py-3.5 hidden md:table-cell">
+                            <span className="text-slate-600 font-semibold text-xs">
+                              {opp.project?.name || 'Sin Proyecto'}
                             </span>
-                            
-                            <div className="relative" onClick={e => e.stopPropagation()}>
-                              {/* Desktop Actions (Shown on sm and above) */}
-                              <div className="hidden sm:flex items-center gap-1.5">
-                                {opp.contact?.phone && (
-                                  <>
-                                    <a 
-                                      href={`tel:${opp.contact.phone}`}
-                                      className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
-                                      title="Llamar"
-                                    >
-                                      <Phone className="w-3.5 h-3.5" />
-                                    </a>
-                                    <a 
-                                      href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
-                                      title="WhatsApp"
-                                    >
-                                      <MessageSquare className="w-3.5 h-3.5" />
-                                    </a>
-                                  </>
-                                )}
-                                {opp.contact?.email && (
+                          </td>
+                          {/* Origen */}
+                          <td className="px-4 py-3.5 hidden lg:table-cell">
+                            <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 text-slate-500">
+                              {opp.contact?.source || 'Sin Origen'}
+                            </span>
+                          </td>
+                          {/* Etapa */}
+                          <td className="px-4 py-3.5">
+                            <span 
+                              className="text-[9px] font-bold px-2.5 py-0.5 rounded-full border inline-block"
+                              style={{ 
+                                color: stageConfig.color || '#475569', 
+                                backgroundColor: `${stageConfig.color}12` || '#f1f5f9',
+                                borderColor: `${stageConfig.color}25` || '#e2e8f0'
+                              }}
+                            >
+                              {stageConfig.name}
+                            </span>
+                          </td>
+                          {/* Antigüedad */}
+                          <td className="px-4 py-3.5 hidden sm:table-cell text-slate-500 text-xs font-medium">
+                            {getElapsedTime(opp.createdAt)}
+                          </td>
+                          {/* Acciones */}
+                          <td className="px-4 py-3.5 text-right" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              {opp.contact?.phone && (
+                                <>
                                   <a 
-                                    href={`mailto:${opp.contact.email}`}
-                                    className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
-                                    title="Enviar correo"
+                                    href={`tel:${opp.contact.phone}`}
+                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                                    title="Llamar"
                                   >
-                                    <Mail className="w-3.5 h-3.5" />
+                                    <Phone className="w-3.5 h-3.5" />
                                   </a>
-                                )}
+                                  <a 
+                                    href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                    title="WhatsApp"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                  </a>
+                                </>
+                              )}
+                              {opp.contact?.email && (
+                                <a 
+                                  href={`mailto:${opp.contact.email}`}
+                                  className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-colors"
+                                  title="Enviar correo"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                </a>
+                              )}
 
-                                {/* Bot Toggle Button in List View */}
-                                {opp.contact?.chats?.[0] ? (
-                                  <button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      try {
-                                        const chat = opp.contact.chats[0];
-                                        await toggleChatBot(chat.id, !chat.isBotActive);
-                                        fetchPipeline();
-                                      } catch (err: any) {
-                                        alert(err.message || 'Error al alternar bot');
-                                      }
-                                    }}
-                                    className={`p-1.5 rounded-lg border transition-all ${
-                                      opp.contact.chats[0].isBotActive 
-                                        ? 'bg-rose-50 text-rose-600 border-rose-150' 
-                                        : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
-                                    }`}
-                                    title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
-                                  >
-                                    <Bot className="w-3.5 h-3.5" />
-                                  </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    disabled
-                                    className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
-                                    title="Sin chat de WhatsApp activo"
-                                  >
-                                    <Bot className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-
-                                {/* Edit / Delete actions */}
-                                <div className="flex items-center gap-1 pl-1 border-l border-slate-200 ml-1">
-                                  <button 
-                                    onClick={() => setSelectedOpp(opp)}
-                                    className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
-                                    title="Editar"
-                                  >
-                                    <Edit className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDeleteOpportunity(opp.id)}
-                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                                    title="Eliminar"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Mobile Actions Dropdown Trigger (Shown only on mobile) */}
-                              <div className="block sm:hidden relative">
+                              {opp.contact?.chats?.[0] ? (
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMobileMenuId(activeMobileMenuId === opp.id ? null : opp.id)}
-                                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const chat = opp.contact.chats[0];
+                                      await toggleChatBot(chat.id, !chat.isBotActive);
+                                      fetchPipeline();
+                                    } catch (err: any) {
+                                      alert(err.message || 'Error al alternar bot');
+                                    }
+                                  }}
+                                  className={`p-1.5 rounded-lg border transition-all ${
+                                    opp.contact.chats[0].isBotActive 
+                                      ? 'bg-rose-50 text-rose-600 border-rose-150' 
+                                      : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
+                                  }`}
+                                  title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
                                 >
-                                  <MoreHorizontal className="w-4 h-4" />
+                                  <Bot className="w-3.5 h-3.5" />
                                 </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
+                                  title="Sin chat de WhatsApp activo"
+                                >
+                                  <Bot className="w-3.5 h-3.5" />
+                                </button>
+                              )}
 
-                                {activeMobileMenuId === opp.id && (
-                                  <div className="absolute right-0 top-8 bg-white border border-slate-200 shadow-lg rounded-xl py-1.5 z-30 w-36 flex flex-col font-semibold text-[10px] text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
-                                    {opp.contact?.phone && (
-                                      <>
-                                        <a 
-                                          href={`tel:${opp.contact.phone}`}
-                                          className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
-                                        >
-                                          <Phone className="w-3.5 h-3.5 text-emerald-500" />
-                                          Llamar
-                                        </a>
-                                        <a 
-                                          href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
-                                        >
-                                          <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
-                                          WhatsApp
-                                        </a>
-                                      </>
-                                    )}
-                                    {opp.contact?.chats?.[0] && (
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          try {
-                                            const chat = opp.contact.chats[0];
-                                            await toggleChatBot(chat.id, !chat.isBotActive);
-                                            fetchPipeline();
-                                          } catch (err: any) {
-                                            alert(err.message || 'Error');
-                                          } finally {
-                                            setActiveMobileMenuId(null);
-                                          }
-                                        }}
-                                        className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-left w-full text-slate-700"
-                                      >
-                                        <Bot className={`w-3.5 h-3.5 ${opp.contact.chats[0].isBotActive ? 'text-pink-500' : 'text-slate-400'}`} />
-                                        {opp.contact.chats[0].isBotActive ? 'Desactivar Bot' : 'Activar Bot'}
-                                      </button>
-                                    )}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedOpp(opp);
-                                        setActiveMobileMenuId(null);
-                                      }}
-                                      className="px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-left w-full text-slate-700"
-                                    >
-                                      <Edit className="w-3.5 h-3.5 text-slate-500" />
-                                      Ver Detalle
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        handleDeleteOpportunity(opp.id);
-                                        setActiveMobileMenuId(null);
-                                      }}
-                                      className="px-3 py-2 hover:bg-rose-50 hover:text-rose-600 flex items-center gap-2 text-left w-full text-rose-500 border-t border-slate-100 mt-1 pt-1.5"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                      Eliminar
-                                    </button>
-                                  </div>
-                                )}
+                              <div className="flex items-center gap-1 pl-1.5 border-l border-slate-200 ml-1">
+                                <button 
+                                  onClick={() => setSelectedOpp(opp)}
+                                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                                  title="Editar"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteOpportunity(opp.id)}
+                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 shrink-0 font-medium">
+              <span>Mostrando {filteredOpportunities.length} oportunidades</span>
+            </div>
           </div>
         ) : (
           /* Kanban Board View */

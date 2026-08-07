@@ -19,10 +19,20 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const opportunities = await prisma.opportunity.findMany({
       include: {
-        contact: { select: { id: true, firstName: true, lastName: true, phone: true, email: true, budgetMin: true, chats: { select: { id: true, isBotActive: true } } } },
+        contact: {
+          include: {
+            chats: { select: { id: true, isBotActive: true } }
+          }
+        },
         property: { select: { id: true, unitCode: true, title: true } },
         project: { select: { id: true, name: true } },
-        agent: { select: { id: true, firstName: true, lastName: true, avatar: true } }
+        agent: { select: { id: true, firstName: true, lastName: true, avatar: true } },
+        activities: {
+          include: {
+            user: { select: { firstName: true, lastName: true } }
+          },
+          orderBy: { createdAt: 'desc' }
+        }
       },
       orderBy: { updatedAt: 'desc' }
     });

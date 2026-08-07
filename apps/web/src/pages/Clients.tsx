@@ -113,7 +113,7 @@ export function Clients() {
   return (
     <div className="p-4 md:p-6 space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <UserCheck className="w-6 h-6 text-brand-green" />
@@ -121,15 +121,15 @@ export function Clients() {
           </h1>
           <p className="text-xs text-slate-500 mt-1">Clientes que ya realizaron una acción comercial (separación, compra, alquiler)</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Buscar por nombre, DNI, email..."
+              placeholder="Buscar..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-64"
+              className="pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-full md:w-64 transition-all"
             />
           </div>
           <button 
@@ -143,28 +143,28 @@ export function Clients() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-          <p className="text-xs text-slate-500 font-medium">Total Clientes</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{clients.length}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Total Clientes</p>
+          <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">{clients.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-          <p className="text-xs text-slate-500 font-medium">Con Contrato</p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{clients.filter(c => c.buyerContracts && c.buyerContracts.length > 0).length}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Con Contrato</p>
+          <p className="text-lg sm:text-2xl font-bold text-emerald-600 mt-1">{clients.filter(c => c.buyerContracts && c.buyerContracts.length > 0).length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-          <p className="text-xs text-slate-500 font-medium">Con DNI</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{clients.filter(c => c.dni).length}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Con DNI</p>
+          <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1">{clients.filter(c => c.dni).length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-          <p className="text-xs text-slate-500 font-medium">Casados/Convivientes</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">{clients.filter(c => c.maritalStatus === 'CASADO' || c.maritalStatus === 'CONVIVIENTE').length}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Casados/Convivientes</p>
+          <p className="text-lg sm:text-2xl font-bold text-purple-600 mt-1">{clients.filter(c => c.maritalStatus === 'CASADO' || c.maritalStatus === 'CONVIVIENTE').length}</p>
         </div>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Table */}
-        <div className={`bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden ${selectedClient ? 'w-1/2' : 'w-full'} transition-all`}>
+        <div className={`bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden w-full ${selectedClient ? 'hidden md:block md:w-1/2' : 'w-full'} transition-all duration-300`}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
@@ -225,14 +225,14 @@ export function Clients() {
 
         {/* Detail Panel */}
         {selectedClient && (
-          <div className="w-1/2 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="w-full md:w-1/2 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col animate-fade-in">
             {/* Panel Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
-              <div>
-                <h2 className="font-bold text-slate-900">{selectedClient.firstName} {selectedClient.lastName || ''}</h2>
-                <p className="text-xs text-slate-400">{selectedClient.dni ? `DNI: ${selectedClient.dni}` : 'Sin DNI registrado'}</p>
+              <div className="min-w-0">
+                <h2 className="font-bold text-slate-900 truncate">{selectedClient.firstName} {selectedClient.lastName || ''}</h2>
+                <p className="text-xs text-slate-400 truncate">{selectedClient.dni ? `DNI: ${selectedClient.dni}` : 'Sin DNI registrado'}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {editMode ? (
                   <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors disabled:opacity-50">
                     <Save className="w-3.5 h-3.5" />{saving ? 'Guardando...' : 'Guardar'}
@@ -254,7 +254,7 @@ export function Clients() {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-100">
+            <div className="flex border-b border-slate-100 shrink-0">
               {(['personal', 'spouse', 'contracts'] as const).map(tab => (
                 <button
                   key={tab}
@@ -267,21 +267,21 @@ export function Clients() {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
               {activeTab === 'personal' && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <FieldGroup label="Nombre" value={editData.firstName} field="firstName" editMode={editMode} onChange={(v) => setEditData({...editData, firstName: v})} />
                     <FieldGroup label="Apellido" value={editData.lastName} field="lastName" editMode={editMode} onChange={(v) => setEditData({...editData, lastName: v})} />
                   </div>
                   <FieldGroup label="DNI" value={editData.dni} field="dni" editMode={editMode} onChange={(v) => setEditData({...editData, dni: v})} icon={<FileText className="w-3.5 h-3.5" />} />
-                  <FieldGroup label="Email" value={editData.email} field="email" editMode={editMode} onChange={(v) => setEditData({...editData, email: v})} icon={<Mail className="w-3.5 h-3.5" />} />
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <FieldGroup label="Teléfono" value={editData.phone} field="phone" editMode={editMode} onChange={(v) => setEditData({...editData, phone: v})} icon={<Phone className="w-3.5 h-3.5" />} />
                     <FieldGroup label="Teléfono 2" value={editData.phone2} field="phone2" editMode={editMode} onChange={(v) => setEditData({...editData, phone2: v})} />
                   </div>
+                  <FieldGroup label="Email" value={editData.email} field="email" editMode={editMode} onChange={(v) => setEditData({...editData, email: v})} icon={<Mail className="w-3.5 h-3.5" />} />
                   <FieldGroup label="Dirección" value={editData.address} field="address" editMode={editMode} onChange={(v) => setEditData({...editData, address: v})} icon={<MapPin className="w-3.5 h-3.5" />} />
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <FieldGroup label="Distrito" value={editData.district} field="district" editMode={editMode} onChange={(v) => setEditData({...editData, district: v})} />
                     <FieldGroup label="Ciudad" value={editData.city} field="city" editMode={editMode} onChange={(v) => setEditData({...editData, city: v})} />
                     <FieldGroup label="Departamento" value={editData.department} field="department" editMode={editMode} onChange={(v) => setEditData({...editData, department: v})} />
