@@ -3,12 +3,13 @@ import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings } fr
 import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
 import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
-import { getPipeline, getPipelineStages } from '../lib/api';
+import { getPipeline, getPipelineStages, updateOpportunityStage } from '../lib/api';
 
 export function Pipeline() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isStagesModalOpen, setIsStagesModalOpen] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
+  const [draggedOverStage, setDraggedOverStage] = useState<string | null>(null);
   
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [stages, setStages] = useState<any[]>([]);
@@ -113,7 +114,29 @@ export function Pipeline() {
                   </div>
 
                   {/* Column Content */}
-                  <div className="p-3 overflow-y-auto flex-1 space-y-3 custom-scrollbar">
+                  <div 
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnter={() => setDraggedOverStage(stage.id)}
+                    onDragLeave={() => setDraggedOverStage(null)}
+                    onDrop={async (e) => {
+                      const oppId = e.dataTransfer.getData('text/plain');
+                      setDraggedOverStage(null);
+                      if (!oppId) return;
+                      
+                      // Optimistic UI update
+                      setOpportunities(prev => prev.map(o => o.id === oppId ? { ...o, stage: stage.key } : o));
+                      
+                      try {
+                        await updateOpportunityStage(oppId, stage.key);
+                      } catch (error) {
+                        console.error(error);
+                        fetchPipeline();
+                      }
+                    }}
+                    className={`p-3 overflow-y-auto flex-1 space-y-3 custom-scrollbar transition-all ${
+                      draggedOverStage === stage.id ? 'bg-slate-100/80 border-2 border-dashed border-brand-green/20 rounded-b-xl' : ''
+                    }`}
+                  >
                     {stageOpps.map((opp) => {
                       const oppDays = Math.floor((new Date().getTime() - new Date(opp.createdAt).getTime()) / (1000 * 3600 * 24));
                       const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}` : 'Sin Contacto';
@@ -121,6 +144,11 @@ export function Pipeline() {
                       return (
                         <div 
                           key={opp.id} 
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('text/plain', opp.id);
+                            e.dataTransfer.effectAllowed = 'move';
+                          }}
                           onDoubleClick={() => setSelectedOpp(opp)}
                           className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-sm cursor-pointer hover:border-brand-green/30 hover:shadow-md transition-all group select-none space-y-2 relative"
                         >
