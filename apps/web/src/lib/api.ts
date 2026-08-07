@@ -59,6 +59,10 @@ export const getContacts = () => fetchApi('/contacts');
 export const createContact = (data: any) => fetchApi('/contacts', { method: 'POST', body: JSON.stringify(data) });
 export const updateContact = (id: string, data: any) => fetchApi(`/contacts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteContact = (id: string) => fetchApi(`/contacts/${id}`, { method: 'DELETE' });
+export const getLeadSources = () => fetchApi('/contacts/sources');
+export const createLeadSource = (data: any) => fetchApi('/contacts/sources', { method: 'POST', body: JSON.stringify(data) });
+export const updateLeadSource = (id: string, data: any) => fetchApi(`/contacts/sources/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteLeadSource = (id: string) => fetchApi(`/contacts/sources/${id}`, { method: 'DELETE' });
 
 // Inventory
 export const getProjects = () => fetchApi('/inventory/projects');

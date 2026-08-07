@@ -186,7 +186,7 @@ model Contact {
   spouseDni     String?
   spouseEmail   String?
   spousePhone   String?
-  source        LeadSource  @default(OTRO)
+  source        String      @default("OTRO")
   budgetMin Decimal?    @db.Decimal(14, 2)
   budgetMax Decimal?    @db.Decimal(14, 2)
   interests String[] // ["departamento", "penthouse"]
@@ -820,6 +820,14 @@ model PipelineStageConfig {
   color     String   @default("#64748b")
   isVisible Boolean  @default(true)
   order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeadSourceConfig {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String   @default("#3b82f6")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

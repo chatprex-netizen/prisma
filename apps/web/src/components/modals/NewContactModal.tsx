@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createContact, updateContact, getProjects, getUsers } from '../../lib/api';
+import { createContact, updateContact, getProjects, getUsers, getLeadSources } from '../../lib/api';
 
 interface NewContactModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [sources, setSources] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -20,7 +21,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
     phone: '',
     email: '',
     type: 'LEAD',
-    source: 'REDES_SOCIALES',
+    source: 'Otro',
     isVip: false,
     budgetMin: '',
     budgetMax: '',
@@ -33,9 +34,10 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
 
   useEffect(() => {
     if (isOpen) {
-      // Load real projects and users from the backend
+      // Load real projects, users, and dynamic lead sources from the backend
       getProjects().then(res => setProjects(res?.data || [])).catch(console.error);
       getUsers().then(res => setUsers(res?.data || [])).catch(console.error);
+      getLeadSources().then(res => setSources(res?.data || [])).catch(console.error);
     }
   }, [isOpen]);
 
@@ -47,7 +49,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         phone: initialData.phone || '',
         email: initialData.email || '',
         type: initialData.type || 'LEAD',
-        source: initialData.source || 'REDES_SOCIALES',
+        source: initialData.source || 'Otro',
         isVip: !!initialData.isVip,
         budgetMin: initialData.budgetMin ? String(initialData.budgetMin) : '',
         budgetMax: initialData.budgetMax ? String(initialData.budgetMax) : '',
@@ -64,7 +66,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         phone: '',
         email: '',
         type: 'LEAD',
-        source: 'REDES_SOCIALES',
+        source: 'Otro',
         isVip: false,
         budgetMin: '',
         budgetMax: '',
@@ -192,14 +194,9 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   value={formData.source}
                   onChange={e => setFormData({...formData, source: e.target.value})}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
-                  <option value="REDES_SOCIALES">Redes Sociales (FB, IG, TikTok, etc.)</option>
-                  <option value="WEB">Sitio Web</option>
-                  <option value="PORTAL_INMOBILIARIO">Portal Inmobiliario</option>
-                  <option value="REFERIDO">Referido</option>
-                  <option value="EVENTO">Evento</option>
-                  <option value="CALL_CENTER">Call Center</option>
-                  <option value="VISITA_OFICINA">Visita a Oficina</option>
-                  <option value="OTRO">Otro</option>
+                  {sources.map(src => (
+                    <option key={src.id} value={src.name}>{src.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-1">

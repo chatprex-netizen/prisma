@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2, PieChart as PieIcon } from 'lucide-react';
+import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource } from '../lib/api';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-type TabType = 'perfil' | 'empresa' | 'apariencia' | 'whatsapp' | 'integraciones' | 'seguridad';
+type TabType = 'perfil' | 'empresa' | 'apariencia' | 'whatsapp' | 'integraciones' | 'seguridad' | 'origenes';
 
 // WhatsApp Connection Tab Component
 function WhatsAppConnectionTab() {
@@ -375,6 +376,7 @@ export function Settings() {
             { id: 'whatsapp', icon: MessageCircle, label: 'Conexión WhatsApp', badge: 'NUEVO' },
             { id: 'integraciones', icon: Link2, label: 'Integraciones' },
             { id: 'seguridad', icon: Shield, label: 'Seguridad y Permisos' },
+            { id: 'origenes', icon: PieIcon, label: 'Orígenes de Leads' },
           ].map(({ id, icon: Icon, label, badge }) => (
             <button
               key={id}
@@ -608,7 +610,188 @@ export function Settings() {
             </div>
           )}
 
+          {/* TAB: ORIGENES */}
+          {activeTab === 'origenes' && (
+            <LeadSourcesTab />
+          )}
+
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LeadSourcesTab() {
+  const [sources, setSources] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState('');
+  const [newColor, setNewColor] = useState('#3b82f6');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editColor, setEditColor] = useState('');
+
+  const loadSources = async () => {
+    try {
+      setLoading(true);
+      const res = await getLeadSources();
+      setSources(res.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSources();
+  }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    try {
+      await createLeadSource({ name: newName.trim(), color: newColor });
+      setNewName('');
+      setNewColor('#3b82f6');
+      loadSources();
+    } catch (err: any) {
+      alert(err.message || 'Error al agregar origen');
+    }
+  };
+
+  const handleStartEdit = (src: any) => {
+    setEditingId(src.id);
+    setEditName(src.name);
+    setEditColor(src.color);
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    if (!editName.trim()) return;
+    try {
+      await updateLeadSource(id, { name: editName.trim(), color: editColor });
+      setEditingId(null);
+      loadSources();
+    } catch (err: any) {
+      alert(err.message || 'Error al actualizar');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Confirmas que deseas eliminar este origen?')) return;
+    try {
+      await deleteLeadSource(id);
+      loadSources();
+    } catch (err: any) {
+      alert(err.message || 'Error al eliminar');
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Orígenes de Leads</h2>
+        <p className="text-xs text-slate-500 mt-1">Configura y gestiona las fuentes u orígenes desde donde llegan tus leads (ej. campañas, portales, referidos).</p>
+      </div>
+
+      {/* Formulario Agregar */}
+      <form onSubmit={handleAdd} className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 flex items-end gap-4">
+        <div className="flex-1 space-y-1.5">
+          <label className="block text-xs font-semibold text-slate-700">Nombre de la Fuente</label>
+          <input 
+            type="text" 
+            value={newName} 
+            onChange={e => setNewName(e.target.value)} 
+            placeholder="Ej. Facebook Ads, TikTok Orgánico" 
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+            required
+          />
+        </div>
+        <div className="space-y-1.5 shrink-0">
+          <label className="block text-xs font-semibold text-slate-700">Color</label>
+          <div className="flex items-center gap-2">
+            <input 
+              type="color" 
+              value={newColor} 
+              onChange={e => setNewColor(e.target.value)} 
+              className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer bg-white p-1"
+            />
+          </div>
+        </div>
+        <button 
+          type="submit" 
+          className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+        >
+          Agregar
+        </button>
+      </form>
+
+      {/* Listado */}
+      <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+        <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-200/60 font-semibold text-xs text-slate-500 uppercase tracking-wider">
+          Fuentes de lead activas
+        </div>
+        
+        {loading ? (
+          <div className="text-center py-8 text-slate-400 text-sm">Cargando orígenes...</div>
+        ) : sources.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-sm">No hay orígenes registrados. Agrega uno arriba.</div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {sources.map(src => (
+              <div key={src.id} className="p-3.5 flex items-center justify-between gap-4">
+                {editingId === src.id ? (
+                  <div className="flex-1 flex items-center gap-3">
+                    <input 
+                      type="color" 
+                      value={editColor} 
+                      onChange={e => setEditColor(e.target.value)} 
+                      className="w-7 h-7 rounded cursor-pointer border border-slate-200 p-0.5"
+                    />
+                    <input 
+                      type="text" 
+                      value={editName} 
+                      onChange={e => setEditName(e.target.value)} 
+                      className="flex-1 px-3 py-1 rounded border border-slate-200 text-sm focus:ring-1 focus:ring-brand-green focus:border-brand-green"
+                    />
+                    <button 
+                      onClick={() => handleSaveEdit(src.id)}
+                      className="text-xs bg-brand-green text-white px-3 py-1 rounded hover:bg-brand-greenHover"
+                    >
+                      Guardar
+                    </button>
+                    <button 
+                      onClick={() => setEditingId(null)}
+                      className="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded hover:bg-slate-300"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: src.color }} />
+                      <span className="text-sm font-semibold text-slate-800">{src.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleStartEdit(src)}
+                        className="text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100 transition-colors"
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(src.id)}
+                        className="text-xs text-rose-500 hover:text-rose-700 px-2 py-1 rounded hover:bg-rose-50 transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

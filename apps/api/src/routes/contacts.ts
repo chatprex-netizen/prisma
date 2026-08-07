@@ -81,4 +81,77 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
+const DEFAULT_SOURCES = [
+  { name: 'Redes Sociales', color: '#10b981' },
+  { name: 'Portales Inmobiliarios', color: '#059669' },
+  { name: 'Web Directa', color: '#047857' },
+  { name: 'Referidos', color: '#065f46' },
+  { name: 'Eventos / Feria', color: '#34d399' },
+  { name: 'Call Center', color: '#3b82f6' },
+  { name: 'Visita Oficina', color: '#8b5cf6' },
+  { name: 'Otro', color: '#64748b' }
+];
+
+// Get Lead Sources Config
+router.get('/sources', async (req: Request, res: Response) => {
+  try {
+    let configs = await prisma.leadSourceConfig.findMany({
+      orderBy: { createdAt: 'asc' }
+    });
+
+    if (configs.length === 0) {
+      await prisma.leadSourceConfig.createMany({
+        data: DEFAULT_SOURCES
+      });
+      configs = await prisma.leadSourceConfig.findMany({
+        orderBy: { createdAt: 'asc' }
+      });
+    }
+
+    res.json({ success: true, data: configs });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create Lead Source
+router.post('/sources', async (req: Request, res: Response) => {
+  try {
+    const { name, color } = req.body;
+    const newSource = await prisma.leadSourceConfig.create({
+      data: { name, color }
+    });
+    res.status(201).json({ success: true, data: newSource });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Update Lead Source
+router.put('/sources/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, color } = req.body;
+    const updated = await prisma.leadSourceConfig.update({
+      where: { id },
+      data: { name, color }
+    });
+    res.json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Delete Lead Source
+router.delete('/sources/:id', async (req: Request, res: Response) => {
+  try {
+    await prisma.leadSourceConfig.delete({
+      where: { id: req.params.id }
+    });
+    res.json({ success: true, message: 'Source deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 export default router;
