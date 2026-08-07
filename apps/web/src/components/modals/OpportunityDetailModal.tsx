@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User, DollarSign, Building } from 'lucide-react';
+import { getProperties, createContract, updateOpportunityStage } from '../../lib/api';
 
 interface OpportunityDetailModalProps {
   isOpen: boolean;
@@ -7,7 +8,7 @@ interface OpportunityDetailModalProps {
   opportunity: any; // We'll pass the whole opportunity object
 }
 
-type TabType = 'TAREAS' | 'NOTAS' | 'HISTORIAL';
+type TabType = 'TAREAS' | 'NOTAS' | 'HISTORIAL' | 'CONTRATO';
 
 const TASK_TYPES = [
   { id: 'LLAMADA', label: 'Llamada', icon: Phone },
@@ -20,6 +21,39 @@ const TASK_TYPES = [
 
 export function OpportunityDetailModal({ isOpen, onClose, opportunity }: OpportunityDetailModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('TAREAS');
+  const [properties, setProperties] = useState<any[]>([]);
+  const [selectedDevId, setSelectedDevId] = useState('');
+  const [selectedProjId, setSelectedProjId] = useState('');
+  const [contractData, setContractData] = useState({
+    propertyId: '',
+    type: 'COMPRAVENTA',
+    status: 'FIRMADO',
+    amount: '',
+    currency: 'USD',
+    notes: ''
+  });
+  const [submittingContract, setSubmittingContract] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && activeTab === 'CONTRATO') {
+      getProperties().then(res => setProperties(res.data || [])).catch(console.error);
+    }
+  }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (opportunity) {
+      setContractData({
+        propertyId: '',
+        type: 'COMPRAVENTA',
+        status: 'FIRMADO',
+        amount: String(opportunity.value || opportunity.contact?.budgetMin || ''),
+        currency: opportunity.contact?.currency || 'USD',
+        notes: ''
+      });
+      setSelectedDevId('');
+      setSelectedProjId('');
+    }
+  }, [opportunity]);
 
   if (!isOpen || !opportunity) return null;
 
@@ -75,6 +109,13 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             >
               <History className="w-4 h-4" />
               Historial
+            </button>
+            <button
+              onClick={() => setActiveTab('CONTRATO')}
+              className={`flex items-center gap-2 px-3 py-1.5.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <FileSignature className="w-4 h-4" />
+              Registrar Contrato
             </button>
           </div>
 
