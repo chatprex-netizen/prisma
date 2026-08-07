@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Plus, MoreHorizontal, Filter } from 'lucide-react';
+import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail } from 'lucide-react';
 import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
 import { getPipeline } from '../lib/api';
 
 const STAGES = [
-  { id: 'PROSPECCION', name: 'Prospección', color: 'bg-slate-200' },
-  { id: 'CALIFICACION', name: 'Calificación', color: 'bg-blue-100' },
-  { id: 'VISITA', name: 'Visita', color: 'bg-indigo-100' },
-  { id: 'PROPUESTA', name: 'Propuesta', color: 'bg-purple-100' },
-  { id: 'NEGOCIACION', name: 'Negociación', color: 'bg-orange-100' },
+  { id: 'PROSPECCION', name: 'Prospección', color: 'bg-cyan-500', textClass: 'text-cyan-600', borderClass: 'border-t-4 border-cyan-500' },
+  { id: 'CALIFICACION', name: 'Calificación', color: 'bg-emerald-500', textClass: 'text-emerald-600', borderClass: 'border-t-4 border-emerald-500' },
+  { id: 'VISITA', name: 'Visita', color: 'bg-fuchsia-500', textClass: 'text-fuchsia-600', borderClass: 'border-t-4 border-fuchsia-500' },
+  { id: 'PROPUESTA', name: 'Propuesta', color: 'bg-violet-500', textClass: 'text-violet-600', borderClass: 'border-t-4 border-violet-500' },
+  { id: 'NEGOCIACION', name: 'Negociación', color: 'bg-amber-500', textClass: 'text-amber-600', borderClass: 'border-t-4 border-amber-500' },
 ];
 
 export function Pipeline() {
@@ -22,7 +22,7 @@ export function Pipeline() {
     try {
       setLoading(true);
       const res = await getPipeline();
-      setOpportunities(res.data);
+      setOpportunities(res.data || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -62,7 +62,7 @@ export function Pipeline() {
         {loading ? (
           <div className="flex items-center justify-center h-full text-slate-500">Cargando oportunidades...</div>
         ) : (
-          <div className="flex gap-5 h-full items-start w-max">
+          <div className="flex gap-5 h-full items-start w-max pb-4">
             {STAGES.map((stage) => {
               const stageOpps = opportunities.filter(o => o.stage === stage.id);
               const totalValue = stageOpps.reduce((acc, curr) => {
@@ -71,16 +71,16 @@ export function Pipeline() {
               }, 0);
 
               return (
-                <div key={stage.id} className="w-72 max-h-full flex flex-col bg-slate-50/80 rounded-xl border border-slate-200/50 shrink-0">
+                <div key={stage.id} className={`w-72 max-h-full flex flex-col bg-slate-50/80 rounded-xl border border-slate-200/50 shrink-0 ${stage.borderClass}`}>
                   {/* Column Header */}
-                  <div className="p-3 border-b border-slate-200/60 flex justify-between items-center bg-white/50 rounded-t-xl">
+                  <div className="p-3 border-b border-slate-200/60 flex justify-between items-center bg-white/50 rounded-t-lg">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                      <h3 className={`text-sm font-bold flex items-center gap-2 ${stage.textClass}`}>
                         <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`}></div>
                         {stage.name}
                       </h3>
-                      <p className="text-xxs text-slate-500 font-medium mt-1">
-                        {stageOpps.length} op. · S/ {totalValue.toLocaleString()}
+                      <p className="text-xxs text-slate-500 font-semibold mt-1">
+                        {stageOpps.length} op. · S/ {totalValue.toLocaleString('es-PE')}
                       </p>
                     </div>
                     <button className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -98,17 +98,60 @@ export function Pipeline() {
                         <div 
                           key={opp.id} 
                           onDoubleClick={() => setSelectedOpp(opp)}
-                          className="bg-white p-3.5 rounded-lg border border-slate-200/70 shadow-sm cursor-pointer hover:border-brand-green/40 hover:shadow-md transition-all group select-none"
+                          className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-sm cursor-pointer hover:border-brand-green/30 hover:shadow-md transition-all group select-none space-y-2 relative"
                         >
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-xs font-semibold text-slate-900 group-hover:text-brand-green transition-colors">{opp.title}</span>
-                            <span className="text-[10px] text-slate-400 font-medium">{oppDays}d</span>
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="text-xxs font-semibold text-slate-500 uppercase tracking-wider block truncate max-w-[80%]">
+                              {opp.project?.name || 'Sin Proyecto'}
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-medium shrink-0">{oppDays}d</span>
                           </div>
-                          <p className="text-xs text-slate-600 mb-3">{contactName}</p>
-                          <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
-                            <span className="text-xs font-bold text-slate-800">S/ {Number(opp.value || 0).toLocaleString()}</span>
-                            <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500 border border-white ring-1 ring-slate-200">
-                              {contactName.charAt(0).toUpperCase()}
+
+                          <div>
+                            <p className="text-sm font-bold text-slate-950 group-hover:text-brand-green transition-colors truncate">
+                              {contactName}
+                            </p>
+                            {opp.title && opp.title !== opp.contact?.firstName && (
+                              <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{opp.title}</p>
+                            )}
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-100/70 flex justify-between items-center gap-2">
+                            <span className="text-xs font-extrabold text-slate-900">
+                              {opp.contact?.currency === 'EUR' ? '€' : opp.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opp.value || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </span>
+                            
+                            {/* Action Buttons to the right */}
+                            <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                              {opp.contact?.phone && (
+                                <>
+                                  <a 
+                                    href={`tel:${opp.contact.phone}`}
+                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                    title="Llamar"
+                                  >
+                                    <Phone className="w-3.5 h-3.5" />
+                                  </a>
+                                  <a 
+                                    href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                    title="WhatsApp"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                  </a>
+                                </>
+                              )}
+                              {opp.contact?.email && (
+                                <a 
+                                  href={`mailto:${opp.contact.email}`}
+                                  className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Enviar correo"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                </a>
+                              )}
                             </div>
                           </div>
                         </div>
