@@ -202,18 +202,34 @@ export async function handleIncomingMessage(data: {
       },
     });
 
-    // If no contact exists, auto-create one from WhatsApp profile name
+    // If no contact exists, auto-create one from WhatsApp profile name as a LEAD
     if (!existingContact && contactName) {
       const nameParts = contactName.split(' ');
+      const defaultAgent = await prisma.user.findFirst();
+      const agentId = defaultAgent?.id;
+
       const newContact = await prisma.contact.create({
         data: {
           firstName: nameParts[0] || contactName,
           lastName: nameParts.slice(1).join(' ') || '',
           phone: phoneNormalized,
-          type: 'CLIENTE',
-          source: 'REDES_SOCIALES',
+          type: 'LEAD',
+          source: 'WhatsApp',
+          assignedTo: agentId,
         },
       });
+
+      // Auto-create pipeline opportunity so they appear in the Kanban board immediately
+      if (agentId) {
+        await prisma.opportunity.create({
+          data: {
+            contactId: newContact.id,
+            stage: 'PROSPECCION',
+            agentId: agentId,
+            notes: 'Lead registrado automáticamente tras recibir mensaje inicial de WhatsApp',
+          }
+        });
+      }
 
       // Link the chat to the new contact
       await prisma.chat.update({
