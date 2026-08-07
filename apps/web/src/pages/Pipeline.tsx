@@ -1,21 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail } from 'lucide-react';
+import { Plus, MoreHorizontal, Filter, Phone, MessageSquare, Mail, Settings } from 'lucide-react';
 import { NewOpportunityModal } from '../components/modals/NewOpportunityModal';
 import { OpportunityDetailModal } from '../components/modals/OpportunityDetailModal';
-import { getPipeline } from '../lib/api';
-
-const STAGES = [
-  { id: 'PROSPECCION', name: 'Prospección', color: 'bg-cyan-500', textClass: 'text-cyan-600', borderClass: 'border-t-4 border-cyan-500' },
-  { id: 'CALIFICACION', name: 'Calificación', color: 'bg-emerald-500', textClass: 'text-emerald-600', borderClass: 'border-t-4 border-emerald-500' },
-  { id: 'VISITA', name: 'Visita', color: 'bg-fuchsia-500', textClass: 'text-fuchsia-600', borderClass: 'border-t-4 border-fuchsia-500' },
-  { id: 'PROPUESTA', name: 'Propuesta', color: 'bg-violet-500', textClass: 'text-violet-600', borderClass: 'border-t-4 border-violet-500' },
-  { id: 'NEGOCIACION', name: 'Negociación', color: 'bg-amber-500', textClass: 'text-amber-600', borderClass: 'border-t-4 border-amber-500' },
-];
+import { PipelineStagesModal } from '../components/modals/PipelineStagesModal';
+import { getPipeline, getPipelineStages } from '../lib/api';
 
 export function Pipeline() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStagesModalOpen, setIsStagesModalOpen] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
+  
   const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [stages, setStages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPipeline = async () => {
@@ -30,9 +26,22 @@ export function Pipeline() {
     }
   };
 
+  const fetchStages = async () => {
+    try {
+      const res = await getPipelineStages();
+      setStages(res.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchPipeline();
+    fetchStages();
   }, []);
+
+  // Filter only visible stages for the kanban board
+  const visibleStages = stages.filter(s => s.isVisible);
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto h-full flex flex-col">
@@ -43,6 +52,13 @@ export function Pipeline() {
           <p className="text-xs text-slate-500 mt-0.5">Gestiona tus oportunidades comerciales por etapa</p>
         </div>
         <div className="flex w-full md:w-auto gap-3">
+          <button 
+            onClick={() => setIsStagesModalOpen(true)}
+            className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
+          >
+            <Settings className="w-4 h-4 text-slate-500" />
+            Gestionar Etapas
+          </button>
           <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filtros
@@ -59,24 +75,32 @@ export function Pipeline() {
 
       {/* Kanban Board Container */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        {loading ? (
+        {loading && stages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-slate-500">Cargando oportunidades...</div>
         ) : (
           <div className="flex gap-5 h-full items-start w-max pb-4">
-            {STAGES.map((stage) => {
-              const stageOpps = opportunities.filter(o => o.stage === stage.id);
+            {visibleStages.map((stage) => {
+              const stageOpps = opportunities.filter(o => o.stage === stage.key);
               const totalValue = stageOpps.reduce((acc, curr) => {
                 const val = curr.value || 0;
                 return acc + Number(val);
               }, 0);
 
+              // Use custom color for line and text
+              const headerColorStyle = { color: stage.color };
+              const lineStyle = { borderTop: `4px solid ${stage.color}` };
+
               return (
-                <div key={stage.id} className={`w-72 max-h-full flex flex-col bg-slate-50/80 rounded-xl border border-slate-200/50 shrink-0 ${stage.borderClass}`}>
+                <div 
+                  key={stage.id} 
+                  className="w-72 max-h-full flex flex-col bg-slate-50/80 rounded-xl border border-slate-200/50 shrink-0"
+                  style={lineStyle}
+                >
                   {/* Column Header */}
                   <div className="p-3 border-b border-slate-200/60 flex justify-between items-center bg-white/50 rounded-t-lg">
                     <div>
-                      <h3 className={`text-sm font-bold flex items-center gap-2 ${stage.textClass}`}>
-                        <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`}></div>
+                      <h3 className="text-sm font-bold flex items-center gap-2" style={headerColorStyle}>
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stage.color }}></div>
                         {stage.name}
                       </h3>
                       <p className="text-xxs text-slate-500 font-semibold mt-1">
@@ -175,6 +199,12 @@ export function Pipeline() {
         isOpen={!!selectedOpp}
         onClose={() => setSelectedOpp(null)}
         opportunity={selectedOpp}
+      />
+
+      <PipelineStagesModal
+        isOpen={isStagesModalOpen}
+        onClose={() => setIsStagesModalOpen(false)}
+        onSuccess={() => { fetchPipeline(); fetchStages(); }}
       />
     </div>
   );

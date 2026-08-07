@@ -812,3 +812,15 @@ model SystemConfig {
   updatedAt DateTime @updatedAt
 }
 
+model PipelineStageConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique // Matches the PipelineStage enum values
+  name      String
+  details   String?  @db.Text
+  color     String   @default("#64748b")
+  isVisible Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
