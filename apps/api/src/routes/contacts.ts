@@ -30,6 +30,9 @@ function mapSourceFromDb(contact: any) {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const contacts = await prisma.contact.findMany({
+      include: {
+        opportunities: { select: { id: true, stage: true } }
+      },
       orderBy: { createdAt: 'desc' }
     });
     res.json({ success: true, data: contacts.map(mapSourceFromDb) });
@@ -47,8 +50,9 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 
     mapSourceToDb(req.body);
+    const { stage, ...contactData } = req.body;
     const contact = await prisma.contact.create({
-      data: req.body
+      data: contactData
     });
 
     // Automatically create an opportunity in pipeline if the type is LEAD
@@ -64,7 +68,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       await prisma.opportunity.create({
         data: {
           contactId: contact.id,
-          stage: 'PROSPECCION',
+          stage: stage || 'PROSPECCION',
           agentId: contact.assignedTo || agentId,
           projectId: projectId,
           notes: contact.notes,
@@ -83,10 +87,33 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     mapSourceToDb(req.body);
+    const { stage, ...contactData } = req.body;
     const contact = await prisma.contact.update({
       where: { id: req.params.id },
-      data: req.body
+      data: contactData
     });
+
+    if (stage) {
+      const opp = await prisma.opportunity.findFirst({
+        where: { contactId: contact.id }
+      });
+      if (opp) {
+        await prisma.opportunity.update({
+          where: { id: opp.id },
+          data: { stage }
+        });
+      } else {
+        await prisma.opportunity.create({
+          data: {
+            contactId: contact.id,
+            stage,
+            agentId: contact.assignedTo || '',
+            value: contact.budgetMin
+          }
+        });
+      }
+    }
+
     res.json({ success: true, data: mapSourceFromDb(contact) });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });

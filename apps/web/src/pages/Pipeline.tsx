@@ -13,6 +13,13 @@ export function Pipeline() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [stages, setStages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Advanced Filters state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterProject, setFilterProject] = useState('');
+  const [filterSource, setFilterSource] = useState('');
+  const [filterAgent, setFilterAgent] = useState('');
+  const [filterSearch, setFilterSearch] = useState('');
   
   // Default to list view on mobile screens (< 768px), otherwise grid (kanban)
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>(
@@ -69,6 +76,16 @@ export function Pipeline() {
   // Filter only visible stages for the kanban board
   const visibleStages = stages.filter(s => s.isVisible);
 
+  // Client-side advanced filtering
+  const filteredOpportunities = opportunities.filter(opp => {
+    const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}`.toLowerCase() : '';
+    const matchesSearch = !filterSearch || contactName.includes(filterSearch.toLowerCase());
+    const matchesProject = !filterProject || opp.projectId === filterProject;
+    const matchesSource = !filterSource || opp.contact?.source === filterSource;
+    const matchesAgent = !filterAgent || opp.agentId === filterAgent;
+    return matchesSearch && matchesProject && matchesSource && matchesAgent;
+  });
+
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto h-[calc(100vh-80px)] flex flex-col overflow-hidden font-sans">
       {/* Header */}
@@ -103,12 +120,69 @@ export function Pipeline() {
             <Settings className="w-4 h-4 text-slate-500" />
             <span className="hidden sm:inline">Gestionar Etapas</span>
           </button>
-          <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
-            <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">Filtros</span>
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex-1 md:flex-none bg-white border text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm ${showFilters ? 'bg-slate-100 border-slate-300 font-bold' : 'border-slate-200'}`}
+          >
+            <Filter className="w-4 h-4 text-slate-500" />
+            <span className="hidden sm:inline">Filtros avanzados</span>
           </button>
         </div>
       </div>
+
+      {showFilters && (
+        <div className="bg-white border border-slate-200 p-3 rounded-xl mb-4 grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-xs animate-in slide-in-from-top-1 duration-200 text-left shrink-0 font-sans">
+          <div className="space-y-0.5">
+            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Buscar Lead</label>
+            <input
+              type="text"
+              value={filterSearch}
+              onChange={e => setFilterSearch(e.target.value)}
+              placeholder="Buscar por nombre..."
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20"
+            />
+          </div>
+          <div className="space-y-0.5">
+            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Proyecto</label>
+            <select
+              value={filterProject}
+              onChange={e => setFilterProject(e.target.value)}
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
+            >
+              <option value="">Todos los Proyectos</option>
+              {Array.from(new Map(opportunities.map(o => o.project).filter(Boolean).map(p => [p.id, p])).values()).map((p: any) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-0.5">
+            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Origen / Fuente</label>
+            <select
+              value={filterSource}
+              onChange={e => setFilterSource(e.target.value)}
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
+            >
+              <option value="">Todos los Orígenes</option>
+              {Array.from(new Set(opportunities.map(o => o.contact?.source).filter(Boolean))).map((src: any) => (
+                <option key={src} value={src}>{src}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-0.5">
+            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Asesor encargado</label>
+            <select
+              value={filterAgent}
+              onChange={e => setFilterAgent(e.target.value)}
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
+            >
+              <option value="">Todos los Asesores</option>
+              {Array.from(new Map(opportunities.map(o => o.agent).filter(Boolean).map(a => [a.id, a])).values()).map((a: any) => (
+                <option key={a.id} value={a.id}>{a.firstName} {a.lastName || ''}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Kanban Board Container / List View */}
       <div className="flex-1 overflow-hidden flex flex-col">
@@ -118,7 +192,7 @@ export function Pipeline() {
           /* List View (Ultra Compact) */
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {visibleStages.map((stage) => {
-              const stageOpps = opportunities.filter(o => o.stage === stage.key);
+              const stageOpps = filteredOpportunities.filter(o => o.stage === stage.key);
               if (stageOpps.length === 0) return null;
 
               return (
@@ -163,17 +237,38 @@ export function Pipeline() {
                         >
                           <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 font-sans">
                             {/* Client Name & Project */}
-                            <div className="min-w-0 sm:w-1/2">
+                            <div className="min-w-0 sm:w-1/4">
                               <span className="text-xs font-bold text-slate-900 block truncate">{contactName}</span>
                               <span className="text-[9px] text-slate-400 font-semibold truncate block sm:hidden">
-                                {opp.project?.name || 'Sin Proyecto'}
+                                {opp.project?.name || 'Sin Proyecto'} · {opp.contact?.source || 'Sin Origen'}
                               </span>
                             </div>
 
                             {/* Project Name (Desktop Only) */}
-                            <div className="hidden sm:block min-w-0 sm:w-1/2">
+                            <div className="hidden sm:block min-w-0 sm:w-1/4">
                               <span className="text-[10px] text-slate-500 font-semibold truncate block">
                                 {opp.project?.name || 'Sin Proyecto'}
+                              </span>
+                            </div>
+
+                            {/* Lead Source (Desktop Only) */}
+                            <div className="hidden sm:block min-w-0 sm:w-1/4">
+                              <span className="text-[10px] text-slate-400 font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 inline-block truncate max-w-[90%]">
+                                {opp.contact?.source || 'Sin Origen'}
+                              </span>
+                            </div>
+
+                            {/* Stage/Estado (Desktop Only) */}
+                            <div className="hidden sm:block min-w-0 sm:w-1/4">
+                              <span 
+                                className="text-[9px] font-bold px-2 py-0.5 rounded-full border inline-block"
+                                style={{ 
+                                  color: stage.color || '#475569', 
+                                  backgroundColor: `${stage.color}12` || '#f1f5f9',
+                                  borderColor: `${stage.color}25` || '#e2e8f0'
+                                }}
+                              >
+                                {stage.name}
                               </span>
                             </div>
                           </div>
@@ -281,7 +376,7 @@ export function Pipeline() {
           <div className="flex-1 overflow-x-auto overflow-y-hidden">
             <div className="flex gap-5 h-full items-start w-max pb-4">
               {visibleStages.map((stage) => {
-                const stageOpps = opportunities.filter(o => o.stage === stage.key);
+                const stageOpps = filteredOpportunities.filter(o => o.stage === stage.key);
                 const totalValue = stageOpps.reduce((acc, curr) => {
                   const val = curr.value || 0;
                   return acc + Number(val);

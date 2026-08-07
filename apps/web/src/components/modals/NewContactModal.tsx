@@ -26,6 +26,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
     budgetMin: '',
     budgetMax: '',
     currency: 'USD',
+    stage: 'PROSPECCION',
     projectOfInterest: '',
     assignedUserId: '',
     tags: '',
@@ -54,6 +55,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         budgetMin: initialData.budgetMin ? String(initialData.budgetMin) : '',
         budgetMax: initialData.budgetMax ? String(initialData.budgetMax) : '',
         currency: initialData.currency || 'USD',
+        stage: initialData.opportunities?.[0]?.stage || 'PROSPECCION',
         projectOfInterest: initialData.projectOfInterest || '',
         assignedUserId: initialData.assignedTo || initialData.assignedUserId || '',
         tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
@@ -71,6 +73,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         budgetMin: '',
         budgetMax: '',
         currency: 'USD',
+        stage: 'PROSPECCION',
         projectOfInterest: '',
         assignedUserId: '',
         tags: '',
@@ -214,8 +217,24 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
             </div>
 
-            {/* Line 2: Moneda and Presupuesto */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Line 2: Estado según Pipeline, Moneda and Presupuesto */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium text-slate-700">Estado según Pipeline</label>
+                <select 
+                  value={formData.stage}
+                  onChange={e => setFormData({...formData, stage: e.target.value})}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white font-semibold"
+                >
+                  <option value="PROSPECCION">Prospección</option>
+                  <option value="CALIFICACION">Calificación</option>
+                  <option value="VISITA">Visita</option>
+                  <option value="PROPUESTA">Propuesta</option>
+                  <option value="NEGOCIACION">Negociación</option>
+                  <option value="CIERRE_GANADO">Ganado</option>
+                  <option value="CIERRE_PERDIDO">Perdido</option>
+                </select>
+              </div>
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
                 <select 
