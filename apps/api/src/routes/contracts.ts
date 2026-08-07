@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -22,10 +23,21 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Create new contract
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    const agentId = req.user?.id;
+    if (!agentId) {
+      return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
+    }
+
+    const { agentId: bodyAgentId, ...restOfData } = req.body;
+    const finalAgentId = bodyAgentId || agentId;
+
     const contract = await prisma.contract.create({
-      data: req.body
+      data: {
+        ...restOfData,
+        agentId: finalAgentId
+      }
     });
     res.status(201).json({ success: true, data: contract });
   } catch (error: any) {

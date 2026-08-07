@@ -23,6 +23,9 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
   const [paymentDayRule, setPaymentDayRule] = useState<'5' | '20' | 'CUSTOM'>('5');
   const [customStartDate, setCustomStartDate] = useState<string>('');
 
+  const [selectedDeveloperId, setSelectedDeveloperId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
   const [formData, setFormData] = useState({
     buyerId: '',
     type: 'COMPRAVENTA',
@@ -51,6 +54,45 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Get unique developers from properties
+  const developersList = Array.from(
+    new Map(
+      properties
+        .map(p => p.project?.developer)
+        .filter(Boolean)
+        .map(dev => [dev.id, dev])
+    ).values()
+  );
+
+  // Get projects filtered by selected developer
+  const projectsList = Array.from(
+    new Map(
+      properties
+        .filter(p => !selectedDeveloperId || p.project?.developerId === selectedDeveloperId)
+        .map(p => p.project)
+        .filter(Boolean)
+        .map(proj => [proj.id, proj])
+    ).values()
+  );
+
+  // Get properties filtered by selected project
+  const propertiesList = properties.filter(p => {
+    const matchesProject = !selectedProjectId || p.projectId === selectedProjectId;
+    const matchesDeveloper = !selectedDeveloperId || p.project?.developerId === selectedDeveloperId;
+    return matchesProject && matchesDeveloper;
+  });
+
+  const handleDeveloperChange = (devId: string) => {
+    setSelectedDeveloperId(devId);
+    setSelectedProjectId('');
+    setFormData(prev => ({ ...prev, propertyId: '' }));
+  };
+
+  const handleProjectChange = (projId: string) => {
+    setSelectedProjectId(projId);
+    setFormData(prev => ({ ...prev, propertyId: '' }));
+  };
 
   // Generate Payment Schedule dynamically
   const generateSchedule = () => {
@@ -237,22 +279,57 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
           <div className="p-3.5 border border-slate-100 rounded-lg bg-slate-50/50 space-y-3">
             <span className="text-xs font-bold text-slate-700 block uppercase tracking-wide">Condiciones del Cierre</span>
             
+            {/* Desarrollador y Proyecto */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium text-slate-700">Desarrollador</label>
+                <select 
+                  value={selectedDeveloperId}
+                  onChange={e => handleDeveloperChange(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                >
+                  <option value="">Selecciona desarrollador...</option>
+                  {developersList.map(dev => (
+                    <option key={dev.id} value={dev.id}>{dev.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium text-slate-700">Proyecto</label>
+                <select 
+                  value={selectedProjectId}
+                  onChange={e => handleProjectChange(e.target.value)}
+                  disabled={!selectedDeveloperId}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white disabled:bg-slate-100 disabled:text-slate-400"
+                >
+                  <option value="">Selecciona proyecto...</option>
+                  {projectsList.map(proj => (
+                    <option key={proj.id} value={proj.id}>{proj.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Propiedad y Asesor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Propiedad Inmobiliaria *</label>
                 <select 
                   value={formData.propertyId}
                   onChange={e => setFormData({...formData, propertyId: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                  disabled={!selectedProjectId}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white disabled:bg-slate-100 disabled:text-slate-400"
                 >
-                  <option value="">Selecciona desarrollador - proyecto - propiedad...</option>
-                  {properties.map(p => (
+                  <option value="">Selecciona unidad...</option>
+                  {propertiesList.map(p => (
                     <option key={p.id} value={p.id}>
-                      [{p.project?.developer?.name || 'S/D'}] {p.project?.name} - {p.unitCode} ({p.type})
+                      {p.unitCode} ({p.type})
                     </option>
                   ))}
                 </select>
               </div>
+
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Asesor que cerró *</label>
                 <select 
