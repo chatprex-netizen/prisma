@@ -120,23 +120,22 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-lg font-semibold text-slate-900">{initialData ? 'Editar Contacto' : 'Nuevo Contacto'}</h2>
+        <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+          <h2 className="text-base font-semibold text-slate-900">{initialData ? 'Editar Contacto' : 'Nuevo Contacto'}</h2>
           <button 
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
-          
-          {/* Row 1: Nombre and Teléfono */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
+          {/* Row 1: Nombre, Teléfono and Email */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Nombre *</label>
               <input 
@@ -157,11 +156,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-          </div>
-
-          {/* Row 2: Correo, Origen, and Lead VIP */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="space-y-1 md:col-span-5">
+            <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Correo Electrónico</label>
               <input 
                 type="email" 
@@ -171,39 +166,13 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="space-y-1 md:col-span-5">
-              <label className="block text-[11px] font-medium text-slate-700">Origen de Lead *</label>
-              <select 
-                value={formData.source}
-                onChange={e => setFormData({...formData, source: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
-                <option value="REDES_SOCIALES">Redes Sociales (FB, IG, TikTok, etc.)</option>
-                <option value="WEB">Sitio Web</option>
-                <option value="PORTAL_INMOBILIARIO">Portal Inmobiliario</option>
-                <option value="REFERIDO">Referido</option>
-                <option value="EVENTO">Evento</option>
-                <option value="CALL_CENTER">Call Center</option>
-                <option value="VISITA_OFICINA">Visita a Oficina</option>
-                <option value="OTRO">Otro</option>
-              </select>
-            </div>
-            <div className="space-y-1 flex items-end pb-2 md:col-span-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={formData.isVip}
-                  onChange={e => setFormData({...formData, isVip: e.target.checked})}
-                  className="rounded border-slate-300 text-brand-green focus:ring-brand-green/20 w-4 h-4" 
-                />
-                <span className="text-sm font-medium text-amber-600">VIP 🌟</span>
-              </label>
-            </div>
           </div>
 
-          <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 space-y-4">
-            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Detalles Adicionales & Preferencias</h3>
+          <div className="p-3 bg-slate-50/50 rounded-lg border border-slate-100 space-y-3">
+            <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Detalles Adicionales & Preferencias</span>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Line 1: Proyecto de Interés, Origen, and Asesor Asignado */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Proyecto de Interés</label>
                 <select 
@@ -215,6 +184,22 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   {projects.map(p => (
                     <option key={p.id} value={p.name}>{p.name}</option>
                   ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium text-slate-700">Origen de Lead *</label>
+                <select 
+                  value={formData.source}
+                  onChange={e => setFormData({...formData, source: e.target.value})}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
+                  <option value="REDES_SOCIALES">Redes Sociales (FB, IG, TikTok, etc.)</option>
+                  <option value="WEB">Sitio Web</option>
+                  <option value="PORTAL_INMOBILIARIO">Portal Inmobiliario</option>
+                  <option value="REFERIDO">Referido</option>
+                  <option value="EVENTO">Evento</option>
+                  <option value="CALL_CENTER">Call Center</option>
+                  <option value="VISITA_OFICINA">Visita a Oficina</option>
+                  <option value="OTRO">Otro</option>
                 </select>
               </div>
               <div className="space-y-1">
@@ -232,7 +217,8 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Line 2: Moneda and Presupuesto */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
                 <select 
@@ -278,23 +264,23 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               onChange={e => setFormData({...formData, notes: e.target.value})}
               placeholder="Información adicional sobre el contacto..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
-            ></textarea>
+            />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
+        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+            className="px-4 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
           >
             {loading ? 'Guardando...' : initialData ? 'Actualizar Contacto' : 'Guardar Contacto'}
           </button>
