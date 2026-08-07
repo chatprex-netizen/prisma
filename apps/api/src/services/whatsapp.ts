@@ -214,7 +214,8 @@ export async function handleIncomingMessage(data: {
           lastName: nameParts.slice(1).join(' ') || '',
           phone: phoneNormalized,
           type: 'LEAD',
-          source: 'WhatsApp',
+          source: 'OTRO',
+          customSource: 'WhatsApp',
           assignedTo: agentId,
         },
       });

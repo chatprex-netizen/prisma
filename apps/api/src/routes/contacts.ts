@@ -5,13 +5,34 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
+const enumValues = ['WEB', 'PORTAL_INMOBILIARIO', 'REDES_SOCIALES', 'REFERIDO', 'EVENTO', 'CALL_CENTER', 'VISITA_OFICINA', 'OTRO'];
+
+function mapSourceToDb(body: any) {
+  if (body.source) {
+    if (enumValues.includes(body.source)) {
+      body.customSource = null;
+    } else {
+      body.customSource = body.source;
+      body.source = 'OTRO';
+    }
+  }
+}
+
+function mapSourceFromDb(contact: any) {
+  if (!contact) return contact;
+  return {
+    ...contact,
+    source: contact.source === 'OTRO' && contact.customSource ? contact.customSource : contact.source
+  };
+}
+
 // Get all contacts
 router.get('/', async (req: Request, res: Response) => {
   try {
     const contacts = await prisma.contact.findMany({
       orderBy: { createdAt: 'desc' }
     });
-    res.json({ success: true, data: contacts });
+    res.json({ success: true, data: contacts.map(mapSourceFromDb) });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -25,6 +46,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
     }
 
+    mapSourceToDb(req.body);
     const contact = await prisma.contact.create({
       data: req.body
     });
@@ -50,7 +72,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       });
     }
 
-    res.status(201).json({ success: true, data: contact });
+    res.status(201).json({ success: true, data: mapSourceFromDb(contact) });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
   }
@@ -59,11 +81,12 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 // Update contact
 router.put('/:id', async (req: Request, res: Response) => {
   try {
+    mapSourceToDb(req.body);
     const contact = await prisma.contact.update({
       where: { id: req.params.id },
       data: req.body
     });
-    res.json({ success: true, data: contact });
+    res.json({ success: true, data: mapSourceFromDb(contact) });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
   }

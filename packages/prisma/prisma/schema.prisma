@@ -186,7 +186,8 @@ model Contact {
   spouseDni     String?
   spouseEmail   String?
   spousePhone   String?
-  source        String      @default("OTRO")
+  source        LeadSource  @default(OTRO)
+  customSource  String?
   budgetMin Decimal?    @db.Decimal(14, 2)
   budgetMax Decimal?    @db.Decimal(14, 2)
   interests String[] // ["departamento", "penthouse"]
