@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -17,11 +18,38 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Create new contact
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    const agentId = req.user?.id;
+    if (!agentId) {
+      return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
+    }
+
     const contact = await prisma.contact.create({
       data: req.body
     });
+
+    // Automatically create an opportunity in pipeline if the type is LEAD
+    if (contact.type === 'LEAD') {
+      let projectId: string | null = null;
+      if (contact.interests && contact.interests.length > 0) {
+        const proj = await prisma.project.findFirst({
+          where: { name: contact.interests[0] }
+        });
+        if (proj) projectId = proj.id;
+      }
+
+      await prisma.opportunity.create({
+        data: {
+          contactId: contact.id,
+          stage: 'PROSPECCION',
+          agentId: contact.assignedTo || agentId,
+          projectId: projectId,
+          notes: contact.notes
+        }
+      });
+    }
+
     res.status(201).json({ success: true, data: contact });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
