@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createProject, getDevelopers } from '../../lib/api';
+import { createProject, updateProject, getDevelopers } from '../../lib/api';
 
 interface NewProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalProps) {
+export function NewProjectModal({ isOpen, onClose, onSuccess, initialData }: NewProjectModalProps) {
   const [loading, setLoading] = useState(false);
   const [developers, setDevelopers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -32,13 +33,42 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
         .then(res => {
           const devs = res?.data || [];
           setDevelopers(devs);
-          if (devs.length > 0) {
-            setFormData(prev => ({ ...prev, developerId: devs[0].id }));
+          
+          if (initialData) {
+            setFormData({
+              name: initialData.name || '',
+              developerId: initialData.developerId || '',
+              type: initialData.type || 'EDIFICIO_MULTIFAMILIAR',
+              status: initialData.status || 'PREVENTA',
+              address: initialData.address || '',
+              city: initialData.city || '',
+              state: initialData.state || '',
+              country: initialData.country || 'Perú',
+              totalUnits: initialData.totalUnits ? String(initialData.totalUnits) : '',
+              deliveryDate: initialData.deliveryDate ? initialData.deliveryDate.split('T')[0] : '',
+              brochureUrl: initialData.brochureUrl || '',
+              description: initialData.description || ''
+            });
+          } else {
+            setFormData({
+              name: '',
+              developerId: devs.length > 0 ? devs[0].id : '',
+              type: 'EDIFICIO_MULTIFAMILIAR',
+              status: 'PREVENTA',
+              address: '',
+              city: '',
+              state: '',
+              country: 'Perú',
+              totalUnits: '',
+              deliveryDate: '',
+              brochureUrl: '',
+              description: ''
+            });
           }
         })
         .catch(console.error);
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -48,22 +78,33 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
       return;
     }
 
-    if (!window.confirm('¿Confirmas que deseas guardar este proyecto en la base de datos?')) {
+    const confirmMsg = initialData 
+      ? '¿Confirmas que deseas guardar los cambios de este proyecto?' 
+      : '¿Confirmas que deseas guardar este proyecto en la base de datos?';
+
+    if (!window.confirm(confirmMsg)) {
       return;
     }
 
     try {
       setLoading(true);
-      await createProject({
+      const payload = {
         ...formData,
         totalUnits: formData.totalUnits ? Number(formData.totalUnits) : null,
         deliveryDate: formData.deliveryDate ? new Date(formData.deliveryDate) : null
-      });
+      };
+
+      if (initialData) {
+        await updateProject(initialData.id, payload);
+      } else {
+        await createProject(payload);
+      }
+      
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
       console.error(error);
-      alert('Error al crear el proyecto');
+      alert(initialData ? 'Error al actualizar el proyecto' : 'Error al crear el proyecto');
     } finally {
       setLoading(false);
     }
@@ -74,7 +115,9 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
       <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-base font-semibold text-slate-900">Nuevo Proyecto Inmobiliario</h2>
+          <h2 className="text-sm font-bold text-slate-900">
+            {initialData ? 'Editar Proyecto Inmobiliario' : 'Nuevo Proyecto Inmobiliario'}
+          </h2>
           <button 
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
@@ -84,11 +127,11 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
         </div>
 
         {/* Body */}
-        <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
+        <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar text-left">
           {/* Row 1: Nombre and Desarrolladora */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Nombre del Proyecto *</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Nombre del Proyecto *</label>
               <input 
                 type="text" 
                 value={formData.name}
@@ -98,11 +141,11 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Desarrolladora *</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Desarrolladora *</label>
               <select 
                 value={formData.developerId}
                 onChange={e => setFormData({...formData, developerId: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all cursor-pointer"
               >
                 <option value="">Selecciona desarrolladora...</option>
                 {developers.map(d => (
@@ -115,11 +158,11 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
           {/* Row 2: Tipo and Estado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Proyecto *</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Tipo de Proyecto *</label>
               <select 
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all cursor-pointer">
                 <option value="EDIFICIO_MULTIFAMILIAR">Edificio Multifamiliar</option>
                 <option value="CONDOMINIO">Condominio</option>
                 <option value="LOTIZACION">Lotización</option>
@@ -131,11 +174,11 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Estado *</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Estado *</label>
               <select 
                 value={formData.status}
                 onChange={e => setFormData({...formData, status: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all cursor-pointer">
                 <option value="PREVENTA">Preventa</option>
                 <option value="EN_CONSTRUCCION">En Construcción</option>
                 <option value="ENTREGADO">Entregado</option>
@@ -146,7 +189,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
 
           {/* Row 3: Dirección */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Dirección</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase">Dirección</label>
             <input 
               type="text" 
               value={formData.address}
@@ -159,7 +202,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
           {/* Row 4: Ciudad and Provincia */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Ciudad</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Ciudad</label>
               <input 
                 type="text" 
                 value={formData.city}
@@ -169,7 +212,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Provincia/Región</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Provincia/Región</label>
               <input 
                 type="text" 
                 value={formData.state}
@@ -183,7 +226,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
           {/* Row 5: Total Unidades and Fecha Entrega */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Total Unidades</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Total Unidades</label>
               <input 
                 type="number" 
                 value={formData.totalUnits}
@@ -193,7 +236,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Fecha de Entrega Estimada</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase">Fecha de Entrega Estimada</label>
               <input 
                 type="date" 
                 value={formData.deliveryDate}
@@ -205,7 +248,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
           
           {/* Row 6: URL Brochure */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">URL del Brochure</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase">URL del Brochure</label>
             <input 
               type="url" 
               value={formData.brochureUrl}
@@ -217,7 +260,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
 
           {/* Row 7: Descripción */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Descripción / Notas</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase">Descripción / Notas</label>
             <textarea 
               rows={2}
               value={formData.description}
@@ -242,7 +285,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             disabled={loading}
             className="px-4 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
           >
-            {loading ? 'Creando...' : 'Crear Proyecto'}
+            {loading ? (initialData ? 'Guardando...' : 'Creando...') : (initialData ? 'Guardar Cambios' : 'Crear Proyecto')}
           </button>
         </div>
       </div>

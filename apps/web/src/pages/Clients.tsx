@@ -46,6 +46,14 @@ export function Clients() {
   const [activeTab, setActiveTab] = useState<'personal' | 'spouse' | 'contracts'>('personal');
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  
+  // Advanced Filters states
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [maritalFilter, setMaritalFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [hasContractFilter, setHasContractFilter] = useState('todos');
+  const [hasDniFilter, setHasDniFilter] = useState('todos');
 
   useEffect(() => {
     loadClients();
@@ -64,13 +72,31 @@ export function Clients() {
 
   const filtered = clients.filter(c => {
     const term = search.toLowerCase();
-    return (
+    const matchesSearch = 
       c.firstName.toLowerCase().includes(term) ||
       (c.lastName && c.lastName.toLowerCase().includes(term)) ||
       (c.dni && c.dni.includes(term)) ||
       (c.email && c.email.toLowerCase().includes(term)) ||
-      c.phone.includes(term)
-    );
+      c.phone.includes(term);
+
+    const matchesMarital = maritalFilter ? c.maritalStatus === maritalFilter : true;
+    const matchesCity = cityFilter ? c.city === cityFilter : true;
+    
+    const hasContracts = c.buyerContracts && c.buyerContracts.length > 0;
+    const matchesContract = hasContractFilter === 'todos' 
+      ? true 
+      : hasContractFilter === 'si' 
+        ? hasContracts 
+        : !hasContracts;
+
+    const hasDni = !!c.dni;
+    const matchesDni = hasDniFilter === 'todos'
+      ? true
+      : hasDniFilter === 'si'
+        ? hasDni
+        : !hasDni;
+
+    return matchesSearch && matchesMarital && matchesCity && matchesContract && matchesDni;
   });
 
   const openDetail = (client: Client) => {
@@ -113,37 +139,56 @@ export function Clients() {
   return (
     <div className="p-4 md:p-6 space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+      <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-brand-green" />
-            Gestión de Clientes
+          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+            <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
+            Clientes
           </h1>
-          <p className="text-xs text-slate-500 mt-1">Clientes que ya realizaron una acción comercial (separación, compra, alquiler)</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block mt-0.5">Clientes con acción comercial (separación, compra, alquiler)</p>
         </div>
-        <div className="flex flex-row items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+
+        {/* Compact Single-Row Action Buttons */}
+        <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
+          {showSearch && (
             <input
               type="text"
               placeholder="Buscar..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-full md:w-64 transition-all"
+              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
+              autoFocus
             />
-          </div>
+          )}
+          
+          <button 
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-2 rounded-lg border transition-all ${showSearch ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`p-2 rounded-lg border transition-all ${showAdvancedFilters ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
+            className="p-2 rounded-lg bg-brand-green text-white hover:bg-brand-greenHover transition-all shadow-sm shadow-brand-green/10"
+            title="Nuevo Cliente"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Nuevo Cliente</span>
           </button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+      {/* Stats Panel (Hidden on mobile) */}
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
         <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Total Clientes</p>
           <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">{clients.length}</p>
@@ -161,6 +206,67 @@ export function Clients() {
           <p className="text-lg sm:text-2xl font-bold text-purple-600 mt-1">{clients.filter(c => c.maritalStatus === 'CASADO' || c.maritalStatus === 'CONVIVIENTE').length}</p>
         </div>
       </div>
+
+      {/* Advanced Collapsible Filter Panel */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Estado Civil</label>
+            <select
+              value={maritalFilter}
+              onChange={e => setMaritalFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Estado Civil</option>
+              {Object.entries(maritalLabels).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Ciudad</label>
+            <select
+              value={cityFilter}
+              onChange={e => setCityFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Ciudad</option>
+              {Array.from(new Set(clients.map(c => c.city).filter(Boolean))).map((city: any) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Contratos</label>
+            <select
+              value={hasContractFilter}
+              onChange={e => setHasContractFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="todos">Todos los Contratos</option>
+              <option value="si">Con Contrato Activo</option>
+              <option value="no">Sin Contrato</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">DNI / Documento</label>
+            <select
+              value={hasDniFilter}
+              onChange={e => setHasDniFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="todos">Todos los Documentos</option>
+              <option value="si">Con DNI Registrado</option>
+              <option value="no">Sin DNI Registrado</option>
+            </select>
+          </div>
+
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Table */}

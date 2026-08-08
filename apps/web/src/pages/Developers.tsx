@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Mail, Phone, Edit2, Trash2, Building2, User } from 'lucide-react';
+import { Plus, Search, Filter, Mail, Phone, Edit2, Trash2, Building2, User } from 'lucide-react';
 import { NewDeveloperModal } from '../components/modals/NewDeveloperModal';
 import { getDevelopers, deleteDeveloper } from '../lib/api';
 
@@ -8,7 +8,16 @@ export function Developers() {
   const [editingDeveloper, setEditingDeveloper] = useState<any | null>(null);
   const [developers, setDevelopers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Compact Toolbar States
+  const [showSearch, setShowSearch] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasRucFilter, setHasRucFilter] = useState('todos');
+  const [hasPhoneFilter, setHasPhoneFilter] = useState('todos');
+  const [hasEmailFilter, setHasEmailFilter] = useState('todos');
 
   const fetchDevelopers = async () => {
     try {
@@ -51,59 +60,141 @@ export function Developers() {
 
   // Filtered developers
   const filteredDevelopers = developers.filter((d) => {
-    const nameMatch = (d.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const rucMatch = (d.ruc || '').includes(searchQuery);
-    const emailMatch = (d.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const contactMatch = (d.contactName || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const term = searchQuery.toLowerCase();
+    const matchesSearch = !searchQuery || (
+      (d.name || '').toLowerCase().includes(term) ||
+      (d.ruc || '').includes(term) ||
+      (d.email || '').toLowerCase().includes(term) ||
+      (d.contactName || '').toLowerCase().includes(term)
+    );
 
-    return nameMatch || rucMatch || emailMatch || contactMatch;
+    const matchesRuc = hasRucFilter === 'todos' 
+      ? true 
+      : hasRucFilter === 'si' 
+        ? !!d.ruc 
+        : !d.ruc;
+
+    const matchesPhone = hasPhoneFilter === 'todos' 
+      ? true 
+      : hasPhoneFilter === 'si' 
+        ? !!d.phone 
+        : !d.phone;
+
+    const matchesEmail = hasEmailFilter === 'todos' 
+      ? true 
+      : hasEmailFilter === 'si' 
+        ? !!d.email 
+        : !d.email;
+
+    return matchesSearch && matchesRuc && matchesPhone && matchesEmail;
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-brand-green" />
-            Empresas Desarrolladoras
+          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
+            Desarrolladoras
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Gestión de socios comerciales y constructoras para los proyectos</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block mt-0.5 font-medium">Gestión de constructoras y socios comerciales</p>
         </div>
-        <div className="flex w-full md:w-auto gap-3">
+
+        {/* Compact Single-Row Action Buttons */}
+        <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
+          {showSearch && (
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar..." 
+              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
+              autoFocus
+            />
+          )}
+          
+          <button 
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-2 rounded-lg border transition-all ${showSearch ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`p-2 rounded-lg border transition-all ${showAdvancedFilters ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={handleOpenNewModal}
-            className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
+            className="p-2 rounded-lg bg-brand-green text-white hover:bg-brand-greenHover transition-all shadow-sm shadow-brand-green/10"
+            title="Nueva Desarrolladora"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Nueva Desarrolladora</span>
           </button>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-4 shrink-0">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por razón social, RUC, email o contacto..." 
-            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
-          />
+      {/* Collapsible Advanced Filters */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">RUC / Registro</label>
+            <select 
+              value={hasRucFilter}
+              onChange={e => setHasRucFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="todos">Todos los RUC</option>
+              <option value="si">Con RUC Registrado</option>
+              <option value="no">Sin RUC</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Teléfono de Contacto</label>
+            <select 
+              value={hasPhoneFilter}
+              onChange={e => setHasPhoneFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="todos">Todos los Teléfonos</option>
+              <option value="si">Con Teléfono</option>
+              <option value="no">Sin Teléfono</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Correo de Contacto</label>
+            <select 
+              value={hasEmailFilter}
+              onChange={e => setHasEmailFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="todos">Todos los Correos</option>
+              <option value="si">Con Correo</option>
+              <option value="no">Sin Correo</option>
+            </select>
+          </div>
+
         </div>
-      </div>
+      )}
 
       {/* Developers List */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
         {loading ? (
           <div className="flex-1 flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         ) : (
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto flex-1 custom-scrollbar">
+            <table className="w-full text-sm text-left whitespace-nowrap">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium text-xs uppercase tracking-wider">
                   <th className="py-3 px-4">Empresa / RUC</th>

@@ -141,9 +141,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     }).filter(item => {
       if (user?.role === 'AGENTE' || user?.role === 'ASISTENTE') {
         if (
-          item.path === '/users' || 
-          item.path === '/ai-assistants' || 
-          item.path === '/settings'
+          item.path === '/users'
         ) {
           return false;
         }

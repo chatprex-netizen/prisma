@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, Building2, Calendar, FileText, Filter, Search, Trash2 } from 'lucide-react';
+import { Plus, MapPin, Building2, Calendar, FileText, Filter, Search, Trash2, Edit3 } from 'lucide-react';
 import { NewProjectModal } from '../components/modals/NewProjectModal';
-import { getProjects, deleteProject } from '../lib/api';
+import { getProjects, deleteProject, getDevelopers } from '../lib/api';
 
 const STATUS_COLORS: Record<string, string> = {
   PREVENTA: 'bg-blue-100 text-blue-700',
@@ -23,14 +23,27 @@ const TYPE_LABELS: Record<string, string> = {
 
 export function Projects() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
+  const [developers, setDevelopers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Compact Toolbar States
+  const [showSearch, setShowSearch] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [devFilter, setDevFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
       const res = await getProjects();
-      setProjects(res.data);
+      setProjects(res.data || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -40,51 +53,161 @@ export function Projects() {
 
   useEffect(() => {
     fetchProjects();
+    getDevelopers().then(res => setDevelopers(res?.data || [])).catch(console.error);
   }, []);
 
+  const handleOpenEdit = (project: any) => {
+    setEditingProject(project);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenNew = () => {
+    setEditingProject(null);
+    setIsModalOpen(true);
+  };
+
+  // Dynamic filter logic
+  const filteredProjects = projects.filter((project) => {
+    const term = searchQuery.toLowerCase();
+    const matchesSearch = !searchQuery || (
+      project.name.toLowerCase().includes(term) ||
+      (project.city && project.city.toLowerCase().includes(term)) ||
+      (project.developer?.name && project.developer.name.toLowerCase().includes(term))
+    );
+
+    const matchesStatus = !statusFilter || project.status === statusFilter;
+    const matchesType = !typeFilter || project.type === typeFilter;
+    const matchesDev = !devFilter || project.developerId === devFilter;
+    const matchesCity = !cityFilter || project.city === cityFilter;
+
+    return matchesSearch && matchesStatus && matchesType && matchesDev && matchesCity;
+  });
+
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Proyectos Inmobiliarios</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{projects.length} proyectos registrados</p>
+          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
+            Proyectos
+          </h1>
+          <p className="text-[10px] sm:text-xs text-slate-505 hidden sm:block mt-0.5">{projects.length} proyectos inmobiliarios registrados</p>
         </div>
-        <div className="flex w-full md:w-auto gap-3">
-          <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
-            <Filter className="w-4 h-4" />
-            Filtros
-          </button>
+
+        {/* Compact Single-Row Action Buttons */}
+        <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
+          {showSearch && (
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar..." 
+              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
+              autoFocus
+            />
+          )}
+          
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm shadow-brand-green/20"
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-2 rounded-lg border transition-all ${showSearch ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`p-2 rounded-lg border transition-all ${showAdvancedFilters ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={handleOpenNew}
+            className="p-2 rounded-lg bg-brand-green text-white hover:bg-brand-greenHover transition-all shadow-sm shadow-brand-green/10"
+            title="Nuevo Proyecto"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Nuevo Proyecto</span>
           </button>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-4 shrink-0">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre, ciudad o desarrollador..." 
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
-          />
+      {/* Collapsible Advanced Filters */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Estado Obra</label>
+            <select 
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Estado</option>
+              <option value="PREVENTA">Preventa</option>
+              <option value="EN_CONSTRUCCION">En Construcción</option>
+              <option value="ENTREGADO">Entregado</option>
+              <option value="AGOTADO">Agotado</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
+            <select 
+              value={typeFilter}
+              onChange={e => setTypeFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Tipo</option>
+              {Object.entries(TYPE_LABELS).map(([key, val]) => (
+                <option key={key} value={key}>{val}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Desarrolladora</label>
+            <select 
+              value={devFilter}
+              onChange={e => setDevFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Desarrolladora</option>
+              {developers.map(dev => (
+                <option key={dev.id} value={dev.id}>{dev.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Ciudad</label>
+            <select 
+              value={cityFilter}
+              onChange={e => setCityFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Ciudad</option>
+              {Array.from(new Set(projects.map(p => p.city).filter(Boolean))).map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
         </div>
-      </div>
+      )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto pr-1 custom-scrollbar">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-slate-500">Cargando proyectos...</div>
-        ) : projects.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-slate-500">No hay proyectos registrados.</div>
-        ) : projects.map(project => (
-          <div key={project.id} className="bg-white rounded-xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow group cursor-pointer flex flex-col">
+          <div className="col-span-full py-12 text-center text-slate-500">
+            <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        ) : filteredProjects.length === 0 ? (
+          <div className="col-span-full py-12 text-center text-slate-400 font-medium">No hay proyectos registrados.</div>
+        ) : filteredProjects.map(project => (
+          <div key={project.id} className="bg-white rounded-xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-fit">
             {/* Top Image Placeholder */}
             <div className="h-14 bg-slate-100 relative overflow-hidden flex items-center justify-center">
               <Building2 className="w-5 h-5 text-slate-300" />
@@ -99,7 +222,7 @@ export function Projects() {
             <div className="p-5 flex-1 flex flex-col">
               <div className="mb-4">
                 <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-brand-green transition-colors">{project.name}</h3>
-                <p className="text-xs text-slate-500 mt-1 font-medium">{TYPE_LABELS[project.type]}</p>
+                <p className="text-xs text-slate-505 mt-1 font-semibold">{TYPE_LABELS[project.type]}</p>
               </div>
 
               <div className="space-y-2.5 flex-1">
@@ -120,7 +243,7 @@ export function Projects() {
               </div>
 
               {/* Footer */}
-              <div className="pt-4 mt-4 border-t border-slate-100 flex justify-between items-center relative">
+              <div className="pt-4 mt-4 border-t border-slate-100 flex justify-between items-center relative shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
                     <span className="text-[9px] font-bold text-slate-500">{project.developer?.name?.charAt(0) || 'D'}</span>
@@ -128,6 +251,13 @@ export function Projects() {
                   <span className="text-[11px] font-medium text-slate-600 truncate max-w-[120px]">{project.developer?.name || 'Desarrollador'}</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleOpenEdit(project)}
+                    className="text-slate-400 hover:text-brand-green transition-colors p-1" 
+                    title="Editar proyecto"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
                   <button 
                     onClick={async (e) => {
                       e.stopPropagation();
@@ -147,7 +277,7 @@ export function Projects() {
                   </button>
                   <button 
                     onClick={(e) => e.stopPropagation()}
-                    className="text-slate-400 hover:text-brand-green transition-colors p-1" 
+                    className="text-slate-400 hover:text-slate-600 transition-colors p-1" 
                     title="Ver brochure"
                   >
                     <FileText className="w-4 h-4" />
@@ -161,8 +291,9 @@ export function Projects() {
 
       <NewProjectModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => { setIsModalOpen(false); setEditingProject(null); }} 
         onSuccess={fetchProjects}
+        initialData={editingProject}
       />
     </div>
   );

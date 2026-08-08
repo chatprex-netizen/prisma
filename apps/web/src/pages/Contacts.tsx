@@ -22,9 +22,17 @@ export function Contacts() {
   const [users, setUsers] = useState<any[]>([]);
   const [sources, setSources] = useState<any[]>([]);
 
+  // Compact Toolbar States
+  const [showSearch, setShowSearch] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [minBudget, setMinBudget] = useState('');
+  const [vipFilter, setVipFilter] = useState(false);
+  const [assignedFilter, setAssignedFilter] = useState('');
 
   const fetchContacts = async () => {
     try {
@@ -148,44 +156,67 @@ export function Contacts() {
 
     const matchesSearch = nameMatch || emailMatch || phoneMatch;
     const matchesSource = sourceFilter ? c.source === sourceFilter : true;
+    const matchesType = typeFilter ? c.type === typeFilter : true;
+    const matchesVip = vipFilter ? c.isVip === true : true;
+    const matchesBudget = minBudget ? Number(c.budgetMin || 0) >= Number(minBudget) : true;
+    const matchesAssigned = assignedFilter ? (c.assignedTo === assignedFilter || c.assignedUserId === assignedFilter) : true;
 
-    return matchesSearch && matchesSource;
+    return matchesSearch && matchesSource && matchesType && matchesVip && matchesBudget && matchesAssigned;
   });
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <User className="w-6 h-6 text-brand-green" />
-            Directorio de Leads y Contactos
+          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+            <User className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
+            Contactos
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Gestión y registro completo de prospectos ingresados al CRM</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block mt-0.5">Gestión y registro de prospectos ingresados al CRM</p>
         </div>
-        <div className="flex flex-row items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+
+        {/* Compact Single-Row Action Buttons */}
+        <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
+          {showSearch && (
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
-              className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-full md:w-64 transition-all"
+              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
+              autoFocus
             />
-          </div>
+          )}
+          
+          <button 
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-2 rounded-lg border transition-all ${showSearch ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`p-2 rounded-lg border transition-all ${showAdvancedFilters ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={handleOpenNewModal}
-            className="flex bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
+            className="p-2 rounded-lg bg-brand-green text-white hover:bg-brand-greenHover transition-all shadow-sm shadow-brand-green/10"
+            title="Nuevo Contacto"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Nuevo Contacto</span>
           </button>
         </div>
       </div>
 
-      {/* Stats Panel */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+      {/* Stats Panel (Hidden on mobile) */}
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
         <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Total Contactos</p>
           <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">{contacts.length}</p>
@@ -204,19 +235,76 @@ export function Contacts() {
         </div>
       </div>
 
-      {/* Toolbar / Filters */}
-      <div className="flex flex-col md:flex-row gap-4 shrink-0">
-        <select 
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-700 cursor-pointer outline-none w-full md:w-48"
-        >
-          <option value="">Cualquier Origen</option>
-          {Array.from(new Set(contacts.map(c => c.source).filter(Boolean))).map((src: any) => (
-            <option key={src} value={src}>{src}</option>
-          ))}
-        </select>
-      </div>
+      {/* Advanced Collapsible Filter Panel */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Origen / Canal</label>
+            <select
+              value={sourceFilter}
+              onChange={e => setSourceFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Origen</option>
+              {Array.from(new Set(contacts.map(c => c.source).filter(Boolean))).map((src: any) => (
+                <option key={src} value={src}>{src}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo de Lead</label>
+            <select
+              value={typeFilter}
+              onChange={e => setTypeFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Tipo</option>
+              <option value="LEAD">Leads / Prospectos</option>
+              <option value="CLIENTE">Clientes Ganados</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Presupuesto Mínimo</label>
+            <input
+              type="number"
+              value={minBudget}
+              onChange={e => setMinBudget(e.target.value)}
+              placeholder="Ej: 50000"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Asesor Asignado</label>
+            <select
+              value={assignedFilter}
+              onChange={e => setAssignedFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Asesor</option>
+              {users.map(u => (
+                <option key={u.id} value={u.id}>{u.firstName} {u.lastName || ''}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center pt-5">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={vipFilter}
+                onChange={e => setVipFilter(e.target.checked)}
+                className="w-4 h-4 text-brand-green border-slate-200 rounded focus:ring-brand-green"
+              />
+              <span className="text-xs font-bold text-slate-600">Solo VIP / Estrellas</span>
+            </label>
+          </div>
+
+        </div>
+      )}
 
       {/* Split Screen Area */}
       <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden min-h-0">

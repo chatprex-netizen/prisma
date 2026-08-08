@@ -353,11 +353,6 @@ function WhatsAppConnectionTab() {
 
 export function Settings() {
   const { user } = useAuth();
-
-  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
-    return <Navigate to="/" replace />;
-  }
-
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
   const [defaultCurrency, setDefaultCurrency] = useState('PEN');
   const [exchangeRate, setExchangeRate] = useState(3.75);

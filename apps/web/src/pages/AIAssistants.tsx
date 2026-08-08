@@ -5,11 +5,6 @@ import { Bot, Plus, Sparkles, Save, FileText, Settings2, Zap, RefreshCw, UploadC
 
 export function AIAssistants() {
   const { user } = useAuth();
-
-  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
-    return <Navigate to="/" replace />;
-  }
-
   const [activeTab, setActiveTab] = useState<'PERSONALIDAD' | 'MOTOR_IA' | 'CONOCIMIENTO' | 'AJUSTES_PRO'>('PERSONALIDAD');
 
   return (

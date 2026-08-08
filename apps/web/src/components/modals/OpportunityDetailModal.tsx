@@ -1,45 +1,85 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User, DollarSign, Building, Edit3, ChevronRight } from 'lucide-react';
-import { getProperties, createContract, updateOpportunityStage, getAppointments, createAppointment, updateAppointment, updateContact } from '../../lib/api';
+import { 
+  X, Calendar, Clock, Phone, Video, MapPin, FileSignature, 
+  MessageSquare, History, AlignLeft, CheckCircle2, User, 
+  DollarSign, Building, Edit3, ChevronRight, CheckSquare, Plus, Check, AlertCircle, AlertTriangle
+} from 'lucide-react';
+import { 
+  getProperties, createContract, updateOpportunityStage, 
+  getAppointments, createAppointment, updateAppointment, 
+  updateContact, getUsers 
+} from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
 
 interface OpportunityDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  opportunity: any; // We'll pass the whole opportunity object
+  opportunity: any;
 }
 
-type TabType = 'TAREAS' | 'NOTAS' | 'HISTORIAL' | 'CONTRATO';
-
-const TASK_TYPES = [
-  { id: 'LLAMADA', label: 'Llamada', icon: Phone },
-  { id: 'VISITA', label: 'Visita a Proyecto', icon: MapPin },
-  { id: 'FIRMA', label: 'Firma de Contrato', icon: FileSignature },
-  { id: 'OFICINA', label: 'Cita en Oficina', icon: User },
-  { id: 'VIRTUAL', label: 'Reunión Virtual', icon: Video },
-  { id: 'WHATSAPP', label: 'Seguimiento WP', icon: MessageSquare },
-];
-
 export function OpportunityDetailModal({ isOpen, onClose, opportunity }: OpportunityDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('TAREAS');
   const [isEditContactOpen, setIsEditContactOpen] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
-  const [selectedDevId, setSelectedDevId] = useState('');
-  const [selectedProjId, setSelectedProjId] = useState('');
-  
-  // New States for dynamic tasks/appointments and notes
-  const [taskType, setTaskType] = useState('LLAMADA');
-  const [taskDate, setTaskDate] = useState('');
-  const [taskTime, setTaskTime] = useState('');
-  const [taskDetails, setTaskDetails] = useState('');
+  const [agents, setAgents] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loadingAppts, setLoadingAppts] = useState(false);
   
-  const [newNote, setNewNote] = useState('');
-  const [notesText, setNotesText] = useState('');
-  const [savingNote, setSavingNote] = useState(false);
-  const [savingTask, setSavingTask] = useState(false);
+  // Pipeline Stage state
+  const [currentStage, setCurrentStage] = useState('');
 
+  // Sub-modal visibility states
+  const [isTaskOpen, setIsTaskOpen] = useState(false);
+  const [isCitaOpen, setIsCitaOpen] = useState(false);
+  const [isNoteOpen, setIsNoteOpen] = useState(false);
+  const [isCallOpen, setIsCallOpen] = useState(false);
+  const [isMessageOpen, setIsMessageOpen] = useState(false);
+  const [isContractOpen, setIsContractOpen] = useState(false);
+
+  // Timeline Filter state
+  const [timelineFilter, setTimelineFilter] = useState<'TODOS' | 'TASK' | 'CITA' | 'NOTE' | 'COMM'>('TODOS');
+
+  // Form states - Task
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDesc, setTaskDesc] = useState('');
+  const [taskAgentId, setTaskAgentId] = useState('');
+  const [taskPropId, setTaskPropId] = useState('');
+  const [taskDueDate, setTaskDueDate] = useState('');
+  const [taskPriority, setTaskPriority] = useState('MEDIA');
+  const [taskStatus, setTaskStatus] = useState('PENDIENTE');
+  const [submittingTask, setSubmittingTask] = useState(false);
+
+  // Form states - Cita
+  const [citaTitle, setCitaTitle] = useState('');
+  const [citaPropId, setCitaPropId] = useState('');
+  const [citaAgentId, setCitaAgentId] = useState('');
+  const [citaDate, setCitaDate] = useState('');
+  const [citaStartTime, setCitaStartTime] = useState('');
+  const [citaEndTime, setCitaEndTime] = useState('');
+  const [citaType, setCitaType] = useState('REUNION');
+  const [citaLocation, setCitaLocation] = useState('');
+  const [citaVideoLink, setCitaVideoLink] = useState('');
+  const [citaDesc, setCitaDesc] = useState('');
+  const [citaStatus, setCitaStatus] = useState('PENDIENTE');
+  const [submittingCita, setSubmittingCita] = useState(false);
+
+  // Form states - Note
+  const [noteContent, setNoteContent] = useState('');
+  const [submittingNote, setSubmittingNote] = useState(false);
+
+  // Form states - Call
+  const [callTitle, setCallTitle] = useState('Llamada con cliente');
+  const [callResult, setCallResult] = useState('CONTESTO');
+  const [callDetails, setCallDetails] = useState('');
+  const [submittingCall, setSubmittingCall] = useState(false);
+
+  // Form states - Message
+  const [msgChannel, setMsgChannel] = useState('WHATSAPP');
+  const [msgDetails, setMsgDetails] = useState('');
+  const [submittingMsg, setSubmittingMsg] = useState(false);
+
+  // Form states - Contract
+  const [selectedDevId, setSelectedDevId] = useState('');
+  const [selectedProjId, setSelectedProjId] = useState('');
   const [contractData, setContractData] = useState({
     propertyId: '',
     type: 'COMPRAVENTA',
@@ -65,25 +105,15 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   };
 
   useEffect(() => {
-    if (isOpen && activeTab === 'CONTRATO') {
-      getProperties().then(res => setProperties(res.data || [])).catch(console.error);
-    }
-  }, [isOpen, activeTab]);
-
-  useEffect(() => {
     if (isOpen && opportunity) {
+      setCurrentStage(opportunity.stage || '');
       fetchAppointments();
-      setNotesText(opportunity.contact?.notes || '');
-      setTaskType('LLAMADA');
-      setTaskDate('');
-      setTaskTime('');
-      setTaskDetails('');
-      setNewNote('');
-    }
-  }, [isOpen, opportunity]);
-
-  useEffect(() => {
-    if (opportunity) {
+      getProperties().then(res => setProperties(res.data || [])).catch(console.error);
+      getUsers().then(res => setAgents(res.data || [])).catch(console.error);
+      
+      // Reset task values defaults
+      setTaskAgentId(opportunity.agentId || opportunity.contact?.assignedTo || '');
+      setCitaAgentId(opportunity.agentId || opportunity.contact?.assignedTo || '');
       setContractData({
         propertyId: '',
         type: 'COMPRAVENTA',
@@ -92,10 +122,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
         currency: opportunity.contact?.currency || 'USD',
         notes: ''
       });
-      setSelectedDevId('');
-      setSelectedProjId('');
     }
-  }, [opportunity]);
+  }, [isOpen, opportunity]);
 
   if (!isOpen || !opportunity) return null;
 
@@ -103,7 +131,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
     ? `${opportunity.contact.firstName} ${opportunity.contact.lastName || ''}`.trim()
     : 'Sin Contacto';
 
-  // Helper to parse notes history
+  // Helper to parse notes history (legacy compatibility)
   const parseNotes = (text: string) => {
     if (!text) return [];
     return text.split('\n\n').filter(Boolean).map(block => {
@@ -111,655 +139,1165 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
       const header = lines[0] || '';
       const content = lines.slice(1).join('\n') || '';
       const displayHeader = header.replace(/^\[|\]$/g, '');
-      return { header: displayHeader, content };
+      return { header: displayHeader, content, isLegacyNote: true };
     });
   };
 
-  const handleAddNote = async () => {
-    if (!newNote.trim() || !opportunity.contactId) return;
-    setSavingNote(true);
+  const handleStageChange = async (newStage: string) => {
     try {
-      const now = new Date();
-      const dateStr = now.toLocaleString('es-PE', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-      const noteHeader = `[Nota del ${dateStr}]`;
-      const formattedNote = `${noteHeader}\n${newNote.trim()}\n\n`;
-      const updatedNotes = formattedNote + notesText;
-      
-      await updateContact(opportunity.contactId, { notes: updatedNotes });
-      setNotesText(updatedNotes);
-      setNewNote('');
-      if (opportunity.contact) {
-        opportunity.contact.notes = updatedNotes;
-      }
-    } catch (err) {
-      console.error('Error saving note:', err);
-      alert('Error al guardar la nota');
-    } finally {
-      setSavingNote(false);
+      await updateOpportunityStage(opportunity.id, newStage);
+      setCurrentStage(newStage);
+      opportunity.stage = newStage; // local update
+      await fetchAppointments(); // Refresh timeline as stage changes log activities
+    } catch (err: any) {
+      alert('Error al actualizar la etapa de la negociación: ' + (err.message || err));
     }
   };
 
-  const handleSaveTask = async () => {
-    if (!taskDate || !taskTime) {
-      alert('Por favor selecciona la fecha y hora de la actividad.');
+  const handleSaveTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskTitle || !taskDueDate) {
+      alert('Por favor completa los campos obligatorios.');
       return;
     }
-    setSavingTask(true);
+    setSubmittingTask(true);
     try {
-      let mappedType = 'LLAMADA';
-      let typeLabel = 'Llamada';
-      if (taskType === 'VISITA') {
-        mappedType = 'VISITA_PROYECTO';
-        typeLabel = 'Visita a Proyecto';
-      } else if (taskType === 'FIRMA') {
-        mappedType = 'PRESENTACION';
-        typeLabel = 'Firma de Contrato';
-      } else if (taskType === 'OFICINA') {
-        mappedType = 'REUNION';
-        typeLabel = 'Cita en Oficina';
-      } else if (taskType === 'VIRTUAL') {
-        mappedType = 'REUNION';
-        typeLabel = 'Reunión Virtual';
-      } else if (taskType === 'WHATSAPP') {
-        mappedType = 'LLAMADA';
-        typeLabel = 'Seguimiento WhatsApp';
-      }
-
-      const startDateTimeStr = `${taskDate}T${taskTime}`;
-      const startAt = new Date(startDateTimeStr);
-      const endAt = new Date(startAt.getTime() + 30 * 60 * 1000); // 30 mins duration
+      const dueDateTime = new Date(`${taskDueDate}T23:59:59`);
+      const notesJson = JSON.stringify({
+        isTask: true,
+        description: taskDesc,
+        priority: taskPriority
+      });
 
       await createAppointment({
-        type: mappedType,
-        title: `${typeLabel} - ${contactName}`,
-        startAt: startAt.toISOString(),
-        endAt: endAt.toISOString(),
-        notes: taskDetails || '',
+        type: 'PRESENTACION', // Internal mapping for task
+        title: taskTitle,
+        startAt: dueDateTime.toISOString(),
+        endAt: dueDateTime.toISOString(),
+        notes: notesJson,
+        status: taskStatus,
         contactId: opportunity.contactId,
-        projectId: opportunity.projectId || null,
-        propertyId: opportunity.propertyId || null,
-        agentId: opportunity.agentId || opportunity.contact?.assignedTo || 'agent-id'
+        propertyId: taskPropId || null,
+        agentId: taskAgentId || opportunity.agentId
       });
 
       await fetchAppointments();
-      setTaskDate('');
-      setTaskTime('');
-      setTaskDetails('');
-      alert('¡Actividad programada con éxito!');
+      setIsTaskOpen(false);
+      // Reset
+      setTaskTitle('');
+      setTaskDesc('');
+      setTaskDueDate('');
+      setTaskPriority('MEDIA');
+      setTaskStatus('PENDIENTE');
     } catch (err: any) {
-      console.error(err);
-      alert(err.message || 'Error al programar la actividad');
+      alert(err.message || 'Error al guardar la tarea');
     } finally {
-      setSavingTask(false);
+      setSubmittingTask(false);
     }
   };
 
-  const handleCompleteAppointment = async (apptId: string) => {
+  const handleSaveCita = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!citaTitle || !citaDate || !citaStartTime || !citaEndTime) {
+      alert('Por favor completa los campos obligatorios.');
+      return;
+    }
+    setSubmittingCita(true);
+    try {
+      const startDateTime = new Date(`${citaDate}T${citaStartTime}`);
+      const endDateTime = new Date(`${citaDate}T${citaEndTime}`);
+      const notesJson = JSON.stringify({
+        isTask: false,
+        description: citaDesc,
+        videoLink: citaVideoLink,
+        reminderMinutes: 15
+      });
+
+      await createAppointment({
+        type: citaType,
+        title: citaTitle,
+        startAt: startDateTime.toISOString(),
+        endAt: endDateTime.toISOString(),
+        notes: notesJson,
+        status: citaStatus,
+        location: citaLocation || null,
+        contactId: opportunity.contactId,
+        propertyId: citaPropId || null,
+        agentId: citaAgentId || opportunity.agentId
+      });
+
+      await fetchAppointments();
+      setIsCitaOpen(false);
+      // Reset
+      setCitaTitle('');
+      setCitaDate('');
+      setCitaStartTime('');
+      setCitaEndTime('');
+      setCitaLocation('');
+      setCitaVideoLink('');
+      setCitaDesc('');
+    } catch (err: any) {
+      alert(err.message || 'Error al agendar la cita');
+    } finally {
+      setSubmittingCita(false);
+    }
+  };
+
+  const handleSaveNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!noteContent.trim()) return;
+    setSubmittingNote(true);
+    try {
+      // We save notes as legacy app notes on the contact
+      const now = new Date();
+      const dateStr = now.toLocaleString('es-PE', { 
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit' 
+      });
+      const noteHeader = `[Nota del ${dateStr}]`;
+      const formattedNote = `${noteHeader}\n${noteContent.trim()}\n\n`;
+      const updatedNotes = formattedNote + (opportunity.contact?.notes || '');
+      
+      await updateContact(opportunity.contactId, { notes: updatedNotes });
+      if (opportunity.contact) {
+        opportunity.contact.notes = updatedNotes;
+      }
+      
+      // Also register as an appointment with isNote: true to display it dynamically
+      const notesJson = JSON.stringify({
+        isNote: true,
+        description: noteContent.trim()
+      });
+      await createAppointment({
+        type: 'REUNION',
+        title: `Nota registrada`,
+        startAt: new Date().toISOString(),
+        endAt: new Date().toISOString(),
+        notes: notesJson,
+        status: 'COMPLETADA',
+        contactId: opportunity.contactId,
+        agentId: opportunity.agentId
+      });
+
+      await fetchAppointments();
+      setNoteContent('');
+      setIsNoteOpen(false);
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar la nota');
+    } finally {
+      setSubmittingNote(false);
+    }
+  };
+
+  const handleSaveCall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingCall(true);
+    try {
+      const notesJson = JSON.stringify({
+        isCall: true,
+        result: callResult,
+        description: callDetails
+      });
+      await createAppointment({
+        type: 'LLAMADA',
+        title: callTitle,
+        startAt: new Date().toISOString(),
+        endAt: new Date().toISOString(),
+        notes: notesJson,
+        status: 'COMPLETADA',
+        contactId: opportunity.contactId,
+        agentId: opportunity.agentId
+      });
+
+      await fetchAppointments();
+      setIsCallOpen(false);
+      setCallDetails('');
+    } catch (err: any) {
+      alert(err.message || 'Error al registrar la llamada');
+    } finally {
+      setSubmittingCall(false);
+    }
+  };
+
+  const handleSaveMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!msgDetails.trim()) return;
+    setSubmittingMsg(true);
+    try {
+      const notesJson = JSON.stringify({
+        isMessage: true,
+        channel: msgChannel,
+        description: msgDetails
+      });
+      await createAppointment({
+        type: 'LLAMADA', // mapping to call/log
+        title: `Mensaje por ${msgChannel}`,
+        startAt: new Date().toISOString(),
+        endAt: new Date().toISOString(),
+        notes: notesJson,
+        status: 'COMPLETADA',
+        contactId: opportunity.contactId,
+        agentId: opportunity.agentId
+      });
+
+      await fetchAppointments();
+      setIsMessageOpen(false);
+      setMsgDetails('');
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar el mensaje');
+    } finally {
+      setSubmittingMsg(false);
+    }
+  };
+
+  const handleCompleteAppt = async (apptId: string, type: 'TASK' | 'CITA') => {
     try {
       await updateAppointment(apptId, { status: 'COMPLETADA' });
       await fetchAppointments();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || 'Error al completar la actividad');
     }
   };
 
+  // Compile timeline events
+  const getTimelineEvents = () => {
+    const events: any[] = [];
+
+    // 1. Add appointments (which include tasks, citas, calls, messages, notes)
+    appointments.forEach((appt) => {
+      let meta: any = {};
+      try {
+        meta = JSON.parse(appt.notes || '{}');
+      } catch {
+        meta = { description: appt.notes || '' };
+      }
+
+      if (meta.isTask) {
+        events.push({
+          id: appt.id,
+          type: 'TASK',
+          title: appt.title,
+          description: meta.description,
+          date: new Date(appt.startAt),
+          priority: meta.priority || 'MEDIA',
+          status: appt.status,
+          assignedTo: appt.agent,
+          property: appt.property,
+          raw: appt
+        });
+      } else if (meta.isNote) {
+        events.push({
+          id: appt.id,
+          type: 'NOTE',
+          title: appt.title,
+          description: meta.description,
+          date: new Date(appt.startAt),
+          raw: appt
+        });
+      } else if (meta.isCall) {
+        events.push({
+          id: appt.id,
+          type: 'CALL',
+          title: appt.title,
+          description: meta.description,
+          result: meta.result,
+          date: new Date(appt.startAt),
+          raw: appt
+        });
+      } else if (meta.isMessage) {
+        events.push({
+          id: appt.id,
+          type: 'MESSAGE',
+          title: appt.title,
+          description: meta.description,
+          channel: meta.channel,
+          date: new Date(appt.startAt),
+          raw: appt
+        });
+      } else {
+        // Normal Cita
+        events.push({
+          id: appt.id,
+          type: 'CITA',
+          title: appt.title,
+          description: meta.description,
+          date: new Date(appt.startAt),
+          endDate: new Date(appt.endAt),
+          location: appt.location,
+          videoLink: meta.videoLink,
+          status: appt.status,
+          assignedTo: appt.agent,
+          property: appt.property,
+          appointmentType: appt.type,
+          raw: appt
+        });
+      }
+    });
+
+    // 2. Add opportunity log activities
+    if (opportunity.activities) {
+      opportunity.activities.forEach((act: any) => {
+        events.push({
+          id: act.id,
+          type: 'ACTIVITY_LOG',
+          title: act.description,
+          description: `Registrado por ${act.user?.firstName || 'Asesor'}`,
+          date: new Date(act.createdAt),
+          raw: act
+        });
+      });
+    }
+
+    // 3. Add legacy notes
+    const legacy = parseNotes(opportunity.contact?.notes || '');
+    legacy.forEach((note, index) => {
+      // Find date
+      let parsedDate = new Date(opportunity.createdAt);
+      const dateMatch = note.header.match(/Nota del (.*)/);
+      if (dateMatch && dateMatch[1]) {
+        const parsed = Date.parse(dateMatch[1]);
+        if (!isNaN(parsed)) parsedDate = new Date(parsed);
+      }
+      events.push({
+        id: `legacy-${index}`,
+        type: 'NOTE',
+        title: 'Nota registrada (Anterior)',
+        description: note.content,
+        date: parsedDate,
+        header: note.header
+      });
+    });
+
+    // Sort newest first
+    return events.sort((a, b) => b.date.getTime() - a.date.getTime());
+  };
+
+  const timelineEvents = getTimelineEvents();
+
+  // Apply timeline filtering
+  const filteredEvents = timelineEvents.filter((ev) => {
+    if (timelineFilter === 'TODOS') return true;
+    if (timelineFilter === 'TASK') return ev.type === 'TASK';
+    if (timelineFilter === 'CITA') return ev.type === 'CITA';
+    if (timelineFilter === 'NOTE') return ev.type === 'NOTE';
+    if (timelineFilter === 'COMM') return ev.type === 'CALL' || ev.type === 'MESSAGE';
+    return true;
+  });
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-[95vw] md:w-full max-w-3xl h-[85vh] md:h-[72vh] flex flex-col overflow-hidden font-sans">
+      <div className="bg-white rounded-2xl shadow-xl w-[95vw] md:w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden font-sans">
         
-        {/* Header */}
-        <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+        {/* Header (Top Panel) */}
+        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0 text-left">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-extrabold text-slate-955 truncate max-w-[50vw]">{opportunity.title}</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-base font-extrabold text-slate-900 truncate max-w-[40vw]">{opportunity.title}</h2>
+              
+              {/* Interactive Stage Selector Dropdown */}
+              <select
+                value={currentStage}
+                onChange={(e) => handleStageChange(e.target.value)}
+                className="px-2 py-0.5 bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-lg text-[10px] font-extrabold outline-none cursor-pointer hover:bg-brand-green/15 transition-all"
+              >
+                <option value="PROSPECTO">Prospecto</option>
+                <option value="CONTACTADO">Contactado</option>
+                <option value="CALIFICACION">Calificación</option>
+                <option value="PROPUESTA">Propuesta</option>
+                <option value="NEGOCIACION">Negociación</option>
+                <option value="CIERRE_GANADO">Cierre Ganado</option>
+                <option value="CIERRE_PERDIDO">Cierre Perdido</option>
+              </select>
             </div>
-            <div className="flex items-center gap-2 mt-0.5 text-xxs text-slate-500 font-semibold">
-              <span className="flex items-center gap-0.5 truncate font-extrabold text-slate-900">
-                <User className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-slate-500">
+              <span className="flex items-center gap-1 font-bold text-slate-700">
+                <User className="w-3.5 h-3.5 text-slate-400" />
                 {contactName}
               </span>
               <span>•</span>
-              <span className="px-1.5 py-0.5 bg-slate-200 rounded text-[9px] font-medium text-slate-700 shrink-0">
-                Etapa: {opportunity.stage}
-              </span>
+              <span className="font-medium">{opportunity.contact?.phone || 'Sin Teléfono'}</span>
+              <span>•</span>
+              <span className="text-slate-400 break-all">{opportunity.contact?.email || 'Sin Email'}</span>
+              <span>•</span>
+              <button 
+                onClick={() => setIsEditContactOpen(true)}
+                className="text-brand-green hover:text-brand-greenHover font-bold hover:underline inline-flex items-center gap-0.5"
+              >
+                <Edit3 className="w-3 h-3" />
+                Editar Contacto
+              </button>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors shrink-0"
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors shrink-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex flex-col md:flex-row flex-1 overflow-hidden bg-slate-50/50">
+        {/* Modal Main Body */}
+        <div className="flex-1 flex flex-col min-h-0 bg-white p-5 overflow-y-auto custom-scrollbar space-y-6">
+          
+          {/* Quick Action Horizontal Toolbar */}
+          <div className="bg-slate-50/60 border border-slate-200/50 p-4 rounded-2xl flex items-center justify-around flex-wrap gap-4 shrink-0 shadow-2xs">
             
-            {/* Left Panel: HubSpot Profile & Client Info */}
-            <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-slate-200/80 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-4">
-              {/* Profile Card */}
-              <div className="text-center pb-4 border-b border-slate-200/60 text-left">
-                <div className="w-14 h-14 rounded-full bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-lg font-bold mx-auto mb-2 shadow-2xs">
-                  {opportunity.contact?.firstName?.substring(0, 1) || 'C'}
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 leading-tight text-center">
-                  {contactName}
-                </h3>
-                <p className="text-xxs text-slate-500 font-medium mt-0.5 text-center">{opportunity.contact?.phone || 'Sin teléfono'}</p>
-                
-                {/* circular quick actions */}
-                <div className="flex justify-center items-center gap-3.5 mt-4">
-                  {[
-                    { id: 'NOTAS', label: 'Nota', icon: AlignLeft, action: () => { setActiveTab('NOTAS'); } },
-                    { id: 'LLAMADA', label: 'Llamar', icon: Phone, action: () => { setActiveTab('TAREAS'); setTaskType('LLAMADA'); } },
-                    { id: 'TAREA', label: 'Tarea', icon: CheckCircle2, action: () => { setActiveTab('TAREAS'); setTaskType('OFICINA'); } },
-                    { id: 'REUNION', label: 'Reunión', icon: Calendar, action: () => { setActiveTab('TAREAS'); setTaskType('VIRTUAL'); } },
-                    { id: 'CONTRATO', label: 'Cierre', icon: FileSignature, action: () => { setActiveTab('CONTRATO'); } }
-                  ].map(btn => (
-                    <button
-                      key={btn.id}
-                      onClick={btn.action}
-                      className="flex flex-col items-center group focus:outline-none"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-brand-green group-hover:border-brand-green group-hover:bg-brand-green/5 transition-all shadow-2xs">
-                        <btn.icon className="w-4 h-4" />
-                      </div>
-                      <span className="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-slate-800 transition-colors">
-                        {btn.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+            {/* Tareas */}
+            <button 
+              onClick={() => setIsTaskOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:border-blue-600 group-hover:bg-blue-50 transition-all shadow-sm">
+                <CheckSquare className="w-4 h-4" />
               </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Tareas
+              </span>
+            </button>
 
-              {/* HubSpot Info Accordion */}
-              <div className="mt-4 text-left">
-                <details className="group" open>
-                  <summary className="flex items-center justify-between cursor-pointer list-none py-1.5 focus:outline-none">
-                    <div className="flex items-center gap-1.5">
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-open:rotate-90 transition-transform" />
-                      <span className="text-xxs font-extrabold text-slate-900 uppercase tracking-wider">Información cliente</span>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsEditContactOpen(true);
-                      }}
-                      className="text-brand-green hover:text-brand-greenHover text-[10px] font-bold shrink-0 hover:underline"
-                    >
-                      Editar
-                    </button>
-                  </summary>
-                  
-                  <div className="mt-2.5 space-y-3 pl-4 border-l border-slate-100">
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Propietario del contacto</span>
-                      <span className="block text-xxs font-extrabold text-slate-800">
-                        {opportunity.contact?.agent 
-                          ? `${opportunity.contact.agent.firstName} ${opportunity.contact.agent.lastName || ''}`.trim()
-                          : 'Sin Asignar'}
-                      </span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Número de teléfono</span>
-                      <span className="block text-xxs font-extrabold text-slate-800 font-mono">{opportunity.contact?.phone || '--'}</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Correo electrónico</span>
-                      <span className="block text-xxs font-extrabold text-slate-800 break-all">{opportunity.contact?.email || '--'}</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">DNI/Documento</span>
-                      <span className="block text-xxs font-extrabold text-slate-800 font-mono">{opportunity.contact?.dni || '--'}</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Ciudad</span>
-                      <span className="block text-xxs font-extrabold text-slate-800">{opportunity.contact?.city || '--'}</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Etapa del ciclo de vida</span>
-                      <div>
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${opportunity.contact?.type === 'CLIENTE' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {opportunity.contact?.type || 'LEAD'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Presupuesto estimado</span>
-                      <span className="block text-xxs font-extrabold text-slate-800">
-                        {opportunity.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opportunity.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0 })}
-                      </span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Interés de compra</span>
-                      <span className="block text-xxs font-extrabold text-slate-800">
-                        {opportunity.contact?.interests && opportunity.contact.interests.length > 0 
-                          ? opportunity.contact.interests.join(', ')
-                          : 'Sin especificar'}
-                      </span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Zona de interés</span>
-                      <span className="block text-xxs font-extrabold text-slate-800">
-                        {[opportunity.contact?.district, opportunity.contact?.department].filter(Boolean).join(', ') || '--'}
-                      </span>
-                    </div>
-                  </div>
-                </details>
+            {/* Cita */}
+            <button 
+              onClick={() => setIsCitaOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-brand-green group-hover:border-brand-green group-hover:bg-brand-green/5 transition-all shadow-sm">
+                <Calendar className="w-4 h-4" />
               </div>
-            </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Cita
+              </span>
+            </button>
 
-            {/* Right Panel: Tabs and Muro de Actividades */}
-            <div className="flex-1 flex flex-col overflow-hidden bg-white">
-              {/* Tabs Header */}
-              <div className="flex items-center gap-1 bg-slate-50 border-b border-slate-200/60 p-2 overflow-x-auto shrink-0 scrollbar-none text-left">
+            {/* Notas */}
+            <button 
+              onClick={() => setIsNoteOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-yellow-600 group-hover:border-yellow-600 group-hover:bg-yellow-50 transition-all shadow-sm">
+                <AlignLeft className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Notas
+              </span>
+            </button>
+
+            {/* Llamar */}
+            <button 
+              onClick={() => setIsCallOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-purple-600 group-hover:border-purple-600 group-hover:bg-purple-50 transition-all shadow-sm">
+                <Phone className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Llamar
+              </span>
+            </button>
+
+            {/* Mensaje */}
+            <button 
+              onClick={() => setIsMessageOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-pink-600 group-hover:border-pink-600 group-hover:bg-pink-50 transition-all shadow-sm">
+                <MessageSquare className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Mensaje
+              </span>
+            </button>
+
+            {/* Cierre (Contrato) */}
+            <button 
+              onClick={() => setIsContractOpen(true)}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-emerald-600 group-hover:border-emerald-600 group-hover:bg-emerald-50 transition-all shadow-sm">
+                <FileSignature className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Cerrar Trato
+              </span>
+            </button>
+
+          </div>
+
+          {/* Unified Chronological Timeline (Historial de Actividades) */}
+          <div className="flex-1 space-y-4 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-2 gap-3">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <History className="w-4 h-4 text-slate-500" />
+                Historial de Seguimiento
+              </h3>
+              
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                 {[
-                  { id: 'TAREAS', label: '📅 Tareas y Citas' },
-                  { id: 'NOTAS', label: '📝 Notas Libres' },
-                  { id: 'HISTORIAL', label: '⏱️ Historial' },
-                  { id: 'CONTRATO', label: '✍️ Registrar Contrato' }
-                ].map(tab => (
+                  { id: 'TODOS', label: 'Todo' },
+                  { id: 'TASK', label: 'Tareas' },
+                  { id: 'CITA', label: 'Citas' },
+                  { id: 'NOTE', label: 'Notas' },
+                  { id: 'COMM', label: 'Comunicaciones' }
+                ].map(f => (
                   <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xxs font-bold transition-all whitespace-nowrap ${
-                      activeTab === tab.id 
-                        ? 'bg-white text-slate-900 border border-slate-200 shadow-2xs font-extrabold' 
-                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
+                    key={f.id}
+                    onClick={() => setTimelineFilter(f.id as any)}
+                    className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold border transition-colors whitespace-nowrap ${
+                      timelineFilter === f.id
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-2xs'
+                        : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
-                    {tab.label}
+                    {f.label}
                   </button>
                 ))}
               </div>
+            </div>
 
-              {/* Active Tab Content Area */}
-              <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-5">
-             
-             {/* TAB: TAREAS Y CITAS */}
-             {activeTab === 'TAREAS' && (
-               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left">
-                 <h3 className="text-xs font-bold text-slate-900 mb-2.5">Programar Actividad</h3>
-                 
-                 {/* Formulario */}
-                 <div className="bg-white border border-slate-200/80 p-4 rounded-xl shadow-xs mb-5">
-                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-                     {TASK_TYPES.map((type) => (
-                       <label key={type.id} className="relative cursor-pointer">
-                         <input 
-                           type="radio" 
-                           name="taskType" 
-                           value={type.id} 
-                           className="peer sr-only" 
-                           checked={taskType === type.id}
-                           onChange={() => setTaskType(type.id)}
-                         />
-                         <div className="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xxs font-bold text-slate-600 hover:bg-slate-50 peer-checked:border-brand-green peer-checked:bg-brand-green/10 peer-checked:text-brand-green transition-all">
-                           <type.icon className="w-3.5 h-3.5 shrink-0" />
-                           {type.label}
-                         </div>
-                       </label>
-                     ))}
-                   </div>
- 
-                   <div className="grid grid-cols-2 gap-3 mb-3">
-                     <div className="space-y-0.5">
-                       <label className="block text-[10px] font-bold text-slate-700">Fecha *</label>
-                       <div className="relative">
-                         <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                         <input 
-                           type="date" 
-                           value={taskDate}
-                           onChange={e => setTaskDate(e.target.value)}
-                           className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" 
-                         />
-                       </div>
-                     </div>
-                     <div className="space-y-0.5">
-                       <label className="block text-[10px] font-bold text-slate-700">Hora *</label>
-                       <div className="relative">
-                         <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                         <input 
-                           type="time" 
-                           value={taskTime}
-                           onChange={e => setTaskTime(e.target.value)}
-                           className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-semibold" 
-                         />
-                       </div>
-                     </div>
-                   </div>
- 
-                   <div className="space-y-0.5 mb-3">
-                     <label className="block text-[10px] font-bold text-slate-700">Detalles de la tarea</label>
-                     <textarea 
-                       value={taskDetails}
-                       onChange={e => setTaskDetails(e.target.value)}
-                       placeholder="Ej. Revisar el contrato de compraventa y explicar facilidades de pago."
-                       className="w-full p-2.5 rounded-lg border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-14 bg-white"
-                     />
-                   </div>
- 
-                   <div className="flex justify-end">
-                     <button 
-                       onClick={handleSaveTask}
-                       disabled={savingTask}
-                       className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors disabled:opacity-50"
-                     >
-                       {savingTask ? 'Guardando...' : 'Guardar Tarea'}
-                     </button>
-                   </div>
-                 </div>
- 
-                 <h3 className="text-xs font-bold text-slate-900 mb-2.5">Próximas Actividades</h3>
-                 
-                 {/* Lista real de tareas */}
-                 <div className="space-y-2">
-                   {loadingAppts ? (
-                     <div className="text-center py-4">
-                       <div className="w-5 h-5 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
-                     </div>
-                   ) : appointments.length === 0 ? (
-                     <p className="text-xxs text-slate-400 text-center py-4">No hay tareas o citas programadas.</p>
-                   ) : (
-                     appointments.map((appt) => {
-                       const isCompleted = appt.status === 'COMPLETADA';
-                       const formattedDate = new Date(appt.startAt).toLocaleString('es-PE', {
-                         day: 'numeric',
-                         month: 'short',
-                         hour: '2-digit',
-                         minute: '2-digit'
-                       });
-                       
-                       let Icon = Calendar;
-                       if (appt.type === 'LLAMADA') Icon = Phone;
-                       else if (appt.type === 'VISITA_PROYECTO' || appt.type === 'VISITA_UNIDAD') Icon = MapPin;
-                       else if (appt.type === 'PRESENTACION') Icon = FileSignature;
-                       else if (appt.type === 'REUNION') Icon = User;
- 
-                       return (
-                         <div key={appt.id} className={`p-3 border rounded-xl bg-white flex items-start gap-3 shadow-xs transition-colors ${isCompleted ? 'border-slate-100 opacity-60' : 'border-slate-200/80 hover:border-brand-green/30'}`}>
-                           <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted ? 'bg-slate-100 text-slate-400' : 'bg-brand-green/10 text-brand-green'}`}>
-                             <Icon className="w-4 h-4" />
-                           </div>
-                           <div className="flex-1 min-w-0">
-                             <div className="flex justify-between items-start">
-                               <h4 className={`text-xs font-bold text-slate-900 truncate ${isCompleted ? 'line-through text-slate-400' : ''}`}>{appt.title}</h4>
-                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 shrink-0 ${isCompleted ? 'bg-slate-100 text-slate-400' : 'text-brand-green bg-brand-green/10'}`}>
-                                 {formattedDate}
-                               </span>
-                             </div>
-                             <p className={`text-xxs text-slate-500 mt-0.5 leading-relaxed truncate ${isCompleted ? 'line-through text-slate-400' : ''}`}>{appt.notes || 'Sin detalles.'}</p>
-                           </div>
-                           {!isCompleted ? (
-                             <button 
-                               onClick={() => handleCompleteAppointment(appt.id)}
-                               className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-green hover:border-brand-green hover:bg-brand-green/5 transition-all shrink-0"
-                               title="Marcar como completada"
-                             >
-                               <CheckCircle2 className="w-4 h-4" />
-                             </button>
-                           ) : (
-                             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-1" />
-                           )}
-                         </div>
-                       );
-                     })
-                   )}
-                 </div>
- 
-               </div>
-             )}
- 
-             {/* TAB: NOTAS */}
-             {activeTab === 'NOTAS' && (
-               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl h-full flex flex-col text-left">
-                 <div className="mb-4 shrink-0">
-                   <textarea 
-                     value={newNote}
-                     onChange={e => setNewNote(e.target.value)}
-                     placeholder="Escribe una nota importante sobre el cliente o la negociación..."
-                     className="w-full p-3 rounded-xl border border-slate-200 text-xxs focus:outline-none focus:ring-2 focus:ring-brand-green/15 resize-none h-20 shadow-xs mb-2 bg-yellow-50/15"
-                   />
-                   <div className="flex justify-end">
-                     <button 
-                       onClick={handleAddNote}
-                       disabled={savingNote}
-                       className="bg-slate-950 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg text-xxs font-bold shadow-xs transition-colors disabled:opacity-50"
-                     >
-                       {savingNote ? 'Añadiendo...' : 'Añadir Nota'}
-                     </button>
-                   </div>
-                 </div>
- 
-                 <div className="space-y-2.5 flex-1 overflow-y-auto">
-                   <h3 className="text-xs font-bold text-slate-900 sticky top-0 bg-white py-1 z-10">Notas Anteriores</h3>
-                   
-                   {parseNotes(notesText).length === 0 ? (
-                     <p className="text-xxs text-slate-400 text-center py-4">No hay notas guardadas para este cliente.</p>
-                   ) : (
-                     parseNotes(notesText).map((note, idx) => (
-                       <div key={idx} className="p-3 bg-yellow-50/60 border border-yellow-100 rounded-xl relative text-left">
-                         <p className="text-xxs text-slate-800 leading-relaxed whitespace-pre-wrap">{note.content}</p>
-                         <span className="text-[9px] text-slate-400 mt-1.5 block font-semibold">{note.header}</span>
-                       </div>
-                     ))
-                   )}
-                 </div>
-               </div>
-             )}
- 
-             {/* TAB: HISTORIAL */}
-             {activeTab === 'HISTORIAL' && (
-               <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-2xl text-left font-sans">
-                 <h3 className="text-xs font-bold text-slate-900 mb-4">Registro de Actividad</h3>
-                 
-                 <div className="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-3">
-                   {(!opportunity.activities || opportunity.activities.length === 0) ? (
-                     <div className="relative pl-5">
-                       <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-brand-green ring-4 ring-white"></div>
-                       <p className="text-xs font-bold text-slate-900">Oportunidad Creada</p>
-                       <p className="text-xxs text-slate-500 mt-0.5">La oportunidad fue registrada en el sistema.</p>
-                       <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">
-                         {new Date(opportunity.createdAt).toLocaleString('es-PE')}
-                       </span>
-                     </div>
-                   ) : (
-                     opportunity.activities.map((act: any) => (
-                       <div key={act.id} className="relative pl-5">
-                         <div className={`absolute -left-[7px] top-1 w-3 h-3 rounded-full ring-4 ring-white ${act.type === 'CAMBIO_ETAPA' ? 'bg-brand-green' : act.type === 'CONTRATO_FIRMADO' || act.type === 'CONTRATO_CREADO' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
-                         <p className="text-xs font-bold text-slate-900">{act.description}</p>
-                         <p className="text-xxs text-slate-500 mt-0.5">
-                           Registrado por {act.user?.firstName} {act.user?.lastName || ''}
-                         </p>
-                         <span className="text-[9px] text-slate-400 block mt-0.5 font-semibold">
-                           {new Date(act.createdAt).toLocaleString('es-PE')}
-                         </span>
-                       </div>
-                     ))
-                   )}
-                 </div>
-               </div>
-             )}
+            {loadingAppts ? (
+              <div className="text-center py-10">
+                <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
+              </div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-xs text-slate-500 font-medium">No se encontraron registros en este filtro de seguimiento.</p>
+              </div>
+            ) : (
+              <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-5">
+                {filteredEvents.map((ev, idx) => {
+                  let badgeColor = 'bg-slate-100 text-slate-600';
+                  let bgTint = 'bg-white';
+                  let borderCol = 'border-slate-200';
+                  let Icon = History;
+                  let isPending = false;
 
-             {/* TAB: CONTRATO (REGISTRAR CIERRE / VENTA) */}
-            {activeTab === 'CONTRATO' && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-xl text-left">
-                <h3 className="text-xs font-bold text-slate-900 mb-1">Registrar Venta / Firma de Contrato</h3>
-                <p className="text-[10px] text-slate-500 mb-3">
-                  Completa los datos de la unidad vendida para registrar el contrato y marcar esta oportunidad como <strong>CIERRE GANADO</strong> de forma automática.
-                </p>
+                  if (ev.type === 'TASK') {
+                    Icon = CheckSquare;
+                    badgeColor = 'bg-blue-15 text-blue-700';
+                    bgTint = 'bg-blue-50/5';
+                    borderCol = 'border-blue-100';
+                    isPending = ev.status === 'PENDIENTE' || ev.status === 'EN_PROGRESO';
+                  } else if (ev.type === 'CITA') {
+                    Icon = Calendar;
+                    badgeColor = 'bg-brand-green/10 text-brand-green';
+                    bgTint = 'bg-brand-green/5';
+                    borderCol = 'border-brand-green/10';
+                    isPending = ev.status === 'PENDIENTE' || ev.status === 'CONFIRMADA';
+                  } else if (ev.type === 'NOTE') {
+                    Icon = AlignLeft;
+                    badgeColor = 'bg-amber-100 text-amber-800';
+                    bgTint = 'bg-amber-50/20';
+                    borderCol = 'border-amber-100';
+                  } else if (ev.type === 'CALL') {
+                    Icon = Phone;
+                    badgeColor = 'bg-purple-100 text-purple-700';
+                    bgTint = 'bg-purple-50/10';
+                    borderCol = 'border-purple-100';
+                  } else if (ev.type === 'MESSAGE') {
+                    Icon = MessageSquare;
+                    badgeColor = 'bg-pink-100 text-pink-700';
+                    bgTint = 'bg-pink-50/10';
+                    borderCol = 'border-pink-100';
+                  } else if (ev.type === 'ACTIVITY_LOG') {
+                    Icon = History;
+                  }
 
-                {/* Form */}
-                <div className="space-y-3.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
-                  {/* Selectors */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Desarrollador</label>
-                      <select
-                        value={selectedDevId}
-                        onChange={e => {
-                          setSelectedDevId(e.target.value);
-                          setSelectedProjId('');
-                          setContractData(prev => ({ ...prev, propertyId: '' }));
-                        }}
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-semibold"
-                      >
-                        <option value="">Selecciona...</option>
-                        {Array.from(new Map(properties.map(p => p.project?.developer).filter(Boolean).map(d => [d.id, d])).values()).map((d: any) => (
-                          <option key={d.id} value={d.id}>{d.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                  const dateStr = ev.date.toLocaleString('es-PE', {
+                    day: 'numeric', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                  });
 
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Proyecto</label>
-                      <select
-                        value={selectedProjId}
-                        onChange={e => {
-                          setSelectedProjId(e.target.value);
-                          setContractData(prev => ({ ...prev, propertyId: '' }));
-                        }}
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-semibold"
-                      >
-                        <option value="">Selecciona...</option>
-                        {Array.from(new Map(properties.filter(p => !selectedDevId || p.project?.developerId === selectedDevId).map(p => p.project).filter(Boolean).map(pr => [pr.id, pr])).values()).map((pr: any) => (
-                          <option key={pr.id} value={pr.id}>{pr.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                  // Calculate if task/cita is overdue
+                  const isOverdue = isPending && ev.date.getTime() < new Date().getTime();
 
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Unidad/Propiedad *</label>
-                      <select
-                        value={contractData.propertyId}
-                        onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-bold"
-                        required
-                      >
-                        <option value="">Selecciona Unidad...</option>
-                        {properties
-                          .filter(p => p.status === 'DISPONIBLE' && (!selectedProjId || p.projectId === selectedProjId) && (!selectedDevId || p.project?.developerId === selectedDevId))
-                          .map(p => (
-                            <option key={p.id} value={p.id}>{p.unitCode} - {p.title || 'Sin Título'}</option>
-                          ))
-                        }
-                      </select>
-                    </div>
-                  </div>
+                  return (
+                    <div key={ev.id || idx} className="relative group">
+                      
+                      {/* Circle icon on the timeline line */}
+                      <div className={`absolute -left-[35px] top-1.5 w-7 h-7 rounded-full flex items-center justify-center border bg-white shadow-2xs group-hover:scale-105 transition-transform ${
+                        ev.type === 'TASK' ? 'text-blue-600 border-blue-200' :
+                        ev.type === 'CITA' ? 'text-brand-green border-brand-green/20' :
+                        ev.type === 'NOTE' ? 'text-amber-600 border-amber-200' :
+                        ev.type === 'CALL' ? 'text-purple-600 border-purple-200' :
+                        ev.type === 'MESSAGE' ? 'text-pink-600 border-pink-200' :
+                        'text-slate-400 border-slate-200'
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
 
-                  {/* Price and Type */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Tipo de Documento</label>
-                      <select
-                        value={contractData.type}
-                        onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-semibold"
-                      >
-                        <option value="COMPRAVENTA">Compraventa</option>
-                        <option value="SEPARACION">Separación</option>
-                        <option value="ALQUILER">Alquiler</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Precio Venta (Monto)</label>
-                      <input
-                        type="number"
-                        value={contractData.amount}
-                        onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
-                        placeholder="Monto"
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-semibold"
-                      />
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <label className="block text-[9px] font-bold text-slate-700">Moneda</label>
-                      <select
-                        value={contractData.currency}
-                        onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
-                        className="w-full px-2 py-1 rounded-lg border border-slate-200 text-xxs bg-white font-semibold"
-                      >
-                        <option value="USD">Dólares ($)</option>
-                        <option value="PEN">Soles (S/)</option>
-                        <option value="EUR">Euros (€)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div className="space-y-0.5">
-                    <label className="block text-[9px] font-bold text-slate-700">Comentarios de Cierre</label>
-                    <textarea
-                      value={contractData.notes}
-                      onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Indica condiciones adicionales de la venta..."
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xxs bg-white resize-none h-12"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex justify-end gap-3 pt-1">
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!contractData.propertyId) {
-                          alert('Por favor selecciona la unidad vendida.');
-                          return;
-                        }
-                        if (!contractData.amount) {
-                          alert('Por favor indica el precio de venta.');
-                          return;
-                        }
-                        try {
-                          setSubmittingContract(true);
+                      {/* Card Body */}
+                      <div className={`p-4 border rounded-xl shadow-2xs transition-all hover:shadow-xs flex items-start gap-4 ${bgTint} ${borderCol} ${isOverdue ? 'border-red-200 bg-red-50/5' : ''}`}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className={`text-xs font-bold text-slate-900 ${ev.status === 'COMPLETADA' ? 'line-through text-slate-400' : ''}`}>
+                                  {ev.title}
+                                </h4>
+                                {isOverdue && (
+                                  <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-red-100 text-red-700 animate-pulse">
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    ¡Atrasada!
+                                  </span>
+                                )}
+                              </div>
+                              {ev.type === 'TASK' && (
+                                <div className="flex gap-2 items-center mt-1">
+                                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
+                                    Prioridad: {ev.priority}
+                                  </span>
+                                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                                    ev.status === 'PENDIENTE' ? 'bg-orange-100 text-orange-700' :
+                                    ev.status === 'CONFIRMADA' || ev.status === 'EN_PROGRESO' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-green-100 text-green-700'
+                                  }`}>
+                                    {ev.status}
+                                  </span>
+                                </div>
+                              )}
+                              {ev.type === 'CITA' && (
+                                <div className="flex gap-2 items-center mt-1">
+                                  {ev.location && (
+                                    <span className="text-[9px] font-semibold text-slate-500 flex items-center gap-0.5">
+                                      <MapPin className="w-2.5 h-2.5" />
+                                      {ev.location}
+                                    </span>
+                                  )}
+                                  {ev.videoLink && (
+                                    <a href={ev.videoLink} target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-brand-green hover:underline flex items-center gap-0.5">
+                                      <Video className="w-2.5 h-2.5" />
+                                      Reunión
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[9px] font-semibold text-slate-400 shrink-0">
+                              {dateStr}
+                            </span>
+                          </div>
                           
-                          // 1. Create the contract
-                          await createContract({
-                            buyerId: opportunity.contactId,
-                            propertyId: contractData.propertyId,
-                            type: contractData.type,
-                            status: 'FIRMADO',
-                            amount: contractData.amount,
-                            currency: contractData.currency,
-                            notes: contractData.notes,
-                            agentId: opportunity.agentId || opportunity.contact?.assignedTo
-                          });
+                          {ev.description && (
+                            <p className={`text-[11px] text-slate-600 mt-2 leading-relaxed whitespace-pre-wrap ${ev.status === 'COMPLETADA' ? 'line-through text-slate-400' : ''}`}>
+                              {ev.description}
+                            </p>
+                          )}
+                        </div>
 
-                          // 2. Mark opportunity as CIERRE_GANADO
-                          await updateOpportunityStage(opportunity.id, 'CIERRE_GANADO');
+                        {/* Action buttons (Complete Task/Cita) */}
+                        {isPending && (
+                          <button
+                            onClick={() => handleCompleteAppt(ev.id, ev.type)}
+                            className="w-7 h-7 rounded-full border border-slate-200 hover:border-brand-green hover:border-brand-green hover:bg-brand-green/5 text-slate-400 hover:text-brand-green flex items-center justify-center shrink-0 transition-colors shadow-2xs"
+                            title="Marcar como completada"
+                          >
+                            <Check className="w-4.5 h-4.5" />
+                          </button>
+                        )}
+                        {!isPending && (ev.type === 'TASK' || ev.type === 'CITA') && (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        )}
+                      </div>
 
-                          alert('🎉 ¡Venta registrada y contrato guardado con éxito!');
-                          onClose();
-                          window.location.reload(); // Quick refresh
-                        } catch (err: any) {
-                          alert(err.message || 'Error al registrar el contrato');
-                        } finally {
-                          setSubmittingContract(false);
-                        }
-                      }}
-                      disabled={submittingContract}
-                      className="bg-brand-green hover:bg-brand-greenHover text-white px-3 py-1.5 rounded-lg text-xxs font-bold transition-all flex items-center gap-1 shadow-xs shadow-brand-green/20"
-                    >
-                      {submittingContract ? 'Registrando...' : 'Confirmar Venta'}
-                    </button>
-                  </div>
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
           </div>
-        </div>
-      </div>
-    </div>
 
+        </div>
+
+      </div>
+
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      {/* SUB-MODALS OVERLAYS */}
+      {/* ────────────────────────────────────────────────────────────────────── */}
+
+      {/* 1. Modal: Nueva Tarea */}
+      {isTaskOpen && (
+        <div className="fixed inset-0 bg-slate-955/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Registrar Nueva Tarea</h3>
+              <button onClick={() => setIsTaskOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveTask} className="p-4 space-y-3.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Tarea *</label>
+                <input 
+                  type="text" 
+                  value={taskTitle} 
+                  onChange={e => setTaskTitle(e.target.value)}
+                  placeholder="Ej: Llamar para confirmar visita" 
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white font-semibold"
+                  required 
+                />
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Detalles / Notas</label>
+                <textarea 
+                  value={taskDesc} 
+                  onChange={e => setTaskDesc(e.target.value)}
+                  placeholder="Instrucciones adicionales..."
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-16"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Responsable *</label>
+                  <select 
+                    value={taskAgentId} 
+                    onChange={e => setTaskAgentId(e.target.value)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    {agents.map(a => (
+                      <option key={a.id} value={a.id}>{a.firstName} {a.lastName || ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad Relacionada</label>
+                  <select 
+                    value={taskPropId} 
+                    onChange={e => setTaskPropId(e.target.value)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="">Ninguna</option>
+                    {properties.map(p => (
+                      <option key={p.id} value={p.id}>{p.unitCode} - {p.project?.name || ''}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Fecha Límite *</label>
+                  <input 
+                    type="date" 
+                    value={taskDueDate} 
+                    onChange={e => setTaskDueDate(e.target.value)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                    required 
+                  />
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Prioridad</label>
+                  <select 
+                    value={taskPriority} 
+                    onChange={e => setTaskPriority(e.target.value)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA">Media</option>
+                    <option value="ALTA">Alta</option>
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Estado</label>
+                  <select 
+                    value={taskStatus} 
+                    onChange={e => setTaskStatus(e.target.value)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="EN_PROGRESO">En Progreso</option>
+                    <option value="COMPLETADA">Completada</option>
+                    <option value="CANCELADA">Cancelada</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setIsTaskOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={submittingTask} className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold shadow-xs">
+                  {submittingTask ? 'Guardando...' : 'Crear Tarea'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Modal: Programar Cita */}
+      {isCitaOpen && (
+        <div className="fixed inset-0 bg-slate-955/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Agendar Nueva Cita</h3>
+              <button onClick={() => setIsCitaOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveCita} className="p-4 space-y-3.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Cita *</label>
+                <input 
+                  type="text" 
+                  value={citaTitle} 
+                  onChange={e => setCitaTitle(e.target.value)}
+                  placeholder="Ej: Firma de Promesa de Compraventa" 
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  required 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad Relacionada</label>
+                  <select value={citaPropId} onChange={e => setCitaPropId(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                    <option value="">Ninguna</option>
+                    {properties.map(p => (
+                      <option key={p.id} value={p.id}>{p.unitCode} - {p.project?.name || ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Asesor Asignado *</label>
+                  <select value={citaAgentId} onChange={e => setCitaAgentId(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                    {agents.map(a => (
+                      <option key={a.id} value={a.id}>{a.firstName} {a.lastName || ''}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Fecha *</label>
+                  <input type="date" value={citaDate} onChange={e => setCitaDate(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Hora Inicio *</label>
+                  <input type="time" value={citaStartTime} onChange={e => setCitaStartTime(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Hora Fin *</label>
+                  <input type="time" value={citaEndTime} onChange={e => setCitaEndTime(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Tipo de Cita</label>
+                  <select value={citaType} onChange={e => setCitaType(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                    <option value="REUNION">Reunión Presencial</option>
+                    <option value="VISITA_PROYECTO">Visita a Proyecto</option>
+                    <option value="PRESENTACION">Presentación de Unidad</option>
+                    <option value="LLAMADA">Llamada/Videollamada</option>
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Estado de la Cita</label>
+                  <select value={citaStatus} onChange={e => setCitaStatus(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                    <option value="PENDIENTE">Programada (Pendiente)</option>
+                    <option value="CONFIRMADA">Confirmada</option>
+                    <option value="COMPLETADA">Realizada</option>
+                    <option value="CANCELADA">Cancelada</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Ubicación</label>
+                  <input type="text" value={citaLocation} onChange={e => setCitaLocation(e.target.value)} placeholder="Ej: Sala de ventas San Isidro" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" />
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Enlace Videollamada</label>
+                  <input type="url" value={citaVideoLink} onChange={e => setCitaVideoLink(e.target.value)} placeholder="Google Meet, Zoom, etc." className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" />
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Notas de la Cita</label>
+                <textarea value={citaDesc} onChange={e => setCitaDesc(e.target.value)} placeholder="Especificaciones de la reunión..." className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white resize-none h-14" />
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <button type="button" onClick={() => setIsCitaOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
+                <button type="submit" disabled={submittingCita} className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold shadow-xs">
+                  {submittingCita ? 'Agendando...' : 'Agendar Cita'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Modal: Nueva Nota */}
+      {isNoteOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Agregar Nota al Historial</h3>
+              <button onClick={() => setIsNoteOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveNote} className="p-4 space-y-3.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Contenido de la Nota *</label>
+                <textarea 
+                  value={noteContent} 
+                  onChange={e => setNoteContent(e.target.value)}
+                  placeholder="Ej: El cliente está interesado en comprar en preventa si se le da un descuento del 3%..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-32 font-semibold"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setIsNoteOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
+                <button type="submit" disabled={submittingNote} className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold">
+                  {submittingNote ? 'Guardando...' : 'Guardar Nota'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Modal: Registrar Llamada */}
+      {isCallOpen && (
+        <div className="fixed inset-0 bg-slate-955/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Registrar Registro de Llamada</h3>
+              <button onClick={() => setIsCallOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveCall} className="p-4 space-y-3.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Llamada *</label>
+                <input 
+                  type="text" 
+                  value={callTitle} 
+                  onChange={e => setCallTitle(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  required
+                />
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Resultado de la Llamada *</label>
+                <select value={callResult} onChange={e => setCallResult(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                  <option value="CONTESTO">Contestó</option>
+                  <option value="NO_CONTESTO">No Contestó</option>
+                  <option value="OCUPADO">Llamada Ocupada</option>
+                  <option value="MENSAJE_VOZ">Dejó Mensaje de Voz</option>
+                </select>
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Detalles / Conversación</label>
+                <textarea 
+                  value={callDetails} 
+                  onChange={e => setCallDetails(e.target.value)}
+                  placeholder="Indica qué hablaron o próximos pasos..."
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white resize-none h-16 font-semibold"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setIsCallOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
+                <button type="submit" disabled={submittingCall} className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold">
+                  {submittingCall ? 'Guardando...' : 'Registrar Llamada'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Modal: Registrar Mensaje */}
+      {isMessageOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Registrar Mensaje Enviado</h3>
+              <button onClick={() => setIsMessageOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveMessage} className="p-4 space-y-3.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Canal de Envío</label>
+                <select value={msgChannel} onChange={e => setMsgChannel(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
+                  <option value="WHATSAPP">WhatsApp</option>
+                  <option value="CORREO">Correo Electrónico</option>
+                </select>
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Contenido del Mensaje *</label>
+                <textarea 
+                  value={msgDetails} 
+                  onChange={e => setMsgDetails(e.target.value)}
+                  placeholder="Copia el texto del mensaje enviado..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-24 font-semibold"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setIsMessageOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
+                <button type="submit" disabled={submittingMsg} className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold">
+                  {submittingMsg ? 'Guardando...' : 'Registrar Mensaje'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Modal: Registrar Contrato (Cerrar Trato) */}
+      {isContractOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden text-left">
+            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-sm font-bold text-slate-900">Registrar Cierre y Firma de Contrato</h3>
+              <button onClick={() => setIsContractOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3.5">
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Desarrollador</label>
+                  <select
+                    value={selectedDevId}
+                    onChange={e => {
+                      setSelectedDevId(e.target.value);
+                      setSelectedProjId('');
+                      setContractData(prev => ({ ...prev, propertyId: '' }));
+                    }}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="">Selecciona...</option>
+                    {Array.from(new Map(properties.map(p => p.project?.developer).filter(Boolean).map(d => [d.id, d])).values()).map((d: any) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Proyecto</label>
+                  <select
+                    value={selectedProjId}
+                    onChange={e => {
+                      setSelectedProjId(e.target.value);
+                      setContractData(prev => ({ ...prev, propertyId: '' }));
+                    }}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="">Selecciona...</option>
+                    {Array.from(new Map(properties.filter(p => !selectedDevId || p.project?.developerId === selectedDevId).map(p => p.project).filter(Boolean).map(pr => [pr.id, pr])).values()).map((pr: any) => (
+                      <option key={pr.id} value={pr.id}>{pr.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad *</label>
+                  <select
+                    value={contractData.propertyId}
+                    onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-bold"
+                    required
+                  >
+                    <option value="">Selecciona Unidad...</option>
+                    {properties
+                      .filter(p => p.status === 'DISPONIBLE' && (!selectedProjId || p.projectId === selectedProjId) && (!selectedDevId || p.project?.developerId === selectedDevId))
+                      .map(p => (
+                        <option key={p.id} value={p.id}>{p.unitCode} - {p.title || 'Sin Título'}</option>
+                      ))
+                    }
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Tipo de Documento</label>
+                  <select
+                    value={contractData.type}
+                    onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="COMPRAVENTA">Compraventa</option>
+                    <option value="SEPARACION">Separación</option>
+                    <option value="ALQUILER">Alquiler</option>
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Monto de Cierre *</label>
+                  <input
+                    type="number"
+                    value={contractData.amount}
+                    onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="Monto"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                    required
+                  />
+                </div>
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] font-bold text-brand-green uppercase">Moneda</label>
+                  <select
+                    value={contractData.currency}
+                    onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
+                  >
+                    <option value="USD">Dólares ($)</option>
+                    <option value="PEN">Soles (S/)</option>
+                    <option value="EUR">Euros (€)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <label className="block text-[10px] font-bold text-brand-green uppercase">Comentarios de Cierre</label>
+                <textarea
+                  value={contractData.notes}
+                  onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Indica las cuotas, condiciones acordadas..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-16"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setIsContractOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
+                <button
+                  type="button"
+                  disabled={submittingContract}
+                  onClick={async () => {
+                    if (!contractData.propertyId || !contractData.amount) {
+                      alert('Por favor completa la unidad y el monto de cierre.');
+                      return;
+                    }
+                    setSubmittingContract(true);
+                    try {
+                      await createContract({
+                        buyerId: opportunity.contactId,
+                        propertyId: contractData.propertyId,
+                        type: contractData.type,
+                        status: 'FIRMADO',
+                        amount: contractData.amount,
+                        currency: contractData.currency,
+                        notes: contractData.notes,
+                        agentId: opportunity.agentId || opportunity.contact?.assignedTo
+                      });
+
+                      await updateOpportunityStage(opportunity.id, 'CIERRE_GANADO');
+                      alert('🎉 ¡Venta registrada y trato cerrado con éxito!');
+                      onClose();
+                      window.location.reload();
+                    } catch (err: any) {
+                      alert(err.message || 'Error al registrar la venta');
+                    } finally {
+                      setSubmittingContract(false);
+                    }
+                  }}
+                  className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold shadow-xs shadow-brand-green/20"
+                >
+                  {submittingContract ? 'Registrando...' : 'Confirmar Cierre'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Contact Secondary Modal */}
       {isEditContactOpen && (
         <NewContactModal
           isOpen={isEditContactOpen}
@@ -768,10 +1306,11 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
           onSuccess={() => {
             setIsEditContactOpen(false);
             alert('¡Datos del contacto actualizados con éxito!');
-            window.location.reload(); // Reload to reflect updates
+            window.location.reload();
           }}
         />
       )}
+
     </div>
   );
 }

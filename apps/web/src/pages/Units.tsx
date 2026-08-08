@@ -36,10 +36,17 @@ export function Units() {
   const [activeTab, setActiveTab] = useState<'features' | 'description'>('features');
   const [saving, setSaving] = useState(false);
 
+  // Compact Toolbar States
+  const [showSearch, setShowSearch] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   const fetchUnits = async () => {
     try {
@@ -96,7 +103,6 @@ export function Units() {
       await updateProperty(selectedUnit.id, payload);
       await fetchUnits();
       
-      // Update selected state locally
       setSelectedUnit({
         ...selectedUnit,
         ...payload,
@@ -123,11 +129,16 @@ export function Units() {
     }
   };
 
-  // Dynamic client-side filtering
+  // Dynamic filtering
   const filteredUnits = units.filter(unit => {
     const term = searchQuery.toLowerCase();
     const projectMatch = !projectFilter || unit.projectId === projectFilter;
     const statusMatch = !statusFilter || unit.status === statusFilter;
+    const typeMatch = !typeFilter || unit.type === typeFilter;
+
+    const price = Number(unit.price || 0);
+    const minPriceMatch = !minPrice || price >= Number(minPrice);
+    const maxPriceMatch = !maxPrice || price <= Number(maxPrice);
     
     const searchMatch = !searchQuery || (
       unit.unitCode.toLowerCase().includes(term) ||
@@ -135,85 +146,151 @@ export function Units() {
       (unit.type && unit.type.toLowerCase().includes(term))
     );
     
-    return projectMatch && statusMatch && searchMatch;
+    return projectMatch && statusMatch && typeMatch && minPriceMatch && maxPriceMatch && searchMatch;
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col bg-slate-50/30 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Home className="w-6 h-6 text-brand-green" />
-            Unidades y Propiedades
+          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
+            Unidades
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Inventario general de unidades de proyectos inmobiliarios</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block mt-0.5">Inventario general de unidades inmobiliarias</p>
         </div>
-        <div className="flex flex-row items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+
+        {/* Compact Single-Row Action Buttons */}
+        <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
+          {showSearch && (
             <input 
               type="text" 
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
-              className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green w-full md:w-64 transition-all"
+              className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
+              autoFocus
             />
-          </div>
+          )}
+          
+          <button 
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-2 rounded-lg border transition-all ${showSearch ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`p-2 rounded-lg border transition-all ${showAdvancedFilters ? 'border-brand-green text-brand-green bg-brand-green/5' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex bg-brand-green hover:bg-brand-greenHover text-white p-2 md:px-4 md:py-2 rounded-lg text-sm font-medium items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 shrink-0"
+            className="p-2 rounded-lg bg-brand-green text-white hover:bg-brand-greenHover transition-all shadow-sm shadow-brand-green/10"
+            title="Nueva Unidad"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Nueva Unidad</span>
           </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
-        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+      {/* Stats Cards (Hidden on mobile) */}
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm text-left">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Total Unidades</p>
           <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">{units.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm text-left">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Disponibles</p>
           <p className="text-lg sm:text-2xl font-bold text-emerald-600 mt-1">{units.filter(u => u.status === 'DISPONIBLE').length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm text-left">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Separados / Reservados</p>
           <p className="text-lg sm:text-2xl font-bold text-purple-600 mt-1">{units.filter(u => u.status === 'SEPARADO' || u.status === 'RESERVADO').length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 sm:p-4 shadow-sm text-left">
           <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate font-sans">Vendidos</p>
           <p className="text-lg sm:text-2xl font-bold text-amber-600 mt-1">{units.filter(u => u.status === 'VENDIDO').length}</p>
         </div>
       </div>
 
-      {/* Toolbar / Filters */}
-      <div className="flex flex-col md:flex-row gap-4 shrink-0">
-        <select 
-          value={projectFilter} 
-          onChange={e => setProjectFilter(e.target.value)}
-          className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-700 cursor-pointer outline-none w-full md:w-48 font-medium"
-        >
-          <option value="">Todos los Proyectos</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-        <select 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-700 cursor-pointer outline-none w-full md:w-48 font-medium"
-        >
-          <option value="">Cualquier Estado</option>
-          <option value="DISPONIBLE">Disponible</option>
-          <option value="SEPARADO">Separado</option>
-          <option value="RESERVADO">Reservado</option>
-          <option value="VENDIDO">Vendido</option>
-        </select>
-      </div>
+      {/* Collapsible Advanced Filters */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Proyecto</label>
+            <select 
+              value={projectFilter} 
+              onChange={e => setProjectFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Todos los Proyectos</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Estado</label>
+            <select 
+              value={statusFilter} 
+              onChange={e => setStatusFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Estado</option>
+              <option value="DISPONIBLE">Disponible</option>
+              <option value="SEPARADO">Separado</option>
+              <option value="RESERVADO">Reservado</option>
+              <option value="VENDIDO">Vendido</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
+            <select 
+              value={typeFilter} 
+              onChange={e => setTypeFilter(e.target.value)}
+              className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
+            >
+              <option value="">Cualquier Tipo</option>
+              {Object.entries(TYPE_LABELS).map(([key, val]) => (
+                <option key={key} value={key}>{val}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Precio Mín ($)</label>
+            <input 
+              type="number"
+              value={minPrice}
+              onChange={e => setMinPrice(e.target.value)}
+              placeholder="Ej: 80000"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase">Precio Máx ($)</label>
+            <input 
+              type="number"
+              value={maxPrice}
+              onChange={e => setMaxPrice(e.target.value)}
+              placeholder="Ej: 250000"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
+            />
+          </div>
+
+        </div>
+      )}
 
       {/* Split Screen Area */}
       <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden min-h-0">
@@ -251,7 +328,7 @@ export function Units() {
                   >
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors">{unit.unitCode}</div>
-                      <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                      <div className="text-[10px] text-slate-505 flex items-center gap-1 mt-0.5">
                         <Building2 className="w-3 h-3 text-slate-400" /> 
                         {unit.project?.name || 'Sin proyecto'}
                       </div>
@@ -260,7 +337,7 @@ export function Units() {
                       <span className="text-slate-600 font-medium text-xs">{TYPE_LABELS[unit.type] || unit.type}</span>
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
-                      <div className="flex items-center gap-3 text-slate-500">
+                      <div className="flex items-center gap-3 text-slate-505">
                         <div className="flex items-center gap-1" title="Área Total">
                           <Maximize className="w-3.5 h-3.5 text-slate-400" />
                           <span className="text-xs">{unit.areaTotal} m²</span>
@@ -372,7 +449,7 @@ export function Units() {
                         <select
                           value={editData.projectId || ''}
                           onChange={e => setEditData({...editData, projectId: e.target.value})}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="">Selecciona proyecto...</option>
                           {projects.map(p => (
@@ -395,7 +472,7 @@ export function Units() {
                         <select
                           value={editData.type || 'DEPARTAMENTO'}
                           onChange={e => setEditData({...editData, type: e.target.value})}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="DEPARTAMENTO">Departamento</option>
                           <option value="DUPLEX">Dúplex</option>
@@ -419,7 +496,7 @@ export function Units() {
                         <select
                           value={editData.status || 'DISPONIBLE'}
                           onChange={e => setEditData({...editData, status: e.target.value})}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="DISPONIBLE">Disponible</option>
                           <option value="SEPARADO">Separado</option>
@@ -444,7 +521,7 @@ export function Units() {
                         <select
                           value={editData.currency || 'USD'}
                           onChange={e => setEditData({...editData, currency: e.target.value})}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
                         >
                           <option value="USD">USD ($)</option>
                           <option value="PEN">PEN (S/)</option>
