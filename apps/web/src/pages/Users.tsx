@@ -9,7 +9,7 @@ export function Users() {
   const { user } = useAuth();
   
   // Guard route for unauthorized roles
-  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
+  if (user?.role !== 'PROPIETARIO' && user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
     return <Navigate to="/" replace />;
   }
 
@@ -67,6 +67,7 @@ export function Users() {
 
   const getRoleBadgeColor = (role: string) => {
     switch(role) {
+      case 'PROPIETARIO': return 'bg-amber-100 text-amber-700';
       case 'ADMIN': return 'bg-purple-100 text-purple-700';
       case 'GERENTE_COMERCIAL': return 'bg-blue-100 text-blue-700';
       case 'AGENTE': return 'bg-brand-green/10 text-brand-green';
@@ -77,6 +78,7 @@ export function Users() {
 
   const getRoleName = (role: string) => {
     switch(role) {
+      case 'PROPIETARIO': return 'Propietario (Dueño)';
       case 'ADMIN': return 'Control Total';
       case 'GERENTE_COMERCIAL': return 'Supervisor / Gerente Comercial';
       case 'AGENTE': return 'Agente';

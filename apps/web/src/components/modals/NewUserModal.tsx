@@ -199,6 +199,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess, initialData }: NewUse
                     <option value="ASISTENTE">Asistente</option>
                     <option value="GERENTE_COMERCIAL">Gerente Comercial (Supervisor)</option>
                     <option value="ADMIN">Administrador (Control Total)</option>
+                    <option value="PROPIETARIO">Propietario (Dueño)</option>
                   </select>
                 </div>
                 

@@ -328,7 +328,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <div className="flex flex-col min-w-0">
                   <span className="text-white font-medium text-xs truncate">{user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Usuario'}</span>
                   <span className="text-slate-400 text-[10px] truncate">
-                    {user?.role === 'ADMIN' ? 'Control Total' : user?.role === 'GERENTE_COMERCIAL' ? 'Supervisor' : user?.role === 'AGENTE' ? 'Agente' : 'Asistente'}
+                    {user?.role === 'PROPIETARIO' ? 'Propietario' : user?.role === 'ADMIN' ? 'Control Total' : user?.role === 'GERENTE_COMERCIAL' ? 'Supervisor' : user?.role === 'AGENTE' ? 'Agente' : 'Asistente'}
                   </span>
                 </div>
               </div>
