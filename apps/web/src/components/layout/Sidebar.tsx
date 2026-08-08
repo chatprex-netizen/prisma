@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '../../contexts/AuthContext';
 
 type MenuItem = {
   icon: any;
@@ -51,14 +52,14 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
   {
     title: 'ADMINISTRACIÓN',
     items: [
-      { icon: UserCheck, label: 'Clientes', path: '/clients' },
-      { icon: FileText, label: 'Contratos', path: '/contracts' },
       {
-        icon: Wallet,
-        label: 'Finanzas',
-        id: 'finanzas',
+        icon: UserCheck,
+        label: 'Administración',
+        id: 'administracion',
         subItems: [
-          { icon: TrendingUp, label: 'Panel', path: '/finances' },
+          { icon: UserCheck, label: 'Clientes', path: '/clients' },
+          { icon: FileText, label: 'Contratos', path: '/contracts' },
+          { icon: Wallet, label: 'Finanzas', path: '/finances' },
           { icon: Receipt, label: 'Ingresos', path: '/finances/incomes' },
           { icon: Receipt, label: 'Egresos', path: '/finances/expenses' },
           { icon: BookOpen, label: 'Plan Contable', path: '/finances/accounts' },
@@ -69,9 +70,16 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
   {
     title: 'INVENTARIO',
     items: [
-      { icon: Building2, label: 'Proyectos', path: '/projects' },
-      { icon: Home, label: 'Unidades', path: '/units' },
-      { icon: Building2, label: 'Desarrolladoras', path: '/developers' },
+      {
+        icon: Building2,
+        label: 'Inventario',
+        id: 'inventario',
+        subItems: [
+          { icon: Building2, label: 'Proyectos', path: '/projects' },
+          { icon: Home, label: 'Unidades', path: '/units' },
+          { icon: Building2, label: 'Desarrolladoras', path: '/developers' },
+        ]
+      },
     ]
   },
   {
@@ -96,10 +104,12 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    finanzas: false
+    administracion: false,
+    inventario: false
   });
 
   const toggleMenu = (id: string) => {
@@ -108,6 +118,40 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       [id]: !prev[id]
     }));
   };
+
+  const filteredMenuGroups = menuGroups.map(group => {
+    const items = group.items.map(item => {
+      if (item.subItems) {
+        const filteredSubItems = item.subItems.filter(sub => {
+          if (user?.role === 'AGENTE' || user?.role === 'ASISTENTE') {
+            if (
+              sub.path === '/finances' || 
+              sub.path === '/finances/incomes' || 
+              sub.path === '/finances/expenses' || 
+              sub.path === '/finances/accounts'
+            ) {
+              return false;
+            }
+          }
+          return true;
+        });
+        return { ...item, subItems: filteredSubItems };
+      }
+      return item;
+    }).filter(item => {
+      if (user?.role === 'AGENTE' || user?.role === 'ASISTENTE') {
+        if (
+          item.path === '/users' || 
+          item.path === '/ai-assistants' || 
+          item.path === '/settings'
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return { ...group, items };
+  }).filter(group => group.items.length > 0);
 
   return (
     <>
@@ -165,7 +209,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           "flex-1 px-3 overflow-y-auto custom-scrollbar",
           isCollapsed ? "space-y-2 py-1 px-1.5" : "space-y-3.5 py-2 px-3" // Reduced spacing by 10%+
         )}>
-          {menuGroups.map((group, groupIdx) => (
+          {filteredMenuGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-0.5">
               {!isCollapsed ? (
                 <h3 className="px-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 mt-2">
@@ -281,24 +325,30 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <>
               <div className="flex items-center gap-3 mb-3.5 w-full">
                 <div className="w-9 h-9 rounded-full bg-brand-green/20 border border-brand-green/30 flex items-center justify-center text-brand-greenLight font-bold overflow-hidden shrink-0">
-                  <img src="https://ui-avatars.com/api/?name=Juan+Perez&background=02B875&color=fff" alt="User" className="w-full h-full object-cover" />
+                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || 'User')}+${encodeURIComponent(user?.lastName || '')}&background=02B875&color=fff`} alt="User" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-white font-medium text-xs truncate">Juan Pérez</span>
-                  <span className="text-slate-400 text-[10px] truncate">Administrador</span>
+                  <span className="text-white font-medium text-xs truncate">{user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Usuario'}</span>
+                  <span className="text-slate-400 text-[10px] truncate">
+                    {user?.role === 'ADMIN' ? 'Control Total' : user?.role === 'GERENTE_COMERCIAL' ? 'Supervisor' : user?.role === 'AGENTE' ? 'Agente' : 'Asistente'}
+                  </span>
                 </div>
               </div>
-              <button className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/10 text-slate-300 hover:text-red-400 text-xs font-medium transition-colors group">
+              <button 
+                onClick={logout}
+                className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/10 text-slate-300 hover:text-red-400 text-xs font-medium transition-colors group"
+              >
                 <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
                 <span>Cerrar sesión</span>
               </button>
             </>
           ) : (
             <>
-              <div className="w-9 h-9 rounded-full bg-brand-green/20 border border-brand-green/30 flex items-center justify-center text-brand-greenLight font-bold overflow-hidden shrink-0" title="Juan Pérez (Administrador)">
-                <img src="https://ui-avatars.com/api/?name=Juan+Perez&background=02B875&color=fff" alt="User" className="w-full h-full object-cover" />
+              <div className="w-9 h-9 rounded-full bg-brand-green/20 border border-brand-green/30 flex items-center justify-center text-brand-greenLight font-bold overflow-hidden shrink-0" title={user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Usuario'}>
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || 'User')}+${encodeURIComponent(user?.lastName || '')}&background=02B875&color=fff`} alt="User" className="w-full h-full object-cover" />
               </div>
               <button 
+                onClick={logout}
                 className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-slate-300 hover:text-red-400 transition-colors group"
                 title="Cerrar sesión"
               >

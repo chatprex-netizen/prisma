@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User, DollarSign, Building, Edit3 } from 'lucide-react';
+import { X, Calendar, Clock, Phone, Video, MapPin, FileSignature, MessageSquare, History, AlignLeft, CheckCircle2, User, DollarSign, Building, Edit3, ChevronRight } from 'lucide-react';
 import { getProperties, createContract, updateOpportunityStage, getAppointments, createAppointment, updateAppointment, updateContact } from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
 
@@ -238,56 +238,150 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             <X className="w-4 h-4" />
           </button>
         </div>
- 
-         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-           {/* Mobile Tab Selector (Select Dropdown for phone view) */}
-           <div className="block md:hidden w-full bg-slate-50 border-b border-slate-100 p-2 shrink-0">
-             <select
-               value={activeTab}
-               onChange={e => setActiveTab(e.target.value as any)}
-               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xxs bg-white font-bold text-slate-800 focus:outline-none"
-             >
-               <option value="TAREAS">📅 Tareas y Citas</option>
-               <option value="NOTAS">📝 Notas Libres</option>
-               <option value="HISTORIAL">⏱️ Historial</option>
-               <option value="CONTRATO">✍️ Registrar Contrato</option>
-             </select>
-           </div>
- 
-           {/* Sidebar Tabs (Desktop only) */}
-           <div className="hidden md:flex w-44 bg-slate-50 border-r border-slate-100 flex-col shrink-0 p-3.5 space-y-2.5">
-             <button
-               onClick={() => setActiveTab('TAREAS')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'TAREAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
-             >
-               <Calendar className="w-3.5 h-3.5" />
-               Tareas y Citas
-             </button>
-             <button
-               onClick={() => setActiveTab('NOTAS')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'NOTAS' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
-             >
-               <AlignLeft className="w-3.5 h-3.5" />
-               Notas Libres
-             </button>
-             <button
-               onClick={() => setActiveTab('HISTORIAL')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'HISTORIAL' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
-             >
-               <History className="w-3.5 h-3.5" />
-               Historial
-             </button>
-             <button
-               onClick={() => setActiveTab('CONTRATO')}
-               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xxs font-bold transition-all ${activeTab === 'CONTRATO' ? 'bg-brand-green/10 text-brand-green font-extrabold' : 'text-slate-600 hover:bg-slate-100'}`}
-             >
-               <FileSignature className="w-3.5 h-3.5" />
-               Registrar Contrato
-             </button>
-           </div>
- 
-           {/* Main Content Area */}
-           <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-5">
+
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden bg-slate-50/50">
+            
+            {/* Left Panel: HubSpot Profile & Client Info */}
+            <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-slate-200/80 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-4">
+              {/* Profile Card */}
+              <div className="text-center pb-4 border-b border-slate-200/60 text-left">
+                <div className="w-14 h-14 rounded-full bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-lg font-bold mx-auto mb-2 shadow-2xs">
+                  {opportunity.contact?.firstName?.substring(0, 1) || 'C'}
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 leading-tight text-center">
+                  {contactName}
+                </h3>
+                <p className="text-xxs text-slate-500 font-medium mt-0.5 text-center">{opportunity.contact?.phone || 'Sin teléfono'}</p>
+                
+                {/* circular quick actions */}
+                <div className="flex justify-center items-center gap-3.5 mt-4">
+                  {[
+                    { id: 'NOTAS', label: 'Nota', icon: AlignLeft, action: () => { setActiveTab('NOTAS'); } },
+                    { id: 'LLAMADA', label: 'Llamar', icon: Phone, action: () => { setActiveTab('TAREAS'); setTaskType('LLAMADA'); } },
+                    { id: 'TAREA', label: 'Tarea', icon: CheckCircle2, action: () => { setActiveTab('TAREAS'); setTaskType('OFICINA'); } },
+                    { id: 'REUNION', label: 'Reunión', icon: Calendar, action: () => { setActiveTab('TAREAS'); setTaskType('VIRTUAL'); } },
+                    { id: 'CONTRATO', label: 'Cierre', icon: FileSignature, action: () => { setActiveTab('CONTRATO'); } }
+                  ].map(btn => (
+                    <button
+                      key={btn.id}
+                      onClick={btn.action}
+                      className="flex flex-col items-center group focus:outline-none"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-brand-green group-hover:border-brand-green group-hover:bg-brand-green/5 transition-all shadow-2xs">
+                        <btn.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-slate-800 transition-colors">
+                        {btn.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* HubSpot Info Accordion */}
+              <div className="mt-4 text-left">
+                <details className="group" open>
+                  <summary className="flex items-center justify-between cursor-pointer list-none py-1.5 focus:outline-none">
+                    <div className="flex items-center gap-1.5">
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-open:rotate-90 transition-transform" />
+                      <span className="text-xxs font-extrabold text-slate-900 uppercase tracking-wider">Información cliente</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsEditContactOpen(true);
+                      }}
+                      className="text-brand-green hover:text-brand-greenHover text-[10px] font-bold shrink-0 hover:underline"
+                    >
+                      Editar
+                    </button>
+                  </summary>
+                  
+                  <div className="mt-2.5 space-y-3 pl-4 border-l border-slate-100">
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Propietario del contacto</span>
+                      <span className="block text-xxs font-extrabold text-slate-800">
+                        {opportunity.contact?.agent 
+                          ? `${opportunity.contact.agent.firstName} ${opportunity.contact.agent.lastName || ''}`.trim()
+                          : 'Sin Asignar'}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Número de teléfono</span>
+                      <span className="block text-xxs font-extrabold text-slate-800 font-mono">{opportunity.contact?.phone || '--'}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Correo electrónico</span>
+                      <span className="block text-xxs font-extrabold text-slate-800 break-all">{opportunity.contact?.email || '--'}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">DNI/Documento</span>
+                      <span className="block text-xxs font-extrabold text-slate-800 font-mono">{opportunity.contact?.dni || '--'}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Ciudad</span>
+                      <span className="block text-xxs font-extrabold text-slate-800">{opportunity.contact?.city || '--'}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Etapa del ciclo de vida</span>
+                      <div>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${opportunity.contact?.type === 'CLIENTE' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                          {opportunity.contact?.type || 'LEAD'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Presupuesto estimado</span>
+                      <span className="block text-xxs font-extrabold text-slate-800">
+                        {opportunity.contact?.currency === 'PEN' ? 'S/' : '$'} {Number(opportunity.contact?.budgetMin || 0).toLocaleString('es-PE', { minimumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Interés de compra</span>
+                      <span className="block text-xxs font-extrabold text-slate-800">
+                        {opportunity.contact?.interests && opportunity.contact.interests.length > 0 
+                          ? opportunity.contact.interests.join(', ')
+                          : 'Sin especificar'}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase">Zona de interés</span>
+                      <span className="block text-xxs font-extrabold text-slate-800">
+                        {[opportunity.contact?.district, opportunity.contact?.department].filter(Boolean).join(', ') || '--'}
+                      </span>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            {/* Right Panel: Tabs and Muro de Actividades */}
+            <div className="flex-1 flex flex-col overflow-hidden bg-white">
+              {/* Tabs Header */}
+              <div className="flex items-center gap-1 bg-slate-50 border-b border-slate-200/60 p-2 overflow-x-auto shrink-0 scrollbar-none text-left">
+                {[
+                  { id: 'TAREAS', label: '📅 Tareas y Citas' },
+                  { id: 'NOTAS', label: '📝 Notas Libres' },
+                  { id: 'HISTORIAL', label: '⏱️ Historial' },
+                  { id: 'CONTRATO', label: '✍️ Registrar Contrato' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xxs font-bold transition-all whitespace-nowrap ${
+                      activeTab === tab.id 
+                        ? 'bg-white text-slate-900 border border-slate-200 shadow-2xs font-extrabold' 
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Active Tab Content Area */}
+              <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-5">
              
              {/* TAB: TAREAS Y CITAS */}
              {activeTab === 'TAREAS' && (
@@ -664,6 +758,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
           </div>
         </div>
       </div>
+    </div>
 
       {isEditContactOpen && (
         <NewContactModal

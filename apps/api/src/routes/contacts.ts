@@ -50,7 +50,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 
     mapSourceToDb(req.body);
-    const { stage, currency, ...contactData } = req.body;
+    const { stage, ...contactData } = req.body;
 
     if (contactData.phone) {
       const existingPhone = await prisma.contact.findFirst({
@@ -82,7 +82,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
           agentId: contact.assignedTo || agentId,
           projectId: projectId,
           notes: contact.notes,
-          value: contact.budgetMin
+          value: contact.budgetMin,
+          currency: contact.currency
         }
       });
     }
@@ -97,7 +98,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     mapSourceToDb(req.body);
-    const { stage, currency, ...contactData } = req.body;
+    const { stage, ...contactData } = req.body;
 
     if (contactData.phone) {
       const existingPhone = await prisma.contact.findFirst({

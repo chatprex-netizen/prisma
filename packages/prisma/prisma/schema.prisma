@@ -115,6 +115,7 @@ model Property {
   status        UnitStatus @default(DISPONIBLE)
   price         Decimal    @db.Decimal(14, 2)
   pricePerM2    Decimal?   @db.Decimal(12, 2)
+  currency      String     @default("USD")
   areaTotal     Float? // m²
   areaTechada   Float?
   areaTerraza   Float?
@@ -190,6 +191,7 @@ model Contact {
   customSource  String?
   budgetMin Decimal?    @db.Decimal(14, 2)
   budgetMax Decimal?    @db.Decimal(14, 2)
+  currency  String      @default("USD")
   interests String[] // ["departamento", "penthouse"]
   tags      String[]
   notes     String?     @db.Text
@@ -245,6 +247,7 @@ model Opportunity {
   id            String        @id @default(uuid())
   stage         PipelineStage @default(PROSPECCION)
   value         Decimal?      @db.Decimal(14, 2)
+  currency      String        @default("USD")
   probability   Int           @default(0)
   expectedClose DateTime?
   notes         String?       @db.Text

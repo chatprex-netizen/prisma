@@ -145,6 +145,13 @@ export const getCampaign = (id: string) => fetchApi(`/campaigns/${id}`);
 export const createCampaign = (data: { name: string; templateId: string; contactIds: string[]; scheduledAt?: string }) => fetchApi('/campaigns', { method: 'POST', body: JSON.stringify(data) });
 
 // Users
-export const getUsers = () => fetchApi('/auth/users');
+export const getUsers = (all = false) => fetchApi(`/auth/users${all ? '?all=true' : ''}`);
+export const createUser = (data: any) => fetchApi('/auth/users', { method: 'POST', body: JSON.stringify(data) });
+export const updateUser = (id: string, data: any) => fetchApi(`/auth/users/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteUser = (id: string) => fetchApi(`/auth/users/${id}`, { method: 'DELETE' });
 export const sendCampaign = (id: string) => fetchApi(`/campaigns/${id}/send`, { method: 'POST' });
+
+// Company Settings
+export const getCompanyConfig = () => fetchApi('/settings/company');
+export const updateCompanyConfig = (data: any) => fetchApi('/settings/company', { method: 'POST', body: JSON.stringify(data) });
 

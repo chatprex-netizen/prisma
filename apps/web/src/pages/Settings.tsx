@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Settings as SettingsIcon, User, Building, Palette, Link2, Bell, Shield, Upload, Save, MessageCircle, CheckCircle2, XCircle, Eye, EyeOff, ChevronDown, ChevronUp, ExternalLink, Wifi, WifiOff, Loader2, PieChart as PieIcon, Plus } from 'lucide-react';
-import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource, getPipelineStages, updatePipelineStage } from '../lib/api';
+import { getLeadSources, createLeadSource, updateLeadSource, deleteLeadSource, getPipelineStages, updatePipelineStage, getCompanyConfig, updateCompanyConfig } from '../lib/api';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -350,7 +352,57 @@ function WhatsAppConnectionTab() {
 }
 
 export function Settings() {
+  const { user } = useAuth();
+
+  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
+    return <Navigate to="/" replace />;
+  }
+
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
+  const [defaultCurrency, setDefaultCurrency] = useState('PEN');
+  const [exchangeRate, setExchangeRate] = useState(3.75);
+  const [loadingCompany, setLoadingCompany] = useState(false);
+  const [savingCompany, setSavingCompany] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'empresa') {
+      (async () => {
+        setLoadingCompany(true);
+        try {
+          const res = await getCompanyConfig();
+          if (res.success && res.data) {
+            setDefaultCurrency(res.data.defaultCurrency || 'PEN');
+            setExchangeRate(res.data.exchangeRate || 3.75);
+          }
+        } catch (err) {
+          console.error('Error fetching company config:', err);
+        }
+        setLoadingCompany(false);
+      })();
+    }
+  }, [activeTab]);
+
+  const handleSaveSettings = async () => {
+    if (activeTab === 'empresa') {
+      setSavingCompany(true);
+      try {
+        const res = await updateCompanyConfig({
+          defaultCurrency,
+          exchangeRate: Number(exchangeRate)
+        });
+        if (res.success) {
+          alert('✅ Configuración de la empresa guardada exitosamente.');
+        } else {
+          alert('❌ Error: ' + res.error);
+        }
+      } catch (err: any) {
+        alert('❌ Error de red: ' + err.message);
+      }
+      setSavingCompany(false);
+    } else {
+      alert('✅ Ajustes actualizados (Simulación)');
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
@@ -360,8 +412,12 @@ export function Settings() {
           <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Ajustes del Sistema</h1>
           <p className="text-xs text-slate-500 mt-0.5">Configura y personaliza tu entorno de trabajo. Elige una sección para gestionarla.</p>
         </div>
-        <button className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 w-full md:w-auto justify-center">
-          <Save className="w-4 h-4" />
+        <button 
+          onClick={handleSaveSettings}
+          disabled={savingCompany}
+          className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 w-full md:w-auto justify-center disabled:opacity-60"
+        >
+          {savingCompany ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Guardar Cambios
         </button>
       </div>
@@ -437,44 +493,68 @@ export function Settings() {
 
           {/* TAB: EMPRESA */}
           {activeTab === 'empresa' && (
-            <div className="space-y-6 max-w-2xl">
+            <div className="space-y-6 max-w-2xl text-left">
               <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Configuración de la Empresa</h2>
               
-              <div className="flex items-center gap-6">
-                <div className="w-32 h-16 rounded bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors cursor-pointer group">
-                  <span className="text-xs font-medium">Subir Logo</span>
+              {loadingCompany ? (
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-green" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-slate-900">Logo del Workspace</h3>
-                  <p className="text-xs text-slate-500 mb-3">Este logo aparecerá en la barra lateral y en los PDF generados.</p>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-6">
+                    <div className="w-32 h-16 rounded bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors cursor-pointer group">
+                      <span className="text-xs font-medium">Subir Logo</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-900">Logo del Workspace</h3>
+                      <p className="text-xs text-slate-500 mb-3">Este logo aparecerá en la barra lateral y en los PDF generados.</p>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="block text-xs font-medium text-slate-700">Nombre de la Inmobiliaria</label>
-                  <input type="text" defaultValue="ChatPrex Inmobiliario" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
-                </div>
-                
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Moneda por Defecto</label>
-                  <select className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
-                    <option value="PEN">Soles (PEN - S/)</option>
-                    <option value="USD">Dólares Estadounidenses (USD - $)</option>
-                    <option value="EUR">Euros (EUR - €)</option>
-                    <option value="MXN">Pesos Mexicanos (MXN - $)</option>
-                  </select>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="block text-xs font-medium text-slate-700">Nombre de la Inmobiliaria</label>
+                      <input type="text" defaultValue="ChatPrex Inmobiliario" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-medium text-slate-700">Moneda por Defecto</label>
+                      <select 
+                        value={defaultCurrency}
+                        onChange={e => setDefaultCurrency(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
+                      >
+                        <option value="PEN">Soles (PEN - S/)</option>
+                        <option value="USD">Dólares Estadounidenses (USD - $)</option>
+                        <option value="EUR">Euros (EUR - €)</option>
+                        <option value="MXN">Pesos Mexicanos (MXN - $)</option>
+                      </select>
+                    </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Zona Horaria</label>
-                  <select className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
-                    <option value="America/Lima">(GMT-05:00) Lima</option>
-                    <option value="America/Bogota">(GMT-05:00) Bogotá</option>
-                    <option value="America/Mexico_City">(GMT-06:00) Ciudad de México</option>
-                  </select>
-                </div>
-              </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-medium text-slate-700">Tipo de Cambio por Defecto (USD a PEN)</label>
+                      <input
+                        type="number"
+                        step="0.001"
+                        value={exchangeRate}
+                        onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+                        placeholder="Ej. 3.75"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-medium text-slate-700">Zona Horaria</label>
+                      <select className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
+                        <option value="America/Lima">(GMT-05:00) Lima</option>
+                        <option value="America/Bogota">(GMT-05:00) Bogotá</option>
+                        <option value="America/Mexico_City">(GMT-06:00) Ciudad de México</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

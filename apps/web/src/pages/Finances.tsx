@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Receipt, BookOpen, Plus, Search, DollarSign, ChevronRight, Trash2, Edit } from 'lucide-react';
-import { getIncomes, getExpenses, getAccounts, deleteIncome, deleteExpense, deleteAccount } from '../lib/api';
+import { getIncomes, getExpenses, getAccounts, deleteIncome, deleteExpense, deleteAccount, getCompanyConfig } from '../lib/api';
 import { NewIncomeModal } from '../components/modals/NewIncomeModal';
 import { NewExpenseModal } from '../components/modals/NewExpenseModal';
 import { NewAccountModal } from '../components/modals/NewAccountModal';
@@ -54,6 +55,12 @@ const paymentMethodLabels: Record<string, string> = {
 };
 
 export function Finances() {
+  const { user } = useAuth();
+
+  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
+    return <Navigate to="/" replace />;
+  }
+
   const location = useLocation();
   const getTabFromPath = (): FinanceTab => {
     if (location.pathname.includes('/finances/incomes')) return 'incomes';
@@ -67,6 +74,8 @@ export function Finances() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exchangeRate, setExchangeRate] = useState<number>(3.75);
+  const [defaultCurrency, setDefaultCurrency] = useState<string>('PEN');
 
   // Modals visibility and edit states
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
@@ -87,10 +96,19 @@ export function Finances() {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [inc, exp, acc] = await Promise.allSettled([getIncomes(), getExpenses(), getAccounts()]);
+      const [inc, exp, acc, company] = await Promise.allSettled([
+        getIncomes(),
+        getExpenses(),
+        getAccounts(),
+        getCompanyConfig()
+      ]);
       if (inc.status === 'fulfilled') setIncomes(Array.isArray(inc.value) ? inc.value : []);
       if (exp.status === 'fulfilled') setExpenses(Array.isArray(exp.value) ? exp.value : []);
       if (acc.status === 'fulfilled') setAccounts(Array.isArray(acc.value) ? acc.value : []);
+      if (company.status === 'fulfilled' && company.value?.success && company.value?.data) {
+        setExchangeRate(company.value.data.exchangeRate || 3.75);
+        setDefaultCurrency(company.value.data.defaultCurrency || 'PEN');
+      }
     } catch (err) {
       console.error('Error loading finances:', err);
     } finally {
@@ -134,11 +152,31 @@ export function Finances() {
     }
   };
 
-  const totalIncomes = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.totalAmount || e.amount || 0), 0);
-  const balance = totalIncomes - totalExpenses;
-  const pendingIncomes = incomes.filter(i => i.status === 'PENDIENTE').reduce((sum, i) => sum + Number(i.amount || 0), 0);
-  const pendingExpenses = expenses.filter(e => e.status === 'PENDIENTE').reduce((sum, e) => sum + Number(e.totalAmount || e.amount || 0), 0);
+  const convertToPen = (amount: number, currency: string) => {
+    if (currency === 'USD') return amount * exchangeRate;
+    if (currency === 'EUR') return amount * (exchangeRate * 1.1);
+    return amount;
+  };
+
+  const convertToUsd = (amount: number, currency: string) => {
+    if (currency === 'PEN') return amount / exchangeRate;
+    if (currency === 'EUR') return amount * 1.1;
+    return amount;
+  };
+
+  // PEN totals
+  const totalIncomesPen = incomes.reduce((sum, i) => sum + convertToPen(Number(i.amount || 0), i.currency || 'PEN'), 0);
+  const totalExpensesPen = expenses.reduce((sum, e) => sum + convertToPen(Number(e.totalAmount || e.amount || 0), e.currency || 'PEN'), 0);
+  const balancePen = totalIncomesPen - totalExpensesPen;
+  const pendingIncomesPen = incomes.filter(i => i.status === 'PENDIENTE').reduce((sum, i) => sum + convertToPen(Number(i.amount || 0), i.currency || 'PEN'), 0);
+  const pendingExpensesPen = expenses.filter(e => e.status === 'PENDIENTE').reduce((sum, e) => sum + convertToPen(Number(e.totalAmount || e.amount || 0), e.currency || 'PEN'), 0);
+
+  // USD totals
+  const totalIncomesUsd = incomes.reduce((sum, i) => sum + convertToUsd(Number(i.amount || 0), i.currency || 'PEN'), 0);
+  const totalExpensesUsd = expenses.reduce((sum, e) => sum + convertToUsd(Number(e.totalAmount || e.amount || 0), e.currency || 'PEN'), 0);
+  const balanceUsd = totalIncomesUsd - totalExpensesUsd;
+  const pendingIncomesUsd = incomes.filter(i => i.status === 'PENDIENTE').reduce((sum, i) => sum + convertToUsd(Number(i.amount || 0), i.currency || 'PEN'), 0);
+  const pendingExpensesUsd = expenses.filter(e => e.status === 'PENDIENTE').reduce((sum, e) => sum + convertToUsd(Number(e.totalAmount || e.amount || 0), e.currency || 'PEN'), 0);
 
   const tabs: { id: FinanceTab; label: string; icon: any }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
@@ -189,10 +227,10 @@ export function Finances() {
             <div className="space-y-6">
               {/* KPI Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <KpiCard title="Balance Total" value={balance} color="blue" icon={<Wallet className="w-4 h-4" />} />
-                <KpiCard title="Total Ingresos" value={totalIncomes} color="green" icon={<ArrowUpRight className="w-4 h-4" />} subtitle={`${incomes.length} registros`} />
-                <KpiCard title="Total Egresos" value={totalExpenses} color="red" icon={<ArrowDownRight className="w-4 h-4" />} subtitle={`${expenses.length} registros`} />
-                <KpiCard title="Por Cobrar" value={pendingIncomes} color="amber" icon={<Receipt className="w-4 h-4" />} subtitle={`${incomes.filter(i => i.status === 'PENDIENTE').length} pendientes`} />
+                <KpiCard title="Balance Total" valuePen={balancePen} valueUsd={balanceUsd} color="blue" icon={<Wallet className="w-4 h-4" />} />
+                <KpiCard title="Total Ingresos" valuePen={totalIncomesPen} valueUsd={totalIncomesUsd} color="green" icon={<ArrowUpRight className="w-4 h-4" />} subtitle={`${incomes.length} registros`} />
+                <KpiCard title="Total Egresos" valuePen={totalExpensesPen} valueUsd={totalExpensesUsd} color="red" icon={<ArrowDownRight className="w-4 h-4" />} subtitle={`${expenses.length} registros`} />
+                <KpiCard title="Por Cobrar" valuePen={pendingIncomesPen} valueUsd={pendingIncomesUsd} color="amber" icon={<Receipt className="w-4 h-4" />} subtitle={`${incomes.filter(i => i.status === 'PENDIENTE').length} pendientes`} />
               </div>
 
               {/* Recent Activity */}
@@ -215,7 +253,7 @@ export function Finances() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-semibold text-emerald-600">+S/ {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</p>
+                          <p className="text-sm font-semibold text-emerald-600">+{inc.currency === 'USD' ? '$' : inc.currency === 'EUR' ? '€' : 'S/'} {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</p>
                           <p className="text-xs text-slate-400">{new Date(inc.date).toLocaleDateString('es-PE')}</p>
                         </div>
                       </div>
@@ -244,7 +282,7 @@ export function Finances() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-semibold text-red-500">-S/ {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</p>
+                          <p className="text-sm font-semibold text-red-500">-{exp.currency === 'USD' ? '$' : exp.currency === 'EUR' ? '€' : 'S/'} {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</p>
                           <p className="text-xs text-slate-400">{new Date(exp.date).toLocaleDateString('es-PE')}</p>
                         </div>
                       </div>
@@ -295,7 +333,7 @@ export function Finances() {
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">{incomeTypeLabels[inc.type] || inc.type}</span></td>
                         <td className="py-2 px-3 text-slate-700 font-medium">{inc.contact ? `${inc.contact.firstName} ${inc.contact.lastName || ''}` : '—'}</td>
                         <td className="py-2 px-3 text-slate-500 text-[11px]">{paymentMethodLabels[inc.paymentMethod] || inc.paymentMethod}</td>
-                        <td className="py-2 px-3 text-right font-bold text-emerald-600">S/ {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-2 px-3 text-right font-bold text-emerald-600">{inc.currency === 'USD' ? '$' : inc.currency === 'EUR' ? '€' : 'S/'} {Number(inc.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                         <td className="py-2 px-3"><StatusBadge status={inc.status} /></td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
@@ -366,7 +404,7 @@ export function Finances() {
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">{expenseCategoryLabels[exp.category] || exp.category}</span></td>
                         <td className="py-2 px-3 text-slate-700 font-medium">{exp.vendorName || '—'}</td>
                         <td className="py-2 px-3 text-slate-500 text-[11px]">{exp.docType}</td>
-                        <td className="py-2 px-3 text-right font-bold text-red-500">S/ {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-2 px-3 text-right font-bold text-red-500">{exp.currency === 'USD' ? '$' : exp.currency === 'EUR' ? '€' : 'S/'} {Number(exp.totalAmount || exp.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                         <td className="py-2 px-3"><StatusBadge status={exp.status} /></td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
@@ -507,11 +545,11 @@ export function Finances() {
 }
 
 // ─── Helper Components ───
-function KpiCard({ title, value, color, icon, subtitle }: { title: string; value: number; color: string; icon: React.ReactNode; subtitle?: string }) {
+function KpiCard({ title, valuePen, valueUsd, color, icon, subtitle }: { title: string; valuePen: number; valueUsd: number; color: string; icon: React.ReactNode; subtitle?: string }) {
   const colorMap: Record<string, { bg: string; text: string; iconBg: string }> = {
     blue: { bg: 'bg-white border-blue-100', text: 'text-blue-600', iconBg: 'bg-blue-50/50' },
     green: { bg: 'bg-white border-emerald-100', text: 'text-emerald-600', iconBg: 'bg-emerald-50/50' },
-    red: { bg: 'bg-white border-red-100', text: 'text-red-650', iconBg: 'bg-red-50/50' },
+    red: { bg: 'bg-white border-red-100', text: 'text-red-655', iconBg: 'bg-red-50/50' },
     amber: { bg: 'bg-white border-amber-100', text: 'text-amber-600', iconBg: 'bg-amber-50/50' },
   };
   const c = colorMap[color] || colorMap.blue;
@@ -522,10 +560,15 @@ function KpiCard({ title, value, color, icon, subtitle }: { title: string; value
         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{title}</p>
         <div className={`w-7 h-7 rounded-full ${c.iconBg} flex items-center justify-center ${c.text}`}>{icon}</div>
       </div>
-      <p className={`text-base sm:text-lg font-bold leading-tight ${value >= 0 ? 'text-slate-900' : 'text-red-650'}`}>
-        S/ {value.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-      </p>
-      {subtitle && <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{subtitle}</p>}
+      <div className="space-y-0.5">
+        <p className={`text-sm sm:text-base font-bold leading-tight ${valuePen >= 0 ? 'text-slate-900' : 'text-red-655'}`}>
+          S/ {valuePen.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-slate-500 font-medium">
+          $ {valueUsd.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
+      {subtitle && <p className="text-[10px] text-slate-400 mt-1 font-medium">{subtitle}</p>}
     </div>
   );
 }

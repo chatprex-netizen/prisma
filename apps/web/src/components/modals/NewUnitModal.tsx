@@ -55,9 +55,8 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
     try {
       setLoading(true);
       // Clean and map fields to match the database schema
-      const { currency, ...restData } = formData;
       await createProperty({
-        ...restData,
+        ...formData,
         projectId: formData.projectId || undefined,
         price: Number(formData.price),
         areaTotal: formData.areaTotal ? Number(formData.areaTotal) : null,

@@ -116,4 +116,58 @@ router.post('/whatsapp/test', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/settings/company - Get default currency and exchange rate
+router.get('/company', async (req: Request, res: Response) => {
+  try {
+    const configs = await prisma.systemConfig.findMany({
+      where: { key: { in: ['DEFAULT_CURRENCY', 'EXCHANGE_RATE'] } }
+    });
+
+    const configMap: Record<string, string> = {};
+    for (const cfg of configs) {
+      configMap[cfg.key] = cfg.value;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        defaultCurrency: configMap['DEFAULT_CURRENCY'] || 'PEN',
+        exchangeRate: parseFloat(configMap['EXCHANGE_RATE'] || '3.75')
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/settings/company - Save default currency and exchange rate
+router.post('/company', async (req: Request, res: Response) => {
+  try {
+    const { defaultCurrency, exchangeRate } = req.body;
+
+    if (defaultCurrency) {
+      await prisma.systemConfig.upsert({
+        where: { key: 'DEFAULT_CURRENCY' },
+        update: { value: defaultCurrency },
+        create: { key: 'DEFAULT_CURRENCY', value: defaultCurrency }
+      });
+    }
+
+    if (exchangeRate !== undefined) {
+      if (isNaN(Number(exchangeRate)) || Number(exchangeRate) <= 0) {
+        return res.status(400).json({ success: false, error: 'El tipo de cambio debe ser un número válido mayor a 0' });
+      }
+      await prisma.systemConfig.upsert({
+        where: { key: 'EXCHANGE_RATE' },
+        update: { value: String(exchangeRate) },
+        create: { key: 'EXCHANGE_RATE', value: String(exchangeRate) }
+      });
+    }
+
+    res.json({ success: true, message: 'Configuración de la empresa guardada correctamente.' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;

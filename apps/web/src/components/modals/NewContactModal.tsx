@@ -127,7 +127,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
 
     try {
       setLoading(true);
-      const { currency, projectOfInterest, assignedUserId, ...restOfData } = formData;
+      const { projectOfInterest, assignedUserId, ...restOfData } = formData;
       const payload = {
         ...restOfData,
         budgetMin: formData.budgetMin ? Number(formData.budgetMin) : null,

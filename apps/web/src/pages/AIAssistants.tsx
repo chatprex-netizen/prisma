@@ -1,7 +1,15 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Bot, Plus, Sparkles, Save, FileText, Settings2, Zap, RefreshCw, UploadCloud, ChevronRight } from 'lucide-react';
 
 export function AIAssistants() {
+  const { user } = useAuth();
+
+  if (user?.role !== 'ADMIN' && user?.role !== 'GERENTE_COMERCIAL') {
+    return <Navigate to="/" replace />;
+  }
+
   const [activeTab, setActiveTab] = useState<'PERSONALIDAD' | 'MOTOR_IA' | 'CONOCIMIENTO' | 'AJUSTES_PRO'>('PERSONALIDAD');
 
   return (
