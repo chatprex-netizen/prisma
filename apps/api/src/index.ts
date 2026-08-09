@@ -29,6 +29,12 @@ import chatsRoutes from './routes/chats';
 import templatesRoutes from './routes/templates';
 import campaignsRoutes from './routes/campaigns';
 import settingsRoutes from './routes/settings';
+import uploadRoutes from './routes/upload';
+import activitiesRoutes from './routes/activities';
+import path from 'path';
+
+// Serve static files from uploads folder
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/webhooks', webhookRoutes);
@@ -43,6 +49,8 @@ app.use('/api/chats', chatsRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/campaigns', campaignsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/activities', activitiesRoutes);
 
 // ─── HEALTH CHECK ───
 app.get('/api/health', (req: Request, res: Response) => {

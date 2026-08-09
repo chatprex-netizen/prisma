@@ -205,7 +205,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* Navigation */}
         <nav className={clsx(
           "flex-1 px-3 overflow-y-auto custom-scrollbar",
-          isCollapsed ? "space-y-2 py-1 px-1.5" : "space-y-3.5 py-2 px-3" // Reduced spacing by 10%+
+          isCollapsed ? "space-y-2 py-1 px-1.5" : "space-y-3.5 py-2 px-3"
         )}>
           {filteredMenuGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-0.5">
@@ -232,7 +232,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                           className={twMerge(
                             clsx(
                               "w-full flex items-center rounded-lg text-sm font-medium transition-all duration-200 ease-in-out group",
-                              isCollapsed ? "p-2 justify-center" : "px-3 py-2 justify-between", // Reduced padding
+                              isCollapsed ? "p-2 justify-center" : "px-3 py-1.5 justify-between",
                               isSubItemActive || isExpanded
                                 ? "bg-white/5 text-white" 
                                 : "hover:bg-white/5 hover:text-white text-slate-300"
@@ -295,7 +295,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         className={twMerge(
                           clsx(
                             "flex items-center rounded-lg text-sm font-medium transition-all duration-200 ease-in-out group",
-                            isCollapsed ? "p-2 justify-center" : "px-3 py-2 gap-3", // Reduced padding
+                            isCollapsed ? "p-2 justify-center" : "px-3 py-1.5 gap-3", // Reduced padding
                             isActive 
                               ? "bg-brand-green text-white shadow-md shadow-brand-green/20" 
                               : "hover:bg-white/5 hover:text-white text-slate-300"

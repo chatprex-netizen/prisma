@@ -1,13 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Get all appointments
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    let whereClause = {};
+
+    if (userRole === 'AGENTE' || userRole === 'ASISTENTE') {
+      whereClause = { agentId: userId };
+    }
+
     const appointments = await prisma.appointment.findMany({
+      where: whereClause,
       include: {
         contact: { select: { firstName: true, lastName: true } },
         project: { select: { name: true } },
@@ -22,7 +32,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Create new appointment
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
     const appointment = await prisma.appointment.create({ data: req.body });
     res.status(201).json({ success: true, data: appointment });
@@ -32,7 +42,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update appointment
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const appointment = await prisma.appointment.update({
       where: { id: req.params.id },
@@ -45,7 +55,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete appointment
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     await prisma.appointment.delete({ where: { id: req.params.id } });
     res.json({ success: true, message: 'Appointment deleted successfully' });

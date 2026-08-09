@@ -105,35 +105,35 @@ export function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {!isLogin && (
               <div className="flex gap-4">
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Nombre</label>
+                  <label className="block text-[10px] font-medium text-brand-green">Nombre</label>
                   <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Apellido</label>
+                  <label className="block text-[10px] font-medium text-brand-green">Apellido</label>
                   <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">Correo</label>
+              <label className="block text-[10px] font-medium text-brand-green">Correo</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">Contraseña</label>
+              <label className="block text-[10px] font-medium text-brand-green">Contraseña</label>
               <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
 

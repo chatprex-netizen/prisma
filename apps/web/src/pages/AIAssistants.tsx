@@ -63,7 +63,7 @@ export function AIAssistants() {
               <span className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></span>
               Motor Activo
             </div>
-            <button className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+            <button className="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
               <Save className="w-4 h-4" />
               Guardar Cambios
             </button>
@@ -169,17 +169,17 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
                   </label>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3.5">
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium text-slate-700">Api key (clave de acceso)</label>
-                    <input type="password" placeholder="sk-..." className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                    <label className="block text-[10px] font-medium text-brand-green">Api key (clave de acceso)</label>
+                    <input type="password" placeholder="sk-..." className="w-full px-3 py-1.5.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     <p className="text-xs text-slate-500 mt-1">Tu clave segura para conectarse al proveedor seleccionado.</p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium text-slate-700">Modelo específico</label>
-                    <select className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-700 font-medium">
+                    <label className="block text-[10px] font-medium text-brand-green">Modelo específico</label>
+                    <select className="w-full px-3 py-1.5.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-700 font-medium">
                       <option value="gpt-4o-mini">gpt-4o-mini (Recomendado - Rápido y económico)</option>
                       <option value="gpt-4o">gpt-4o (Mayor inteligencia, más costoso)</option>
                       <option value="gpt-3.5-turbo">gpt-3.5-turbo (Legado)</option>
@@ -188,7 +188,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between">
-                      <label className="block text-sm font-medium text-slate-700">Temperatura: <span className="text-brand-green">0.7</span></label>
+                      <label className="block text-[10px] font-medium text-brand-green">Temperatura: <span className="text-brand-green">0.7</span></label>
                     </div>
                     <input type="range" min="0" max="2" step="0.1" defaultValue="0.7" className="w-full accent-brand-green" />
                     <div className="flex justify-between text-xs text-slate-400">
@@ -198,8 +198,8 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
                   </div>
 
                   <div className="space-y-1.5 pt-4">
-                    <label className="block text-sm font-medium text-slate-700">Token limit (max tokens)</label>
-                    <input type="number" defaultValue={500} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                    <label className="block text-[10px] font-medium text-brand-green">Token limit (max tokens)</label>
+                    <input type="number" defaultValue={500} className="w-full px-3 py-1.5.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     <p className="text-xs text-slate-500 mt-1">Límite de longitud para la respuesta del bot para ahorrar costos.</p>
                   </div>
                 </div>
@@ -232,7 +232,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
 
           {/* TAB: Ajustes Pro */}
           {activeTab === 'AJUSTES_PRO' && (
-            <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="max-w-4xl mx-auto space-y-3.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <SettingToggle
                 title="Transcripción de audios"
                 description="Convierte notas de voz entrantes de WhatsApp a texto y las procesa con IA automáticamente."
@@ -262,7 +262,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
               <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm mt-6">
                 <h4 className="text-sm font-semibold text-slate-900 mb-1">Palabras clave de activación (Opcional)</h4>
                 <p className="text-xs text-slate-500 mb-3">El bot se activará solo al detectar estos términos exactos en el chat. Déjalo en blanco para responder a todo.</p>
-                <input type="text" className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" placeholder="Ej: info, cotización, proyecto..." />
+                <input type="text" className="w-full px-3 py-1.5.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" placeholder="Ej: info, cotización, proyecto..." />
               </div>
             </div>
           )}

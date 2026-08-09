@@ -123,7 +123,7 @@ export function NotificationsDropdown() {
             )}
           </div>
           
-          <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 text-center">
+          <div className="px-3 py-1.5 border-t border-slate-100 bg-slate-50/50 text-center">
             <button className="text-xs font-medium text-slate-600 hover:text-brand-green transition-colors">
               Ver todo el historial
             </button>

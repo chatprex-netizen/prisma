@@ -151,7 +151,7 @@ function WhatsAppConnectionTab() {
           </div>
 
           {/* API Credentials Card */}
-          <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+          <div className="border border-slate-200 rounded-xl p-5 space-y-3.5 bg-white">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Credenciales API</h3>
               <p className="text-xs text-slate-500 mt-0.5">Ingrese sus credenciales de Meta WhatsApp Business API.</p>
@@ -159,35 +159,35 @@ function WhatsAppConnectionTab() {
 
             {/* Phone Number ID */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-[10px] font-medium text-brand-green">
                 Identificación del número de teléfono <span className="text-red-500">*</span>
               </label>
               <input type="text" value={waCreds.phoneNumberId} onChange={e => setWaCreds({...waCreds, phoneNumberId: e.target.value})}
                 placeholder="e.g. 100234567890123"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
             </div>
 
             {/* WABA ID */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-[10px] font-medium text-brand-green">
                 ID de cuenta empresarial de WhatsApp (WABA ID) <span className="text-red-500">*</span>
               </label>
               <input type="text" value={waCreds.wabaId} onChange={e => setWaCreds({...waCreds, wabaId: e.target.value})}
                 placeholder="e.g. chatprex@gmail.com o ID numérico"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
             </div>
 
             {/* Access Token */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-[10px] font-medium text-brand-green">
                 Token de acceso permanente <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input type={showToken ? 'text' : 'password'} value={waCreds.accessToken} onChange={e => setWaCreds({...waCreds, accessToken: e.target.value})}
                   placeholder="EAAxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  className="w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-mono"
+                  className="w-full px-3 py-1.5 pr-10 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-mono"
                 />
                 <button
                   type="button"
@@ -201,25 +201,25 @@ function WhatsAppConnectionTab() {
 
             {/* Webhook Verify Token */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-[10px] font-medium text-brand-green">
                 Token de verificación de webhook <span className="text-red-500">*</span>
               </label>
               <input type="text" value={waCreds.webhookToken} onChange={e => setWaCreds({...waCreds, webhookToken: e.target.value})}
                 placeholder="Crear un token de verificación personalizado"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
               <p className="text-[10px] text-slate-400">Una cadena personalizada que usted crea. Debe coincidir con el token que configuró en la configuración del meta webhook.</p>
             </div>
 
             {/* 2FA PIN */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-[10px] font-medium text-brand-green">
                 PIN de verificación en dos pasos <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
               <input type="password" value={waCreds.pin} onChange={e => setWaCreds({...waCreds, pin: e.target.value})}
                 placeholder="PIN de 6 dígitos de Meta WhatsApp Manager"
                 maxLength={6}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all tracking-widest font-mono"
+                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all tracking-widest font-mono"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ function WhatsAppConnectionTab() {
           <div className="border border-blue-100 bg-blue-50 rounded-xl p-4 space-y-2">
             <h4 className="text-xs font-semibold text-blue-800 uppercase tracking-wider">URL de Webhook (para Meta)</h4>
             <p className="text-xs text-blue-700">Copia esta URL en la configuración de tu aplicación Meta:</p>
-            <div className="bg-white border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-2">
+            <div className="bg-white border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
               <code className="text-xs text-slate-700 flex-1 break-all">
                 {window.location.hostname === 'localhost' 
                   ? 'https://tu-dominio.com/api/webhooks/whatsapp'
@@ -248,7 +248,7 @@ function WhatsAppConnectionTab() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-green-500/20 flex items-center justify-center gap-2 disabled:opacity-60"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5.5 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-green-500/20 flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? 'Guardando...' : 'Guardar Credenciales'}
@@ -256,7 +256,7 @@ function WhatsAppConnectionTab() {
             <button
               onClick={handleTestConnection}
               disabled={testing || !connected}
-              className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-40"
+              className="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-40"
               title={!connected ? 'Guarda las credenciales primero' : 'Probar conexión con Meta API'}
             >
               {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
@@ -289,7 +289,7 @@ function WhatsAppConnectionTab() {
         </div>
 
         {/* Right: Setup Instructions */}
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           <div className="border border-slate-200 rounded-xl p-5 bg-slate-50">
             <h3 className="text-sm font-semibold text-slate-900 mb-1">Instrucciones de configuración</h3>
             <p className="text-xs text-slate-500 mb-4">Siga estos pasos para conectar su API de WhatsApp Business.</p>
@@ -395,7 +395,7 @@ export function Settings() {
         <button 
           onClick={handleSaveSettings}
           disabled={savingCompany}
-          className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 w-full md:w-auto justify-center disabled:opacity-60"
+          className="bg-brand-green hover:bg-brand-greenHover text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm shadow-brand-green/20 w-full md:w-auto justify-center disabled:opacity-60"
         >
           {savingCompany ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Guardar Cambios
@@ -418,7 +418,7 @@ export function Settings() {
             <button
               key={id}
               onClick={() => setActiveTab(id as TabType)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-1.5.5 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === id ? 'bg-slate-100 text-brand-green' : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -456,16 +456,16 @@ export function Settings() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Nombre</label>
-                  <input type="text" defaultValue="Carlos" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                  <label className="block text-[10px] font-medium text-brand-green">Nombre</label>
+                  <input type="text" defaultValue="Carlos" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Apellido</label>
-                  <input type="text" defaultValue="Mendoza" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                  <label className="block text-[10px] font-medium text-brand-green">Apellido</label>
+                  <input type="text" defaultValue="Mendoza" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                 </div>
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="block text-xs font-medium text-slate-700">Correo electrónico</label>
-                  <input type="email" defaultValue="carlos.mendoza@inmobiliaria.com" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50" readOnly />
+                  <label className="block text-[10px] font-medium text-brand-green">Correo electrónico</label>
+                  <input type="email" defaultValue="carlos.mendoza@inmobiliaria.com" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50" readOnly />
                 </div>
               </div>
             </div>
@@ -494,14 +494,14 @@ export function Settings() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5 md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700">Nombre de la inmobiliaria</label>
-                      <input type="text" defaultValue="ChatPrex Inmobiliario" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                      <label className="block text-[10px] font-medium text-brand-green">Nombre de la inmobiliaria</label>
+                      <input type="text" defaultValue="ChatPrex Inmobiliario" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     </div>
                     
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Moneda por defecto</label>
+                      <label className="block text-[10px] font-medium text-brand-green">Moneda por defecto</label>
                       <select value={defaultCurrency} onChange={e => setDefaultCurrency(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
                       >
                         <option value="PEN">Soles (PEN - S/)</option>
                         <option value="USD">Dólares Estadounidenses (USD - $)</option>
@@ -511,16 +511,16 @@ export function Settings() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Tipo de cambio por defecto (usd a pen)</label>
+                      <label className="block text-[10px] font-medium text-brand-green">Tipo de cambio por defecto (usd a pen)</label>
                       <input type="number" step="0.001" value={exchangeRate} onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
                         placeholder="Ej. 3.75"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Zona horaria</label>
-                      <select className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
+                      <label className="block text-[10px] font-medium text-brand-green">Zona horaria</label>
+                      <select className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
                         <option value="America/Lima">(GMT-05:00) Lima</option>
                         <option value="America/Bogota">(GMT-05:00) Bogotá</option>
                         <option value="America/Mexico_City">(GMT-06:00) Ciudad de México</option>
@@ -537,8 +537,8 @@ export function Settings() {
             <div className="space-y-6 max-w-2xl">
               <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Apariencia y Tema</h2>
               
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-slate-700">Tema del sistema</label>
+              <div className="space-y-3.5">
+                <label className="block text-[10px] font-medium text-brand-green">Tema del sistema</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="border-2 border-brand-green bg-slate-50 rounded-xl p-4 cursor-pointer relative">
                     <div className="absolute top-2 right-2 w-4 h-4 bg-brand-green rounded-full flex items-center justify-center">
@@ -629,35 +629,35 @@ export function Settings() {
             <div className="space-y-6 max-w-2xl">
               <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Seguridad y Permisos</h2>
               
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 <h3 className="text-sm font-medium text-slate-900">Cambiar Contraseña</h3>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Contraseña actual</label>
-                  <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                  <label className="block text-[10px] font-medium text-brand-green">Contraseña actual</label>
+                  <input type="password" placeholder="••••••••" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-700">Nueva contraseña</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                    <label className="block text-[10px] font-medium text-brand-green">Nueva contraseña</label>
+                    <input type="password" placeholder="••••••••" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-700">Confirmar nueva contraseña</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
+                    <label className="block text-[10px] font-medium text-brand-green">Confirmar nueva contraseña</label>
+                    <input type="password" placeholder="••••••••" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                   </div>
                 </div>
-                <button className="text-xs font-medium text-brand-green bg-brand-green/10 px-4 py-2 rounded-lg hover:bg-brand-green/20 transition-colors">
+                <button className="text-xs font-medium text-brand-green bg-brand-green/10 px-3 py-1.5 rounded-lg hover:bg-brand-green/20 transition-colors">
                   Actualizar Contraseña
                 </button>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-slate-100 space-y-4">
+              <div className="pt-6 mt-6 border-t border-slate-100 space-y-3.5">
                 <h3 className="text-sm font-medium text-slate-900">Autenticación de Dos Pasos (2FA)</h3>
                 <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50/50">
                   <div>
                     <p className="text-sm font-medium text-slate-800">Protege tu cuenta</p>
                     <p className="text-xs text-slate-500 mt-0.5">Añade una capa extra de seguridad usando una app autenticadora.</p>
                   </div>
-                  <button className="text-xs font-medium bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors">
+                  <button className="text-xs font-medium bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors">
                     Activar 2FA
                   </button>
                 </div>
@@ -759,7 +759,7 @@ function LeadSourcesTab() {
           <label className="block text-xs font-semibold text-slate-700">Nombre de la fuente</label>
           <input type="text" value={newName} onChange={e => setNewName(e.target.value)} 
             placeholder="Ej. Facebook Ads, TikTok Orgánico" 
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
+            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
             required
           />
         </div>

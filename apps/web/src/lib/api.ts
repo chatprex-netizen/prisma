@@ -24,9 +24,12 @@ function getApiUrl(): string {
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
+
+  if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -53,6 +56,15 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     throw err;
   }
 }
+
+// Documents
+export const uploadDocument = (formData: FormData) => fetchApi('/upload', { method: 'POST', body: formData });
+export const getDocuments = (contactId?: string, propertyId?: string) => {
+  const params = new URLSearchParams();
+  if (contactId) params.append('contactId', contactId);
+  if (propertyId) params.append('propertyId', propertyId);
+  return fetchApi(`/upload?${params.toString()}`);
+};
 
 // Contacts
 export const getContacts = () => fetchApi('/contacts');
@@ -126,6 +138,14 @@ export const deleteAppointment = (id: string) => fetchApi(`/appointments/${id}`,
 export const getContracts = () => fetchApi('/contracts');
 export const createContract = (data: any) => fetchApi('/contracts', { method: 'POST', body: JSON.stringify(data) });
 export const updateContract = (id: string, data: any) => fetchApi(`/contracts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+// Activities (Audit Trail)
+export const getActivities = (contactId?: string, opportunityId?: string) => {
+  const query = new URLSearchParams();
+  if (contactId) query.append('contactId', contactId);
+  if (opportunityId) query.append('opportunityId', opportunityId);
+  return fetchApi(`/activities?${query.toString()}`);
+};
 export const deleteContract = (id: string) => fetchApi(`/contracts/${id}`, { method: 'DELETE' });
 
 // Chats (WhatsApp)

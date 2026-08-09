@@ -140,7 +140,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
         </div>
 
         {/* Body */}
-        <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1">
+        <div className="p-4 md:p-5 overflow-y-auto space-y-3.5 flex-1">
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Título del evento *</label>
             <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
@@ -191,7 +191,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
             </div>
           </div>
 
-          <div className="space-y-4 p-4 md:p-5 border border-slate-100 rounded-lg bg-slate-50/50">
+          <div className="space-y-3.5 p-4 md:p-5 border border-slate-100 rounded-lg bg-slate-50/50">
             <h3 className="text-[11px] font-semibold text-slate-800 uppercase tracking-wider">Detalles de la Cita</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -250,14 +250,14 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+            className="px-3 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
           >
             {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Agendar Cita')}
           </button>

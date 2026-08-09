@@ -7,9 +7,10 @@ import {
 import { 
   getProperties, updateProperty, createContract, updateOpportunityStage, 
   getAppointments, createAppointment, updateAppointment, 
-  updateContact, getUsers 
+  updateContact, getUsers, getActivities 
 } from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
+import DocumentList from '../documents/DocumentList';
 
 interface OpportunityDetailModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   const [isCallOpen, setIsCallOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [isContractOpen, setIsContractOpen] = useState(false);
+  const [isDocumentOpen, setIsDocumentOpen] = useState(false);
 
   // Timeline Filter state
   const [timelineFilter, setTimelineFilter] = useState<'TODOS' | 'TASK' | 'CITA' | 'NOTE' | 'COMM'>('TODOS');
@@ -90,6 +92,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   });
   const [submittingContract, setSubmittingContract] = useState(false);
 
+  const [activities, setActivities] = useState<any[]>([]);
+
   const fetchAppointments = async () => {
     if (!opportunity?.contactId) return;
     try {
@@ -97,8 +101,11 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
       const res = await getAppointments();
       const contactAppts = (res?.data || []).filter((a: any) => a.contactId === opportunity.contactId);
       setAppointments(contactAppts);
+
+      const actRes = await getActivities(undefined, opportunity.id);
+      setActivities(actRes?.data || []);
     } catch (err) {
-      console.error('Error fetching appointments:', err);
+      console.error('Error fetching appointments or activities:', err);
     } finally {
       setLoadingAppts(false);
     }
@@ -434,19 +441,17 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
       }
     });
 
-    // 2. Add opportunity log activities
-    if (opportunity.activities) {
-      opportunity.activities.forEach((act: any) => {
-        events.push({
-          id: act.id,
-          type: 'ACTIVITY_LOG',
-          title: act.description,
-          description: `Registrado por ${act.user?.firstName || 'Asesor'}`,
-          date: new Date(act.createdAt),
-          raw: act
-        });
+    // 2. Add log activities
+    activities.forEach((act: any) => {
+      events.push({
+        id: act.id,
+        type: 'ACTIVITY_LOG',
+        title: act.description,
+        description: `Registrado por ${act.user?.firstName || 'Sistema'}`,
+        date: new Date(act.createdAt),
+        raw: act
       });
-    }
+    });
 
     // 3. Add legacy notes
     const legacy = parseNotes(opportunity.contact?.notes || '');
@@ -594,9 +599,22 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
 
 
 
+            {/* Documentos */}
+            <button 
+              onClick={() => { setIsDocumentOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsContractOpen(false); }}
+              className="flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:border-blue-600 group-hover:bg-blue-50 transition-all shadow-sm">
+                <FileText className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                Documentos
+              </span>
+            </button>
+
             {/* Cierre (Contrato) */}
             <button 
-              onClick={() => setIsContractOpen(true)}
+              onClick={() => { setIsContractOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); }}
               className="flex flex-col items-center gap-1 group focus:outline-none"
             >
               <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-emerald-600 group-hover:border-emerald-600 group-hover:bg-emerald-50 transition-all shadow-sm">
@@ -610,7 +628,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
           </div>
 
           {/* Unified Chronological Timeline (Historial de Actividades) */}
-          <div className="flex-1 space-y-4 text-left">
+          <div className="flex-1 space-y-3.5 text-left">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-2 gap-3">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <History className="w-4 h-4 text-slate-500" />
@@ -1007,7 +1025,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                 <label className="block text-[10px] font-medium text-brand-green ">Contenido de la nota *</label>
                 <textarea value={noteContent} onChange={e => setNoteContent(e.target.value)}
                   placeholder="Ej: El cliente está interesado en comprar en preventa si se le da un descuento del 3%..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-32 font-semibold"
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-32 font-semibold"
                   required
                 />
               </div>
@@ -1089,7 +1107,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                 <label className="block text-[10px] font-medium text-brand-green ">Contenido del mensaje *</label>
                 <textarea value={msgDetails} onChange={e => setMsgDetails(e.target.value)}
                   placeholder="Copia el texto del mensaje enviado..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-24 font-semibold"
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white resize-none h-24 font-semibold"
                   required
                 />
               </div>
@@ -1195,7 +1213,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                 <label className="block text-[10px] font-medium text-brand-green ">Comentarios de cierre</label>
                 <textarea value={contractData.notes} onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Indica las cuotas, condiciones acordadas..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-16"
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white resize-none h-16"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">

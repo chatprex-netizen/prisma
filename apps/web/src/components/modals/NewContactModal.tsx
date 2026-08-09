@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { createContact, updateContact, getProjects, getUsers, getLeadSources } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
+import clsx from 'clsx';
 
 interface NewContactModalProps {
   isOpen: boolean;
@@ -10,6 +12,8 @@ interface NewContactModalProps {
 }
 
 export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: NewContactModalProps) {
+  const { user } = useAuth();
+  const isRestricted = user?.role === 'AGENTE' || user?.role === 'ASISTENTE';
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -134,7 +138,7 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
         budgetMax: formData.budgetMax ? Number(formData.budgetMax) : null,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
         interests: formData.projectOfInterest ? [formData.projectOfInterest] : [],
-        assignedTo: formData.assignedUserId || null
+        assignedTo: isRestricted ? user?.id : (formData.assignedUserId || null)
       };
 
       if (initialData?.id) {
@@ -250,8 +254,9 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
               <div className="space-y-0.5">
                 <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Asesor asignado</label>
-                <select value={formData.assignedUserId} onChange={e => setFormData({...formData, assignedUserId: e.target.value})}
-                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                <select value={isRestricted ? user?.id : formData.assignedUserId} onChange={e => setFormData({...formData, assignedUserId: e.target.value})}
+                  disabled={isRestricted}
+                  className={clsx("w-full px-2.5 py-1 rounded-lg border text-xs focus:outline-none focus:ring-1 transition-all", isRestricted ? "bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed" : "bg-white border-slate-200 focus:ring-brand-green/20 focus:border-brand-green")}
                 >
                   <option value="">Sin asignar (Libre)</option>
                   {users.map(u => (

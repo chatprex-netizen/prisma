@@ -96,7 +96,7 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
         </div>
 
         {/* Body */}
-        <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+        <div className="p-4 md:p-5 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
           {/* Avatar / Logo URL */}
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Logo / url de avatar</label>
@@ -175,14 +175,14 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-100 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-100 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors disabled:opacity-50"
           >
             {loading ? 'Guardando...' : 'Guardar Desarrolladora'}
           </button>

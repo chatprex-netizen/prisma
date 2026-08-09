@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -15,9 +16,18 @@ const DEFAULT_STAGES = [
 ];
 
 // Get Pipeline Opportunities
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    let whereClause = {};
+
+    if (userRole === 'AGENTE' || userRole === 'ASISTENTE') {
+      whereClause = { agentId: userId };
+    }
+
     const opportunities = await prisma.opportunity.findMany({
+      where: whereClause,
       include: {
         contact: {
           include: {
@@ -86,14 +96,31 @@ router.put('/stages/:id', async (req: Request, res: Response) => {
 });
 
 // Update Stage of an Opportunity
-router.patch('/:id/stage', async (req: Request, res: Response) => {
+router.patch('/:id/stage', authenticate, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { stage } = req.body;
+    const agentId = req.user?.id;
+    
+    if (!agentId) {
+      return res.status(401).json({ success: false, error: 'No autenticado' });
+    }
+
     const updated = await prisma.opportunity.update({
       where: { id },
       data: { stage }
     });
+    
+    await prisma.activity.create({
+      data: {
+        type: 'CAMBIO_ETAPA',
+        description: `Etapa cambiada a ${stage}.`,
+        opportunityId: id,
+        contactId: updated.contactId,
+        userId: agentId
+      }
+    });
+    
     res.json({ success: true, data: updated });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });

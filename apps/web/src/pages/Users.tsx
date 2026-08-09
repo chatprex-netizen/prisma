@@ -101,7 +101,7 @@ export function Users() {
           <p className="text-xs text-slate-500 mt-0.5">Administra los accesos y roles de tu equipo</p>
         </div>
         <div className="flex w-full md:w-auto gap-3">
-          <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
+          <button className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filtros
           </button>
@@ -136,17 +136,17 @@ export function Users() {
             <table className="w-full text-left border-collapse text-[11px] sm:text-sm">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  <th className="px-3 py-2.5 sm:px-6 sm:py-4">Usuario</th>
-                  <th className="px-3 py-2.5 sm:px-6 sm:py-4 hidden sm:table-cell">Contacto</th>
-                  <th className="px-3 py-2.5 sm:px-6 sm:py-4">Rol</th>
-                  <th className="px-3 py-2.5 sm:px-6 sm:py-4">Estado</th>
-                  <th className="px-3 py-2.5 sm:px-6 sm:py-4 text-right">Acciones</th>
+                  <th className="px-3 py-1.5.5 sm:px-6 sm:py-4">Usuario</th>
+                  <th className="px-3 py-1.5.5 sm:px-6 sm:py-4 hidden sm:table-cell">Contacto</th>
+                  <th className="px-3 py-1.5.5 sm:px-6 sm:py-4">Rol</th>
+                  <th className="px-3 py-1.5.5 sm:px-6 sm:py-4">Estado</th>
+                  <th className="px-3 py-1.5.5 sm:px-6 sm:py-4 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-3 py-2.5 sm:px-6 sm:py-4">
+                    <td className="px-3 py-1.5.5 sm:px-6 sm:py-4">
                       <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center font-semibold text-xs sm:text-sm shrink-0">
                           {u.firstName.charAt(0)}{u.lastName.charAt(0)}
@@ -164,7 +164,7 @@ export function Users() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 sm:px-6 sm:py-4 hidden sm:table-cell">
+                    <td className="px-3 py-1.5.5 sm:px-6 sm:py-4 hidden sm:table-cell">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
                           <Mail className="w-3.5 h-3.5 text-slate-400" />
@@ -178,19 +178,19 @@ export function Users() {
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 sm:px-6 sm:py-4">
+                    <td className="px-3 py-1.5.5 sm:px-6 sm:py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getRoleBadgeColor(u.role)}`}>
                         <Shield className="w-3 h-3" />
                         {getRoleName(u.role)}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 sm:px-6 sm:py-4">
+                    <td className="px-3 py-1.5.5 sm:px-6 sm:py-4">
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${u.isActive ? 'bg-brand-green' : 'bg-slate-300'}`}></span>
                         <span className="text-xs sm:text-sm text-slate-700">{u.isActive ? 'Activo' : 'Inactivo'}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 sm:px-6 sm:py-4 text-right">
+                    <td className="px-3 py-1.5.5 sm:px-6 sm:py-4 text-right">
                       <div className="relative inline-block text-left">
                         <button 
                           onClick={() => setActiveMenu(activeMenu === u.id ? null : u.id)}
@@ -204,7 +204,7 @@ export function Users() {
                           <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-10">
                             <button 
                               onClick={() => { setEditingUser(u); setIsModalOpen(true); setActiveMenu(null); }}
-                              className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                              className="w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
                             >
                               <Edit2 className="w-4 h-4 text-slate-400" />
                               Editar permisos
@@ -212,7 +212,7 @@ export function Users() {
                             {u.isActive ? (
                               <button 
                                 onClick={() => handleToggleStatus(u)}
-                                className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+                                className="w-full px-3 py-1.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
                               >
                                 <ShieldCheck className="w-4 h-4 text-orange-500" />
                                 Desactivar usuario
@@ -220,7 +220,7 @@ export function Users() {
                             ) : (
                               <button 
                                 onClick={() => handleToggleStatus(u)}
-                                className="w-full px-4 py-2 text-left text-sm text-brand-green hover:bg-brand-green/10 flex items-center gap-2"
+                                className="w-full px-3 py-1.5 text-left text-sm text-brand-green hover:bg-brand-green/10 flex items-center gap-2"
                               >
                                 <ShieldCheck className="w-4 h-4 text-brand-green" />
                                 Activar usuario
@@ -229,7 +229,7 @@ export function Users() {
                             <div className="h-px bg-slate-100 my-1" />
                             <button 
                               onClick={() => handleDelete(u.id)}
-                              className="w-full px-4 py-2 text-left text-sm text-red-650 hover:bg-red-50 flex items-center gap-2"
+                              className="w-full px-3 py-1.5 text-left text-sm text-red-650 hover:bg-red-50 flex items-center gap-2"
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
                               Eliminar

@@ -141,9 +141,9 @@ export function Conversations() {
             {showFilters && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 shadow-lg rounded-xl overflow-hidden z-20">
                 <div className="p-2">
-                  <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">Todos los mensajes</button>
-                  <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">No leídos</button>
-                  <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">Asignados a mí</button>
+                  <button className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">Todos los mensajes</button>
+                  <button className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">No leídos</button>
+                  <button className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg">Asignados a mí</button>
                 </div>
               </div>
             )}
@@ -242,7 +242,7 @@ export function Conversations() {
             </div>
 
             {/* Historial de Mensajes */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-3.5">
               <div className="flex justify-center mb-6">
                 <span className="bg-white/80 backdrop-blur text-slate-500 text-[10px] px-3 py-1 rounded-lg uppercase tracking-wider font-semibold shadow-sm">
                   Inicio de la conversación
@@ -377,7 +377,7 @@ export function Conversations() {
               <button onClick={() => setShowQuickReplyManager(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 overflow-y-auto flex-1">
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 {QUICK_REPLIES.map((qr, idx) => (
                   <div key={idx} className="p-4 border border-slate-200 rounded-xl">
                     <div className="flex justify-between items-start mb-2">
@@ -407,7 +407,7 @@ function Message({ bubble, time, isUser, isBot = false, status }: { bubble: stri
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[85%] md:max-w-[65%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`px-4 py-2 shadow-sm relative ${
+        <div className={`px-3 py-1.5 shadow-sm relative ${
           isUser 
             ? 'bg-[#dcf8c6] text-slate-800 rounded-2xl rounded-tr-sm' 
             : 'bg-white border border-slate-100 text-slate-800 rounded-2xl rounded-tl-sm'

@@ -111,7 +111,7 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+        <form onSubmit={handleSubmit} className="p-4 space-y-3.5 overflow-y-auto flex-1 custom-scrollbar">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Código de cuenta *</label>
@@ -237,14 +237,14 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+              className="px-3 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
             >
               {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Crear Cuenta')}
             </button>

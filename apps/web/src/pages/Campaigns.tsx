@@ -201,7 +201,7 @@ export function Campaigns() {
           <ArrowLeft className="w-4 h-4" />
           Volver a Campañas
         </button>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Nueva transmisión</h1>
+        <h1 className="text-xl font-semibold text-slate-900 tracking-tight tracking-tight">Nueva transmisión</h1>
         <p className="text-sm text-slate-500 mt-1">Crea y envía un mensaje de difusión a tus contactos.</p>
       </div>
 
@@ -257,9 +257,9 @@ export function Campaigns() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Nombre de la campaña</label>
+              <label className="block text-[10px] font-medium text-brand-green mb-1">Nombre de la campaña</label>
               <input type="text" placeholder="Ej. Promoción Lanzamiento Agosto" value={campaignName} onChange={(e) => setCampaignName(e.target.value)}
-                className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
+                className="w-full max-w-md px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
               />
             </div>
             
@@ -274,7 +274,7 @@ export function Campaigns() {
                 </p>
                 <button
                   onClick={handleSeedTemplates}
-                  className="bg-brand-green hover:bg-brand-greenHover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="bg-brand-green hover:bg-brand-greenHover text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                 >
                   Cargar Plantillas de Prueba
                 </button>
@@ -371,7 +371,7 @@ export function Campaigns() {
             <h2 className="text-xl font-bold text-slate-900">Resumen de la Transmisión</h2>
             <p className="text-sm text-slate-500 mt-0.5 mb-6">Confirma los detalles antes de enviar.</p>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-3.5 shadow-sm">
               <div className="flex justify-between border-b border-slate-100 pb-3">
                 <span className="text-sm font-medium text-slate-500">Nombre de Campaña:</span>
                 <span className="text-sm font-bold text-slate-900">{campaignName || 'Difusión sin nombre'}</span>
@@ -394,7 +394,7 @@ export function Campaigns() {
             <div className="w-16 h-16 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center mb-4">
               <Send className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">¡Todo listo para despachar!</h2>
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">¡Todo listo para despachar!</h2>
             <p className="text-sm text-slate-500 max-w-md mt-1 mb-6">
               Al confirmar, la plantilla <span className="font-semibold">{currentTemplate?.name}</span> se enviará a los <span className="font-semibold">{selectedContactIds.length}</span> contactos seleccionados vía WhatsApp.
             </p>

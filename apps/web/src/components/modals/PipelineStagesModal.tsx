@@ -77,7 +77,7 @@ export function PipelineStagesModal({ isOpen, onClose, onSuccess }: PipelineStag
           ) : (
             <div className="space-y-2">
               {stages.map((stage, idx) => (
-                <div key={stage.id} className="px-3 py-2 bg-slate-50 hover:bg-slate-100/30 rounded-lg border border-slate-200/60 flex items-center gap-3 transition-colors">
+                <div key={stage.id} className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100/30 rounded-lg border border-slate-200/60 flex items-center gap-3 transition-colors">
                   {/* Color Picker (Stylized interactive circle) */}
                   <div className="relative shrink-0 flex items-center">
                     <input type="color" value={stage.color || '#64748b'} onChange={e => handleFieldChange(idx, 'color', e.target.value)}

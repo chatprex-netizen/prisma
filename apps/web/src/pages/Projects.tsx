@@ -88,7 +88,7 @@ export function Projects() {
       {/* Header */}
       <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-sm sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
             <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-brand-green" />
             Proyectos
           </h1>

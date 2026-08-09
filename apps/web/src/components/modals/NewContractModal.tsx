@@ -430,11 +430,11 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-[10px] font-semibold text-slate-500 uppercase sticky top-0 border-b border-slate-200">
                       <tr>
-                        <th className="px-3 py-2">N°</th>
-                        <th className="px-3 py-2">Fecha</th>
-                        <th className="px-3 py-2 text-right">%</th>
-                        <th className="px-3 py-2 text-right">Cuota</th>
-                        <th className="px-3 py-2 text-right">Saldo Restante</th>
+                        <th className="px-3 py-1.5">N°</th>
+                        <th className="px-3 py-1.5">Fecha</th>
+                        <th className="px-3 py-1.5 text-right">%</th>
+                        <th className="px-3 py-1.5 text-right">Cuota</th>
+                        <th className="px-3 py-1.5 text-right">Saldo Restante</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">

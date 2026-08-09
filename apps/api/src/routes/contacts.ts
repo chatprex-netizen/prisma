@@ -27,9 +27,18 @@ function mapSourceFromDb(contact: any) {
 }
 
 // Get all contacts
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    let whereClause = {};
+
+    if (userRole === 'AGENTE' || userRole === 'ASISTENTE') {
+      whereClause = { assignedUserId: userId };
+    }
+
     const contacts = await prisma.contact.findMany({
+      where: whereClause,
       include: {
         opportunities: { select: { id: true, stage: true } }
       },
@@ -65,6 +74,15 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       data: contactData
     });
 
+    await prisma.activity.create({
+      data: {
+        type: 'NOTA',
+        description: `Contacto registrado en el sistema.`,
+        contactId: contact.id,
+        userId: agentId
+      }
+    });
+
     // Automatically create an opportunity in pipeline if the type is LEAD
     if (contact.type === 'LEAD') {
       let projectId: string | null = null;
@@ -95,8 +113,13 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 });
 
 // Update contact
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    const agentId = req.user?.id;
+    if (!agentId) {
+      return res.status(401).json({ success: false, error: 'Usuario no autenticado' });
+    }
+
     mapSourceToDb(req.body);
     const { stage, ...contactData } = req.body;
 
@@ -117,15 +140,35 @@ router.put('/:id', async (req: Request, res: Response) => {
       data: contactData
     });
 
+    await prisma.activity.create({
+      data: {
+        type: 'NOTA',
+        description: `Datos del contacto actualizados.`,
+        contactId: contact.id,
+        userId: agentId
+      }
+    });
+
     if (stage) {
       const opp = await prisma.opportunity.findFirst({
         where: { contactId: contact.id }
       });
       if (opp) {
-        await prisma.opportunity.update({
-          where: { id: opp.id },
-          data: { stage }
-        });
+        if (opp.stage !== stage) {
+          await prisma.opportunity.update({
+            where: { id: opp.id },
+            data: { stage }
+          });
+          await prisma.activity.create({
+            data: {
+              type: 'CAMBIO_ETAPA',
+              description: `Etapa cambiada a ${stage}.`,
+              contactId: contact.id,
+              opportunityId: opp.id,
+              userId: agentId
+            }
+          });
+        }
       } else {
         await prisma.opportunity.create({
           data: {

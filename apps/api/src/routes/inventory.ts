@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 // ─── PROJECTS ───
 
-router.get('/projects', async (req: AuthRequest, res: Response) => {
+router.get('/projects', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const projects = await prisma.project.findMany({
       include: { developer: true },
@@ -19,7 +19,7 @@ router.get('/projects', async (req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/projects', async (req: AuthRequest, res: Response) => {
+router.post('/projects', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const project = await prisma.project.create({ data: req.body });
     res.status(201).json({ success: true, data: project });
@@ -28,7 +28,7 @@ router.post('/projects', async (req: AuthRequest, res: Response) => {
   }
 });
 
-router.put('/projects/:id', async (req: AuthRequest, res: Response) => {
+router.put('/projects/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const project = await prisma.project.update({
       where: { id: req.params.id },
@@ -40,7 +40,7 @@ router.put('/projects/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
-router.delete('/projects/:id', async (req: AuthRequest, res: Response) => {
+router.delete('/projects/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     await prisma.project.delete({ where: { id: req.params.id } });
     res.json({ success: true, message: 'Project deleted successfully' });
@@ -51,7 +51,7 @@ router.delete('/projects/:id', async (req: AuthRequest, res: Response) => {
 
 // ─── PROPERTIES ───
 
-router.get('/properties', async (req: AuthRequest, res: Response) => {
+router.get('/properties', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const properties = await prisma.property.findMany({
       include: { 

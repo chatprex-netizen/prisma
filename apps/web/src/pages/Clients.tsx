@@ -142,7 +142,7 @@ export function Clients() {
   const needsSpouse = editData.maritalStatus === 'CASADO' || editData.maritalStatus === 'CONVIVIENTE';
 
   return (
-    <div className="p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-4 animate-fade-in">
+    <div className="p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-3.5 animate-fade-in">
       {/* Header */}
       <div className="flex flex-row justify-between items-center gap-3 shrink-0">
         <div>

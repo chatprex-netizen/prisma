@@ -149,7 +149,7 @@ export function Pipeline() {
 
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 md:flex-none bg-white border text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm ${showFilters ? 'bg-slate-100 border-slate-300 font-bold' : 'border-slate-200'}`}
+            className={`flex-1 md:flex-none bg-white border text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm ${showFilters ? 'bg-slate-100 border-slate-300 font-bold' : 'border-slate-200'}`}
           >
             <Filter className="w-4 h-4 text-slate-500" />
             <span className="hidden sm:inline">Filtros avanzados</span>
@@ -377,7 +377,7 @@ export function Pipeline() {
                 </tbody>
               </table>
             </div>
-            <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 shrink-0 font-medium font-sans">
+            <div className="border-t border-slate-100 px-3 py-1.5.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 shrink-0 font-medium font-sans">
               <span>Mostrando {filteredOpportunities.length} oportunidades</span>
             </div>
           </div>

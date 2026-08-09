@@ -6,10 +6,18 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // Get all clients
-router.get('/', authenticate, async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: any, res: Response) => {
   try {
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    let whereClause: any = { type: 'CLIENTE' };
+
+    if (userRole === 'AGENTE' || userRole === 'ASISTENTE') {
+      whereClause.assignedUserId = userId;
+    }
+
     const clients = await prisma.contact.findMany({
-      where: { type: 'CLIENTE' },
+      where: whereClause,
       include: {
         buyerContracts: true,
         incomes: true

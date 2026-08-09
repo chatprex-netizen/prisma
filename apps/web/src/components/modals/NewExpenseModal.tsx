@@ -155,7 +155,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-4 flex-1 custom-scrollbar">
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-3.5 flex-1 custom-scrollbar">
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Descripción *</label>
             <input type="text" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -319,14 +319,14 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+              className="px-3 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
             >
               {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Guardar Egreso')}
             </button>

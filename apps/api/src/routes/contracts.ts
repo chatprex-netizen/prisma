@@ -83,6 +83,18 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       });
     }
 
+    if (restOfData.opportunityId) {
+      await prisma.activity.create({
+        data: {
+          type: 'CONTRATO_CREADO',
+          description: `Contrato ${contract.number} registrado por ${contract.currency} ${contract.amount}`,
+          opportunityId: restOfData.opportunityId,
+          contactId: restOfData.buyerId || restOfData.contactId,
+          userId: finalAgentId
+        }
+      });
+    }
+
     res.status(201).json({ success: true, data: contract });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
@@ -111,6 +123,84 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Contract deleted successfully' });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+import PDFDocument from 'pdfkit';
+import path from 'path';
+import fs from 'fs';
+
+// Generate PDF for contract
+router.get('/:id/pdf', authenticate, async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const contract = await prisma.contract.findUnique({
+      where: { id: req.params.id },
+      include: {
+        buyer: true,
+        property: { include: { project: true } },
+        agent: true
+      }
+    });
+
+    if (!contract) {
+      return res.status(404).json({ success: false, error: 'Contrato no encontrado' });
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+    
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=contrato-${contract.number}.pdf`);
+    
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(20).fillColor('#10b981').text(`CONTRATO DE ${contract.type}`, { align: 'center' });
+    doc.moveDown();
+    
+    doc.fontSize(10).fillColor('#64748b').text(`Código: ${contract.number}`, { align: 'right' });
+    doc.text(`Fecha: ${new Date(contract.createdAt).toLocaleDateString('es-PE')}`, { align: 'right' });
+    doc.moveDown(2);
+
+    // Body
+    doc.fontSize(12).fillColor('#1e293b').text('Por medio del presente documento, se hace constar la transacción inmobiliaria y el compromiso formal entre las partes involucradas:');
+    doc.moveDown();
+
+    doc.fontSize(14).text('1. EL CLIENTE (COMPRADOR/ARRENDATARIO)');
+    doc.fontSize(12).text(`Nombre: ${contract.buyer?.firstName} ${contract.buyer?.lastName || ''}`);
+    doc.text(`DNI/Doc: ${contract.buyer?.dni || 'No registrado'}`);
+    doc.text(`Correo: ${contract.buyer?.email || 'No registrado'}`);
+    doc.text(`Teléfono: ${contract.buyer?.phone || 'No registrado'}`);
+    doc.moveDown();
+
+    doc.fontSize(14).text('2. LA PROPIEDAD');
+    doc.fontSize(12).text(`Proyecto: ${contract.property?.project?.name || 'Independiente'}`);
+    doc.text(`Unidad: ${contract.property?.unitCode} - ${contract.property?.title}`);
+    doc.text(`Tipo: ${contract.property?.type}`);
+    doc.moveDown();
+
+    doc.fontSize(14).text('3. CONDICIONES ECONÓMICAS');
+    doc.fontSize(12).text(`Monto de Operación: ${contract.currency} ${Number(contract.amount).toLocaleString('es-PE')}`);
+    if (contract.notes) {
+      doc.text(`Condiciones adicionales: ${contract.notes}`);
+    }
+    doc.moveDown(4);
+
+    // Signatures
+    doc.text('_______________________', 50, doc.y, { continued: true });
+    doc.text('_______________________', 300, doc.y);
+    
+    doc.moveDown(0.5);
+    doc.text('FIRMA DEL CLIENTE', 50, doc.y, { continued: true });
+    doc.text('REPRESENTANTE LEGAL', 300, doc.y);
+
+    doc.end();
+
+  } catch (error: any) {
+    console.error('Error generating PDF:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Error al generar PDF' });
+    }
   }
 });
 

@@ -147,6 +147,7 @@ model Property {
   journalEntries JournalEntry[]
   expenses       Expense[]
   incomes        Income[]
+  documents      Document[]
 }
 
 enum UnitType {
@@ -213,6 +214,7 @@ model Contact {
   campaignRecipients CampaignRecipient[]
   journalEntryLines  JournalEntryLine[]
   incomes            Income[]
+  documents          Document[]
 }
 
 enum ContactType {
@@ -835,5 +837,19 @@ model LeadSourceConfig {
   color     String   @default("#3b82f6")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─── DOCUMENTS ───
+model Document {
+  id         String   @id @default(uuid())
+  title      String
+  url        String
+  type       String
+  contactId  String?
+  propertyId String?
+  createdAt  DateTime @default(now())
+
+  contact    Contact?  @relation(fields: [contactId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
 }
 
