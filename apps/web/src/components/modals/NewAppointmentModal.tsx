@@ -142,11 +142,8 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
         {/* Body */}
         <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1">
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Título del Evento *</label>
-            <input 
-              type="text" 
-              value={formData.title}
-              onChange={e => setFormData({...formData, title: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Título del evento *</label>
+            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
               placeholder="Ej. Visita a Torre Marina con Juan Pérez"
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all font-medium"
             />
@@ -154,10 +151,8 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Evento *</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
+              <label className="block text-[11px] font-medium text-slate-700">Tipo de evento *</label>
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="VISITA_PROYECTO">Visita a Proyecto</option>
@@ -169,9 +164,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Estado</label>
-              <select 
-                value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value})}
+              <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="PENDIENTE">Pendiente</option>
@@ -186,19 +179,13 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Inicio *</label>
-              <input 
-                type="datetime-local" 
-                value={formData.startAt}
-                onChange={e => setFormData({...formData, startAt: e.target.value})}
+              <input type="datetime-local" value={formData.startAt} onChange={e => setFormData({...formData, startAt: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all text-slate-700"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Fin *</label>
-              <input 
-                type="datetime-local" 
-                value={formData.endAt}
-                onChange={e => setFormData({...formData, endAt: e.target.value})}
+              <input type="datetime-local" value={formData.endAt} onChange={e => setFormData({...formData, endAt: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all text-slate-700"
               />
             </div>
@@ -209,10 +196,8 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Contacto Asignado *</label>
-                <select 
-                  value={formData.contactId}
-                  onChange={e => setFormData({...formData, contactId: e.target.value})}
+                <label className="block text-[11px] font-medium text-slate-700">Contacto asignado *</label>
+                <select value={formData.contactId} onChange={e => setFormData({...formData, contactId: e.target.value})}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
                 >
                   <option value="">Seleccionar contacto...</option>
@@ -223,9 +208,7 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
               </div>
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Proyecto de interés</label>
-                <select 
-                  value={formData.projectId}
-                  onChange={e => setFormData({...formData, projectId: e.target.value})}
+                <select value={formData.projectId} onChange={e => setFormData({...formData, projectId: e.target.value})}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
                 >
                   <option value="">Ninguno</option>
@@ -244,11 +227,8 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Ubicación / Link</label>
-                <input 
-                  type="text" 
-                  value={formData.location}
-                  onChange={e => setFormData({...formData, location: e.target.value})}
+                <label className="block text-[11px] font-medium text-slate-700">Ubicación / link</label>
+                <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
                   placeholder="Ej. Oficina Central o Zoom"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                 />
@@ -257,11 +237,8 @@ export function NewAppointmentModal({ isOpen, onClose, onSuccess, initialData }:
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Notas / Agenda</label>
-            <textarea 
-              rows={3}
-              value={formData.notes}
-              onChange={e => setFormData({...formData, notes: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Notas / agenda</label>
+            <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
               placeholder="Temas a tratar durante la reunión..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
             ></textarea>

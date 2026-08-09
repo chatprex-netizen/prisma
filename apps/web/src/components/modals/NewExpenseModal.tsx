@@ -158,10 +158,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
         <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-4 flex-1 custom-scrollbar">
           <div className="space-y-1">
             <label className="block text-[11px] font-medium text-slate-700">Descripción *</label>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
+            <input type="text" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
               placeholder="Ej. Pago de publicidad en Meta Ads de Julio"
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green"
               required
@@ -170,46 +167,30 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Monto Base *</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={e => handleAmountChange(e.target.value)}
+              <label className="block text-[11px] font-medium text-slate-700">Monto base *</label>
+              <input type="number" step="0.01" value={formData.amount} onChange={e => handleAmountChange(e.target.value)}
                 placeholder="0.00"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Impuestos / IGV</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.taxAmount}
-                onChange={e => handleTaxChange(e.target.value)}
+              <label className="block text-[11px] font-medium text-slate-700">Impuestos / igv</label>
+              <input type="number" step="0.01" value={formData.taxAmount} onChange={e => handleTaxChange(e.target.value)}
                 placeholder="0.00"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Monto Total</label>
-              <input
-                type="number"
-                value={formData.totalAmount}
-                disabled
-                placeholder="0.00"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 text-slate-500 font-bold"
-              />
+              <label className="block text-[11px] font-medium text-slate-700">Monto total</label>
+              <input type="number" value={formData.totalAmount} disabled placeholder="0.00" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 text-slate-500 " />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
-              <select
-                value={formData.currency}
-                onChange={e => setFormData({ ...formData, currency: e.target.value })}
+              <select value={formData.currency} onChange={e => setFormData({ ...formData, currency: e.target.value })}
                 translate="no"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white notranslate"
               >
@@ -220,10 +201,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Fecha *</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={e => setFormData({ ...formData, date: e.target.value })}
+              <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
                 required
               />
@@ -233,9 +211,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Categoría</label>
-              <select
-                value={formData.category}
-                onChange={e => setFormData({ ...formData, category: e.target.value })}
+              <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
               >
                 <option value="PUBLICIDAD_MARKETING">Publicidad y Marketing</option>
@@ -254,10 +230,8 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Método de Pago</label>
-              <select
-                value={formData.paymentMethod}
-                onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Método de pago</label>
+              <select value={formData.paymentMethod} onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
               >
                 <option value="TRANSFERENCIA">Transferencia</option>
@@ -271,10 +245,8 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Documento</label>
-              <select
-                value={formData.docType}
-                onChange={e => setFormData({ ...formData, docType: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Tipo de documento</label>
+              <select value={formData.docType} onChange={e => setFormData({ ...formData, docType: e.target.value })}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
               >
                 <option value="FACTURA">Factura</option>
@@ -285,11 +257,8 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Número de Documento</label>
-              <input
-                type="text"
-                value={formData.docNumber}
-                onChange={e => setFormData({ ...formData, docNumber: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Número de documento</label>
+              <input type="text" value={formData.docNumber} onChange={e => setFormData({ ...formData, docNumber: e.target.value })}
                 placeholder="F001-0000123"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
               />
@@ -300,21 +269,15 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
             <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Datos del Proveedor</h4>
             <div className="grid grid-cols-3 gap-2">
               <div className="space-y-1 col-span-2">
-                <label className="block text-[11px] font-medium text-slate-700">Razón Social / Proveedor</label>
-                <input
-                  type="text"
-                  value={formData.vendorName}
-                  onChange={e => setFormData({ ...formData, vendorName: e.target.value })}
+                <label className="block text-[11px] font-medium text-slate-700">Razón social / proveedor</label>
+                <input type="text" value={formData.vendorName} onChange={e => setFormData({ ...formData, vendorName: e.target.value })}
                   placeholder="Ej. Meta Platforms Inc"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">RUC</label>
-                <input
-                  type="text"
-                  value={formData.vendorRuc}
-                  onChange={e => setFormData({ ...formData, vendorRuc: e.target.value })}
+                <label className="block text-[11px] font-medium text-slate-700">Ruc</label>
+                <input type="text" value={formData.vendorRuc} onChange={e => setFormData({ ...formData, vendorRuc: e.target.value })}
                   placeholder="20123456789"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
                 />
@@ -327,9 +290,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3.5 h-3.5" /> Proyecto</label>
-                <select
-                  value={formData.projectId}
-                  onChange={e => setFormData({ ...formData, projectId: e.target.value })}
+                <select value={formData.projectId} onChange={e => setFormData({ ...formData, projectId: e.target.value })}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
                 >
                   <option value="">Seleccionar...</option>
@@ -340,9 +301,7 @@ export function NewExpenseModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3.5 h-3.5" /> Unidad</label>
-                <select
-                  value={formData.propertyId}
-                  onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
+                <select value={formData.propertyId} onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
                 >
                   <option value="">Seleccionar...</option>

@@ -80,10 +80,7 @@ export function PipelineStagesModal({ isOpen, onClose, onSuccess }: PipelineStag
                 <div key={stage.id} className="px-3 py-2 bg-slate-50 hover:bg-slate-100/30 rounded-lg border border-slate-200/60 flex items-center gap-3 transition-colors">
                   {/* Color Picker (Stylized interactive circle) */}
                   <div className="relative shrink-0 flex items-center">
-                    <input 
-                      type="color" 
-                      value={stage.color || '#64748b'} 
-                      onChange={e => handleFieldChange(idx, 'color', e.target.value)}
+                    <input type="color" value={stage.color || '#64748b'} onChange={e => handleFieldChange(idx, 'color', e.target.value)}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       title="Elegir color de la etapa"
                     />
@@ -95,10 +92,7 @@ export function PipelineStagesModal({ isOpen, onClose, onSuccess }: PipelineStag
 
                   {/* Custom Name */}
                   <div className="w-1/3 min-w-0">
-                    <input 
-                      type="text" 
-                      value={stage.name}
-                      onChange={e => handleFieldChange(idx, 'name', e.target.value)}
+                    <input type="text" value={stage.name} onChange={e => handleFieldChange(idx, 'name', e.target.value)}
                       placeholder="Nombre de etapa"
                       className="w-full px-2.5 py-1 rounded border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green bg-white font-bold text-slate-800"
                     />
@@ -106,10 +100,7 @@ export function PipelineStagesModal({ isOpen, onClose, onSuccess }: PipelineStag
 
                   {/* Details / Description */}
                   <div className="flex-1 min-w-0">
-                    <input 
-                      type="text" 
-                      value={stage.details || ''}
-                      onChange={e => handleFieldChange(idx, 'details', e.target.value)}
+                    <input type="text" value={stage.details || ''} onChange={e => handleFieldChange(idx, 'details', e.target.value)}
                       placeholder="Detalle o descripción..."
                       className="w-full px-2.5 py-1 rounded border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green focus:border-brand-green bg-white text-slate-500"
                     />

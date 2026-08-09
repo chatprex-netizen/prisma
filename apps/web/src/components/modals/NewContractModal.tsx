@@ -219,27 +219,25 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-3xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Header */}
-        <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">Registrar Nuevo Contrato</h2>
+        <div className="px-3.5 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+          <h2 className="text-sm font-semibold text-slate-900">Registrar Nuevo Contrato</h2>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1 rounded-full transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 overflow-y-auto flex-1 custom-scrollbar space-y-3">
+        <div className="p-3 sm:p-3.5 overflow-y-auto flex-1 custom-scrollbar space-y-2.5">
           {/* Section 1: Principal */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Comprador (Cliente) *</label>
-              <select 
-                value={formData.buyerId}
-                onChange={e => setFormData({...formData, buyerId: e.target.value})}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Comprador (cliente) *</label>
+              <select value={formData.buyerId} onChange={e => setFormData({...formData, buyerId: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="">Seleccionar cliente...</option>
@@ -249,10 +247,8 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Contrato *</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
+              <label className="block text-[11px] font-medium text-slate-700">Tipo de contrato *</label>
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="SEPARACION">Separación</option>
@@ -263,9 +259,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Estado *</label>
-              <select 
-                value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value})}
+              <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="BORRADOR">Borrador</option>
@@ -283,9 +277,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Desarrollador</label>
-                <select 
-                  value={selectedDeveloperId}
-                  onChange={e => handleDeveloperChange(e.target.value)}
+                <select value={selectedDeveloperId} onChange={e => handleDeveloperChange(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   <option value="">Selecciona desarrollador...</option>
@@ -297,9 +289,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
 
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Proyecto</label>
-                <select 
-                  value={selectedProjectId}
-                  onChange={e => handleProjectChange(e.target.value)}
+                <select value={selectedProjectId} onChange={e => handleProjectChange(e.target.value)}
                   disabled={!selectedDeveloperId}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white disabled:bg-slate-100 disabled:text-slate-400"
                 >
@@ -314,10 +304,8 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
             {/* Propiedad y Asesor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Propiedad Inmobiliaria *</label>
-                <select 
-                  value={formData.propertyId}
-                  onChange={e => setFormData({...formData, propertyId: e.target.value})}
+                <label className="block text-[11px] font-medium text-slate-700">Propiedad inmobiliaria *</label>
+                <select value={formData.propertyId} onChange={e => setFormData({...formData, propertyId: e.target.value})}
                   disabled={!selectedProjectId}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white disabled:bg-slate-100 disabled:text-slate-400"
                 >
@@ -332,9 +320,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
 
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Asesor que cerró *</label>
-                <select 
-                  value={formData.agentId}
-                  onChange={e => setFormData({...formData, agentId: e.target.value})}
+                <select value={formData.agentId} onChange={e => setFormData({...formData, agentId: e.target.value})}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   {users.map(u => (
@@ -347,9 +333,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <label className="block text-[11px] font-medium text-slate-700">Moneda *</label>
-                <select 
-                  value={formData.currency}
-                  onChange={e => setFormData({...formData, currency: e.target.value})}
+                <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})}
                   translate="no"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white notranslate"
                 >
@@ -359,17 +343,14 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Monto Final *</label>
-                <input 
-                  type="number" 
-                  value={formData.amount}
-                  onChange={e => setFormData({...formData, amount: e.target.value})}
+                <label className="block text-[11px] font-medium text-slate-700">Monto final *</label>
+                <input type="number" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})}
                   placeholder="Ej. 120000"
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Condición Financiera</label>
+                <label className="block text-[11px] font-medium text-slate-700">Condición financiera</label>
                 <div className="flex bg-white rounded-lg border border-slate-200 p-0.5">
                   <button
                     type="button"
@@ -396,40 +377,29 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-medium text-slate-700">Monto Inicial (Cuota Inicial)</label>
-                    <input 
-                      type="number" 
-                      value={initialPayment}
-                      onChange={e => setInitialPayment(e.target.value)}
+                    <label className="block text-[10px] font-medium text-slate-700">Monto inicial (cuota inicial)</label>
+                    <input type="number" value={initialPayment} onChange={e => setInitialPayment(e.target.value)}
                       placeholder="0.00"
                       className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-medium text-slate-700">Plazo (Meses)</label>
-                    <input 
-                      type="number" 
-                      value={monthsTerm}
-                      onChange={e => setMonthsTerm(e.target.value)}
+                    <label className="block text-[10px] font-medium text-slate-700">Plazo (meses)</label>
+                    <input type="number" value={monthsTerm} onChange={e => setMonthsTerm(e.target.value)}
                       placeholder="Ej. 12"
                       className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-medium text-slate-700">Interés Mensual (%)</label>
-                    <input 
-                      type="number" 
-                      value={interestRate}
-                      onChange={e => setInterestRate(e.target.value)}
+                    <label className="block text-[10px] font-medium text-slate-700">Interés mensual (%)</label>
+                    <input type="number" value={interestRate} onChange={e => setInterestRate(e.target.value)}
                       placeholder="0"
                       className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-medium text-slate-700">Fecha de Pago</label>
-                    <select
-                      value={paymentDayRule}
-                      onChange={e => setPaymentDayRule(e.target.value as any)}
+                    <label className="block text-[10px] font-medium text-slate-700">Fecha de pago</label>
+                    <select value={paymentDayRule} onChange={e => setPaymentDayRule(e.target.value as any)}
                       className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
                     >
                       <option value="5">Días 5 de cada mes</option>
@@ -442,11 +412,8 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                 {paymentDayRule === 'CUSTOM' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-medium text-slate-700">Fecha de Primer Pago</label>
-                      <input 
-                        type="date"
-                        value={customStartDate}
-                        onChange={e => setCustomStartDate(e.target.value)}
+                      <label className="block text-[10px] font-medium text-slate-700">Fecha de primer pago</label>
+                      <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)}
                         className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
                       />
                     </div>
@@ -487,11 +454,8 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
             )}
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Notas / Comentarios</label>
-              <textarea 
-                rows={2}
-                value={formData.notes}
-                onChange={e => setFormData({...formData, notes: e.target.value})}
+              <label className="block text-[11px] font-medium text-slate-700">Notas / comentarios</label>
+              <textarea rows={2} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
                 placeholder="Observaciones adicionales..."
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white resize-none"
               />
@@ -502,12 +466,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
           <div className="space-y-2">
             <h3 className="text-[11px] font-semibold text-slate-800 uppercase tracking-wider">Sustento de Pago</h3>
             <div className="w-full border-2 border-dashed border-slate-300 rounded-lg p-5 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors relative">
-              <input 
-                type="file" 
-                accept="image/*,.pdf"
-                onChange={handleFileUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
+              <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
               {fileName ? (
                 <>
                   <CheckCircle2 className="w-6 h-6 text-emerald-500 mb-1" />
@@ -527,18 +486,18 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
+        <div className="px-3.5 py-2 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2 shrink-0">
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+            className="px-3 py-1 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shadow-xs shadow-brand-green/20"
           >
             {loading ? 'Procesando...' : 'Guardar Contrato'}
           </button>

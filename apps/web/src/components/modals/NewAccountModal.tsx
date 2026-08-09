@@ -114,22 +114,16 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
         <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Código de Cuenta *</label>
-              <input
-                type="text"
-                value={formData.code}
-                onChange={e => setFormData({ ...formData, code: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Código de cuenta *</label>
+              <input type="text" value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })}
                 placeholder="Ej. 10411"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Nombre Cuenta *</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Nombre cuenta *</label>
+              <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ej. BCP Soles Operaciones"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                 required
@@ -139,10 +133,8 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo Cuenta *</label>
-              <select
-                value={formData.type}
-                onChange={e => handleTypeChange(e.target.value)}
+              <label className="block text-[11px] font-medium text-slate-700">Tipo cuenta *</label>
+              <select value={formData.type} onChange={e => handleTypeChange(e.target.value)}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
               >
                 <option value="ACTIVO">Activo</option>
@@ -153,10 +145,8 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Subtipo Cuenta *</label>
-              <select
-                value={formData.subtype}
-                onChange={e => setFormData({ ...formData, subtype: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Subtipo cuenta *</label>
+              <select value={formData.subtype} onChange={e => setFormData({ ...formData, subtype: e.target.value })}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
               >
                 {formData.type === 'ACTIVO' && (
@@ -215,9 +205,7 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
-              <select
-                value={formData.currency}
-                onChange={e => setFormData({ ...formData, currency: e.target.value })}
+              <select value={formData.currency} onChange={e => setFormData({ ...formData, currency: e.target.value })}
                 translate="no"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white notranslate"
               >
@@ -227,12 +215,8 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
               </select>
             </div>
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Saldo Inicial</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.initialBalance}
-                onChange={e => setFormData({ ...formData, initialBalance: e.target.value })}
+              <label className="block text-[11px] font-medium text-slate-700">Saldo inicial</label>
+              <input type="number" step="0.01" value={formData.initialBalance} onChange={e => setFormData({ ...formData, initialBalance: e.target.value })}
                 placeholder="0.00"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
               />
@@ -240,11 +224,8 @@ export function NewAccountModal({ isOpen, onClose, onSuccess, initialData }: New
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Descripción / Notas</label>
-            <textarea
-              rows={2}
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
+            <label className="block text-[11px] font-medium text-slate-700">Descripción / notas</label>
+            <textarea rows={2} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
               placeholder="Descripción opcional de la cuenta contable..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none resize-none"
             />

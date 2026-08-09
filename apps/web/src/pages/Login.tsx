@@ -110,21 +110,13 @@ export function Login() {
               <div className="flex gap-4">
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-xs font-medium text-slate-700">Nombre</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                  <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-xs font-medium text-slate-700">Apellido</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                  <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
@@ -133,22 +125,14 @@ export function Login() {
 
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-slate-700">Correo</label>
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-slate-700">Contraseña</label>
-              <input 
-                type="password" 
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>

@@ -238,7 +238,7 @@ export function Calendar() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-[1400px] mx-auto h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
+    <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
       {/* Header Controls */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0 mb-5">
         <div className="flex flex-row items-center justify-between md:justify-start gap-4 md:gap-6 w-full md:w-auto">
@@ -259,9 +259,7 @@ export function Calendar() {
         </div>
 
         <div className="flex w-full md:w-auto gap-3">
-          <select 
-            value={view}
-            onChange={(e) => setView(e.target.value as any)}
+          <select value={view} onChange={(e) => setView(e.target.value as any)}
             className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-2xs outline-none focus:border-brand-green cursor-pointer"
           >
             <option value="month">Mensual</option>

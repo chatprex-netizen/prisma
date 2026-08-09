@@ -84,7 +84,7 @@ export function Projects() {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 min-h-full flex flex-col bg-slate-50/30 animate-fade-in text-left">
       {/* Header */}
       <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
@@ -98,10 +98,7 @@ export function Projects() {
         {/* Compact Single-Row Action Buttons */}
         <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
           {showSearch && (
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
               className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
               autoFocus
@@ -139,10 +136,8 @@ export function Projects() {
         <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Estado Obra</label>
-            <select 
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Estado obra</label>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Estado</option>
@@ -154,10 +149,8 @@ export function Projects() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
-            <select 
-              value={typeFilter}
-              onChange={e => setTypeFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Tipo</label>
+            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Tipo</option>
@@ -168,10 +161,8 @@ export function Projects() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Desarrolladora</label>
-            <select 
-              value={devFilter}
-              onChange={e => setDevFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Desarrolladora</label>
+            <select value={devFilter} onChange={e => setDevFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Desarrolladora</option>
@@ -182,10 +173,8 @@ export function Projects() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Ciudad</label>
-            <select 
-              value={cityFilter}
-              onChange={e => setCityFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Ciudad</label>
+            <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Ciudad</option>

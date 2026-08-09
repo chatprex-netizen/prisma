@@ -4,6 +4,40 @@ import { OpportunityDetailModal } from '../components/modals/OpportunityDetailMo
 import { NewContactModal } from '../components/modals/NewContactModal';
 import { getPipeline, getPipelineStages, updateOpportunityStage, deleteOpportunity, toggleChatBot } from '../lib/api';
 
+const STAGE_COLORS: Record<string, string> = {
+  PROSPECCION: '#3B82F6', // Blue
+  VISITA: '#8B5CF6',      // Purple
+  NEGOCIACION: '#F59E0B', // Amber
+  GANADO: '#10B981',      // Emerald
+  CIERRE_GANADO: '#10B981',
+  CIERRE_PERDIDO: '#EF4444', // Red
+  PERDIDO: '#EF4444',
+};
+
+const getStageColor = (key: string, defaultColor?: string) => {
+  const norm = key.toUpperCase().replace(/\s/g, '_');
+  return STAGE_COLORS[norm] || defaultColor || '#64748B';
+};
+
+const getSourceBadgeClasses = (source?: string) => {
+  const norm = (source || 'OTRO').toUpperCase().replace(/\s/g, '');
+  if (norm.includes('WHATSAPP')) {
+    return 'bg-emerald-50 text-emerald-700 border-emerald-250/60';
+  } else if (norm.includes('FACEBOOK')) {
+    return 'bg-blue-50 text-blue-700 border-blue-250/60';
+  } else if (norm.includes('INSTAGRAM')) {
+    return 'bg-pink-50 text-pink-700 border-pink-250/60';
+  } else if (norm.includes('TIKTOK')) {
+    return 'bg-slate-950 text-slate-100 border-slate-800';
+  } else if (norm.includes('WEB')) {
+    return 'bg-indigo-50 text-indigo-700 border-indigo-250/60';
+  } else if (norm.includes('FORM') || norm.includes('PORTAL')) {
+    return 'bg-amber-50 text-amber-700 border-amber-250/60';
+  } else {
+    return 'bg-slate-50 text-slate-600 border-slate-200/60';
+  }
+};
+
 export function Pipeline() {
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
   const [editingContact, setEditingContact] = useState<any>(null);
@@ -126,20 +160,15 @@ export function Pipeline() {
       {showFilters && (
         <div className="bg-white border border-slate-200 p-3 rounded-xl mb-4 grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-xs animate-in slide-in-from-top-1 duration-200 text-left shrink-0 font-sans">
           <div className="space-y-0.5">
-            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Buscar Lead</label>
-            <input
-              type="text"
-              value={filterSearch}
-              onChange={e => setFilterSearch(e.target.value)}
+            <label className="block text-[9px] font-medium text-slate-500 tracking-wider">Buscar lead</label>
+            <input type="text" value={filterSearch} onChange={e => setFilterSearch(e.target.value)}
               placeholder="Buscar por nombre..."
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20"
             />
           </div>
           <div className="space-y-0.5">
-            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Proyecto</label>
-            <select
-              value={filterProject}
-              onChange={e => setFilterProject(e.target.value)}
+            <label className="block text-[9px] font-medium text-slate-500 tracking-wider">Proyecto</label>
+            <select value={filterProject} onChange={e => setFilterProject(e.target.value)}
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
             >
               <option value="">Todos los Proyectos</option>
@@ -149,10 +178,8 @@ export function Pipeline() {
             </select>
           </div>
           <div className="space-y-0.5">
-            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Origen / Fuente</label>
-            <select
-              value={filterSource}
-              onChange={e => setFilterSource(e.target.value)}
+            <label className="block text-[9px] font-medium text-slate-500 tracking-wider">Origen / fuente</label>
+            <select value={filterSource} onChange={e => setFilterSource(e.target.value)}
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
             >
               <option value="">Todos los Orígenes</option>
@@ -162,10 +189,8 @@ export function Pipeline() {
             </select>
           </div>
           <div className="space-y-0.5">
-            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Asesor encargado</label>
-            <select
-              value={filterAgent}
-              onChange={e => setFilterAgent(e.target.value)}
+            <label className="block text-[9px] font-medium text-slate-500 tracking-wider">Asesor encargado</label>
+            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)}
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 font-semibold"
             >
               <option value="">Todos los Asesores</option>
@@ -185,15 +210,15 @@ export function Pipeline() {
           /* List View - Single Flat Table with Headers */
           <div className="flex-1 overflow-hidden bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col animate-fade-in text-left">
             <div className="overflow-y-auto flex-1 custom-scrollbar">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 sticky top-0 z-10 text-xs">
+              <table className="w-full text-left text-[11px] sm:text-sm whitespace-nowrap">
+                <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 sticky top-0 z-10 text-[10px] sm:text-xs">
                   <tr>
-                    <th className="px-4 py-3">Cliente</th>
+                    <th className="px-2 py-2.5 sm:px-4 sm:py-3">Cliente</th>
                     <th className="px-4 py-3 hidden md:table-cell">Proyecto / Presupuesto / Asesor</th>
-                    <th className="px-4 py-3">Etapa</th>
+                    <th className="px-2 py-2.5 sm:px-4 sm:py-3">Etapa</th>
                     <th className="px-4 py-3 hidden lg:table-cell">Origen / Fuente</th>
-                    <th className="px-4 py-3 hidden sm:table-cell">Antigüedad</th>
-                    <th className="px-4 py-3 text-right">Acciones</th>
+                    <th className="px-2 py-2.5 sm:px-4 sm:py-3">Antigüedad</th>
+                    <th className="px-2 py-2.5 sm:px-4 sm:py-3 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -207,6 +232,7 @@ export function Pipeline() {
                     filteredOpportunities.map((opp) => {
                       const contactName = opp.contact?.firstName ? `${opp.contact.firstName} ${opp.contact.lastName || ''}`.trim() : 'Sin Contacto';
                       const stageConfig = stages.find(s => s.key === opp.stage) || { name: opp.stage, color: '#475569' };
+                      const resolvedColor = getStageColor(opp.stage, stageConfig.color);
                       
                       const getElapsedTime = (createdAtString: string) => {
                         const diffMs = new Date().getTime() - new Date(createdAtString).getTime();
@@ -228,8 +254,13 @@ export function Pipeline() {
                           className="hover:bg-slate-50/50 cursor-pointer transition-colors group"
                         >
                           {/* Cliente */}
-                          <td className="px-4 py-3.5">
-                            <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors">{contactName}</div>
+                          <td className="px-2 py-3.5 sm:px-4">
+                            <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors text-xs sm:text-sm">
+                              <span className="hidden sm:inline">{contactName}</span>
+                              <span className="sm:hidden">
+                                {contactName.length > 15 ? `${contactName.substring(0, 15)}...` : contactName}
+                              </span>
+                            </div>
                             <div className="text-[10px] text-slate-400 mt-0.5">{opp.contact?.phone || opp.contact?.email || 'Sin datos de contacto'}</div>
                           </td>
                           {/* Proyecto */}
@@ -237,7 +268,7 @@ export function Pipeline() {
                             <div className="font-semibold text-slate-900 text-xs">
                               {opp.project?.name || 'Sin Proyecto'}
                             </div>
-                            <div className="text-[10px] text-slate-500 mt-1 space-y-0.5 font-medium leading-normal">
+                            <div className="text-[10px] text-slate-505 mt-1 space-y-0.5 font-medium leading-normal">
                               {opp.project?.developer?.name && (
                                 <div>
                                   <span className="text-slate-400 font-bold uppercase tracking-wider text-[8px] mr-1">Desarrollador:</span>
@@ -259,13 +290,13 @@ export function Pipeline() {
                             </div>
                           </td>
                           {/* Etapa */}
-                          <td className="px-4 py-3.5">
+                          <td className="px-2 py-3.5 sm:px-4">
                             <span 
                               className="text-[9px] font-bold px-2.5 py-0.5 rounded-full border inline-block"
                               style={{ 
-                                color: stageConfig.color || '#475569', 
-                                backgroundColor: `${stageConfig.color}12` || '#f1f5f9',
-                                borderColor: `${stageConfig.color}25` || '#e2e8f0'
+                                color: resolvedColor, 
+                                backgroundColor: `${resolvedColor}12`,
+                                borderColor: `${resolvedColor}25`
                               }}
                             >
                               {stageConfig.name}
@@ -273,34 +304,34 @@ export function Pipeline() {
                           </td>
                           {/* Origen */}
                           <td className="px-4 py-3.5 hidden lg:table-cell">
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200/50 text-slate-500">
+                            <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${getSourceBadgeClasses(opp.contact?.source)}`}>
                               {opp.contact?.source || 'Sin Origen'}
                             </span>
                           </td>
                           {/* Antigüedad */}
-                          <td className="px-4 py-3.5 hidden sm:table-cell text-slate-500 text-xs font-medium">
+                          <td className="px-2 py-3.5 sm:px-4 text-slate-500 text-[10px] sm:text-xs font-medium">
                             {getElapsedTime(opp.createdAt)}
                           </td>
                           {/* Acciones */}
-                          <td className="px-4 py-3.5 text-right" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
+                          <td className="px-2 py-3.5 sm:px-4 text-right" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1 sm:gap-1.5">
                               {opp.contact?.phone && (
                                 <>
                                   <a 
                                     href={`tel:${opp.contact.phone}`}
-                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                                    className="p-1 sm:p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
                                     title="Llamar"
                                   >
-                                    <Phone className="w-3.5 h-3.5" />
+                                    <Phone className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                                   </a>
                                   <a 
                                     href={`https://wa.me/${opp.contact.phone.replace(/\+/g, '').replace(/\s/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                    className="p-1 sm:p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
                                     title="WhatsApp"
                                   >
-                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    <MessageSquare className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                                   </a>
                                 </>
                               )}
@@ -318,23 +349,23 @@ export function Pipeline() {
                                       alert(err.message || 'Error al alternar bot');
                                     }
                                   }}
-                                  className={`p-1.5 rounded-lg border transition-all ${
+                                  className={`p-1 sm:p-1.5 rounded-lg border transition-all ${
                                     opp.contact.chats[0].isBotActive 
                                       ? 'bg-rose-50 text-rose-600 border-rose-150' 
                                       : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200/50'
                                   }`}
                                   title={opp.contact.chats[0].isBotActive ? "Pausar Asistente de IA" : "Activar Asistente de IA"}
                                 >
-                                  <Bot className="w-3.5 h-3.5" />
+                                  <Bot className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                                 </button>
                               ) : (
                                 <button
                                   type="button"
                                   disabled
-                                  className="p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
+                                  className="p-1 sm:p-1.5 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed border border-slate-200/30"
                                   title="Sin chat de WhatsApp activo"
                                 >
-                                  <Bot className="w-3.5 h-3.5" />
+                                  <Bot className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                                 </button>
                               )}
                             </div>

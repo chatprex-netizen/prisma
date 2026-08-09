@@ -109,7 +109,7 @@ export function Campaigns() {
   // Main Campaigns Dashboard (List View)
   if (!isCreating) {
     return (
-      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 min-h-full flex flex-col animate-fade-in">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
           <div>
@@ -191,7 +191,7 @@ export function Campaigns() {
 
   // Wizard Creation View
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto min-h-full flex flex-col animate-fade-in">
       {/* Wizard Header */}
       <div className="mb-8">
         <button 
@@ -257,12 +257,8 @@ export function Campaigns() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Nombre de la Campaña</label>
-              <input
-                type="text"
-                placeholder="Ej. Promoción Lanzamiento Agosto"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
+              <label className="block text-xs font-medium text-slate-700 mb-1">Nombre de la campaña</label>
+              <input type="text" placeholder="Ej. Promoción Lanzamiento Agosto" value={campaignName} onChange={(e) => setCampaignName(e.target.value)}
                 className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
               />
             </div>
@@ -348,10 +344,7 @@ export function Campaigns() {
                         className={`cursor-pointer transition-colors ${isSelected ? 'bg-brand-green/5' : 'hover:bg-slate-50'}`}
                       >
                         <td className="px-4 py-3">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
+                          <input type="checkbox" checked={isSelected} onChange={() => {}}
                             className="rounded border-slate-300 text-brand-green focus:ring-brand-green"
                           />
                         </td>

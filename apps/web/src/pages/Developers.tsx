@@ -104,10 +104,7 @@ export function Developers() {
         {/* Compact Single-Row Action Buttons */}
         <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
           {showSearch && (
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
               className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
               autoFocus
@@ -145,10 +142,8 @@ export function Developers() {
         <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">RUC / Registro</label>
-            <select 
-              value={hasRucFilter}
-              onChange={e => setHasRucFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Ruc / registro</label>
+            <select value={hasRucFilter} onChange={e => setHasRucFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los RUC</option>
@@ -158,10 +153,8 @@ export function Developers() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Teléfono de Contacto</label>
-            <select 
-              value={hasPhoneFilter}
-              onChange={e => setHasPhoneFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Teléfono de contacto</label>
+            <select value={hasPhoneFilter} onChange={e => setHasPhoneFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los Teléfonos</option>
@@ -171,10 +164,8 @@ export function Developers() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Correo de Contacto</label>
-            <select 
-              value={hasEmailFilter}
-              onChange={e => setHasEmailFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Correo de contacto</label>
+            <select value={hasEmailFilter} onChange={e => setHasEmailFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los Correos</option>
@@ -194,42 +185,42 @@ export function Developers() {
           </div>
         ) : (
           <div className="overflow-x-auto flex-1 custom-scrollbar">
-            <table className="w-full text-sm text-left whitespace-nowrap">
+            <table className="w-full text-[11px] sm:text-sm text-left whitespace-nowrap">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium text-xs uppercase tracking-wider">
-                  <th className="py-3 px-4">Empresa / RUC</th>
-                  <th className="py-3 px-4">Contacto</th>
-                  <th className="py-3 px-4">Teléfono</th>
-                  <th className="py-3 px-4">Correo</th>
-                  <th className="py-3 px-4">Notas</th>
-                  <th className="py-3 px-4 text-center">Acciones</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium text-[10px] sm:text-xs uppercase tracking-wider">
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4">Empresa / RUC</th>
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4">Contacto</th>
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4 hidden sm:table-cell">Teléfono</th>
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4 hidden md:table-cell">Correo</th>
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4 hidden lg:table-cell">Notas</th>
+                  <th className="py-2.5 px-2.5 sm:py-3 sm:px-4 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredDevelopers.map((dev) => (
                   <tr key={dev.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                           {dev.logo ? (
                             <img src={dev.logo} alt="logo" className="w-full h-full object-cover" />
                           ) : (
-                            <Building2 className="w-5 h-5 text-slate-400" />
+                            <Building2 className="w-4 h-4 text-slate-400" />
                           )}
                         </div>
                         <div>
                           <div className="font-semibold text-slate-900">{dev.name}</div>
-                          <div className="text-xs text-slate-400 font-mono">RUC: {dev.ruc || '—'}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">RUC: {dev.ruc || '—'}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2 text-slate-700">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4">
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-slate-700">
                         <User className="w-3.5 h-3.5 text-slate-400" />
                         <span>{dev.contactName || '—'}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4 hidden sm:table-cell">
                       {dev.phone ? (
                         <div className="flex items-center gap-2">
                           <Phone className="w-3.5 h-3.5 text-slate-400" />
@@ -237,7 +228,7 @@ export function Developers() {
                         </div>
                       ) : '—'}
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4 hidden md:table-cell">
                       {dev.email ? (
                         <div className="flex items-center gap-2">
                           <Mail className="w-3.5 h-3.5 text-slate-400" />
@@ -245,14 +236,14 @@ export function Developers() {
                         </div>
                       ) : '—'}
                     </td>
-                    <td className="py-4 px-4 text-xs text-slate-400 max-w-[200px] truncate">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4 text-xs text-slate-400 max-w-[200px] truncate hidden lg:table-cell">
                       {dev.notes || '—'}
                     </td>
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-2.5 px-2.5 sm:py-4 sm:px-4 text-center">
                       <div className="flex justify-center gap-2">
                         <button 
                           onClick={() => handleOpenEditModal(dev)}
-                          className="p-1.5 text-slate-400 hover:text-brand-green hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1 text-slate-400 hover:text-brand-green hover:bg-slate-100 rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit2 className="w-4 h-4" />

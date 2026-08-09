@@ -153,11 +153,7 @@ export function Conversations() {
         <div className="p-3 shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar conversación..." 
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
-            />
+            <input type="text" placeholder="Buscar conversación..." className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
           </div>
         </div>
 
@@ -344,15 +340,7 @@ export function Conversations() {
                   </button>
                 </div>
                 
-                <textarea 
-                  ref={inputRef}
-                  value={inputText}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1 max-h-32 min-h-[44px] bg-transparent resize-none py-3 px-2 text-sm focus:outline-none text-slate-700" 
-                  placeholder="Escribe un mensaje... ('/' para respuestas rápidas)"
-                  rows={1}
-                />
+                <textarea ref={inputRef} value={inputText} onChange={handleInputChange} onKeyDown={handleKeyDown} className="flex-1 max-h-32 min-h-[44px] bg-transparent resize-none py-3 px-2 text-sm focus:outline-none text-slate-700" placeholder="Escribe un mensaje... ('/' para respuestas rápidas)" rows={1} />
                 
                 <button 
                   onClick={handleSendMessage}

@@ -5,7 +5,7 @@ import {
   DollarSign, Building, Edit3, ChevronRight, CheckSquare, Plus, Check, AlertCircle, AlertTriangle
 } from 'lucide-react';
 import { 
-  getProperties, createContract, updateOpportunityStage, 
+  getProperties, updateProperty, createContract, updateOpportunityStage, 
   getAppointments, createAppointment, updateAppointment, 
   updateContact, getUsers 
 } from '../../lib/api';
@@ -495,9 +495,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               <h2 className="text-base font-extrabold text-slate-900 truncate max-w-[40vw]">{opportunity.title}</h2>
               
               {/* Interactive Stage Selector Dropdown */}
-              <select
-                value={currentStage}
-                onChange={(e) => handleStageChange(e.target.value)}
+              <select value={currentStage} onChange={(e) => handleStageChange(e.target.value)}
                 className="px-2 py-0.5 bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-lg text-[10px] font-extrabold outline-none cursor-pointer hover:bg-brand-green/15 transition-all"
               >
                 <option value="PROSPECTO">Prospecto</option>
@@ -594,18 +592,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </span>
             </button>
 
-            {/* Mensaje */}
-            <button 
-              onClick={() => setIsMessageOpen(true)}
-              className="flex flex-col items-center gap-1 group focus:outline-none"
-            >
-              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-pink-600 group-hover:border-pink-600 group-hover:bg-pink-50 transition-all shadow-sm">
-                <MessageSquare className="w-4 h-4" />
-              </div>
-              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
-                Mensaje
-              </span>
-            </button>
+
 
             {/* Cierre (Contrato) */}
             <button 
@@ -828,31 +815,24 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             </div>
             <form onSubmit={handleSaveTask} className="p-4 space-y-3.5">
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Tarea *</label>
-                <input 
-                  type="text" 
-                  value={taskTitle} 
-                  onChange={e => setTaskTitle(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Título de la tarea *</label>
+                <input type="text" value={taskTitle} onChange={e => setTaskTitle(e.target.value)}
                   placeholder="Ej: Llamar para confirmar visita" 
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white font-semibold"
                   required 
                 />
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Detalles / Notas</label>
-                <textarea 
-                  value={taskDesc} 
-                  onChange={e => setTaskDesc(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Detalles / notas</label>
+                <textarea value={taskDesc} onChange={e => setTaskDesc(e.target.value)}
                   placeholder="Instrucciones adicionales..."
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-16"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Responsable *</label>
-                  <select 
-                    value={taskAgentId} 
-                    onChange={e => setTaskAgentId(e.target.value)}
+                  <label className="block text-[10px] font-medium text-brand-green ">Responsable *</label>
+                  <select value={taskAgentId} onChange={e => setTaskAgentId(e.target.value)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     {agents.map(a => (
@@ -861,10 +841,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad Relacionada</label>
-                  <select 
-                    value={taskPropId} 
-                    onChange={e => setTaskPropId(e.target.value)}
+                  <label className="block text-[10px] font-medium text-brand-green ">Propiedad relacionada</label>
+                  <select value={taskPropId} onChange={e => setTaskPropId(e.target.value)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     <option value="">Ninguna</option>
@@ -876,20 +854,15 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Fecha Límite *</label>
-                  <input 
-                    type="date" 
-                    value={taskDueDate} 
-                    onChange={e => setTaskDueDate(e.target.value)}
+                  <label className="block text-[10px] font-medium text-brand-green ">Fecha límite *</label>
+                  <input type="date" value={taskDueDate} onChange={e => setTaskDueDate(e.target.value)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                     required 
                   />
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Prioridad</label>
-                  <select 
-                    value={taskPriority} 
-                    onChange={e => setTaskPriority(e.target.value)}
+                  <label className="block text-[10px] font-medium text-brand-green ">Prioridad</label>
+                  <select value={taskPriority} onChange={e => setTaskPriority(e.target.value)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     <option value="BAJA">Baja</option>
@@ -898,10 +871,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Estado</label>
-                  <select 
-                    value={taskStatus} 
-                    onChange={e => setTaskStatus(e.target.value)}
+                  <label className="block text-[10px] font-medium text-brand-green ">Estado</label>
+                  <select value={taskStatus} onChange={e => setTaskStatus(e.target.value)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     <option value="PENDIENTE">Pendiente</option>
@@ -936,11 +907,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             </div>
             <form onSubmit={handleSaveCita} className="p-4 space-y-3.5">
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Cita *</label>
-                <input 
-                  type="text" 
-                  value={citaTitle} 
-                  onChange={e => setCitaTitle(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Título de la cita *</label>
+                <input type="text" value={citaTitle} onChange={e => setCitaTitle(e.target.value)}
                   placeholder="Ej: Firma de Promesa de Compraventa" 
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   required 
@@ -948,7 +916,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad Relacionada</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Propiedad relacionada</label>
                   <select value={citaPropId} onChange={e => setCitaPropId(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                     <option value="">Ninguna</option>
                     {properties.map(p => (
@@ -957,7 +925,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Asesor Asignado *</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Asesor asignado *</label>
                   <select value={citaAgentId} onChange={e => setCitaAgentId(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                     {agents.map(a => (
                       <option key={a.id} value={a.id}>{a.firstName} {a.lastName || ''}</option>
@@ -967,21 +935,21 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Fecha *</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Fecha *</label>
                   <input type="date" value={citaDate} onChange={e => setCitaDate(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Hora Inicio *</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Hora inicio *</label>
                   <input type="time" value={citaStartTime} onChange={e => setCitaStartTime(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Hora Fin *</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Hora fin *</label>
                   <input type="time" value={citaEndTime} onChange={e => setCitaEndTime(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" required />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Tipo de Cita</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Tipo de cita</label>
                   <select value={citaType} onChange={e => setCitaType(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                     <option value="REUNION">Reunión Presencial</option>
                     <option value="VISITA_PROYECTO">Visita a Proyecto</option>
@@ -990,7 +958,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Estado de la Cita</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Estado de la cita</label>
                   <select value={citaStatus} onChange={e => setCitaStatus(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                     <option value="PENDIENTE">Programada (Pendiente)</option>
                     <option value="CONFIRMADA">Confirmada</option>
@@ -1001,16 +969,16 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Ubicación</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Ubicación</label>
                   <input type="text" value={citaLocation} onChange={e => setCitaLocation(e.target.value)} placeholder="Ej: Sala de ventas San Isidro" className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" />
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Enlace Videollamada</label>
+                  <label className="block text-[10px] font-medium text-brand-green ">Enlace videollamada</label>
                   <input type="url" value={citaVideoLink} onChange={e => setCitaVideoLink(e.target.value)} placeholder="Google Meet, Zoom, etc." className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold" />
                 </div>
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Notas de la Cita</label>
+                <label className="block text-[10px] font-medium text-brand-green ">Notas de la cita</label>
                 <textarea value={citaDesc} onChange={e => setCitaDesc(e.target.value)} placeholder="Especificaciones de la reunión..." className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white resize-none h-14" />
               </div>
               <div className="flex justify-end gap-2 pt-1">
@@ -1036,10 +1004,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             </div>
             <form onSubmit={handleSaveNote} className="p-4 space-y-3.5">
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Contenido de la Nota *</label>
-                <textarea 
-                  value={noteContent} 
-                  onChange={e => setNoteContent(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Contenido de la nota *</label>
+                <textarea value={noteContent} onChange={e => setNoteContent(e.target.value)}
                   placeholder="Ej: El cliente está interesado en comprar en preventa si se le da un descuento del 3%..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white resize-none h-32 font-semibold"
                   required
@@ -1068,17 +1034,14 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             </div>
             <form onSubmit={handleSaveCall} className="p-4 space-y-3.5">
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Título de la Llamada *</label>
-                <input 
-                  type="text" 
-                  value={callTitle} 
-                  onChange={e => setCallTitle(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Título de la llamada *</label>
+                <input type="text" value={callTitle} onChange={e => setCallTitle(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   required
                 />
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Resultado de la Llamada *</label>
+                <label className="block text-[10px] font-medium text-brand-green ">Resultado de la llamada *</label>
                 <select value={callResult} onChange={e => setCallResult(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                   <option value="CONTESTO">Contestó</option>
                   <option value="NO_CONTESTO">No Contestó</option>
@@ -1087,10 +1050,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                 </select>
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Detalles / Conversación</label>
-                <textarea 
-                  value={callDetails} 
-                  onChange={e => setCallDetails(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Detalles / conversación</label>
+                <textarea value={callDetails} onChange={e => setCallDetails(e.target.value)}
                   placeholder="Indica qué hablaron o próximos pasos..."
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white resize-none h-16 font-semibold"
                 />
@@ -1118,17 +1079,15 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             </div>
             <form onSubmit={handleSaveMessage} className="p-4 space-y-3.5">
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Canal de Envío</label>
+                <label className="block text-[10px] font-medium text-brand-green ">Canal de envío</label>
                 <select value={msgChannel} onChange={e => setMsgChannel(e.target.value)} className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold">
                   <option value="WHATSAPP">WhatsApp</option>
                   <option value="CORREO">Correo Electrónico</option>
                 </select>
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Contenido del Mensaje *</label>
-                <textarea 
-                  value={msgDetails} 
-                  onChange={e => setMsgDetails(e.target.value)}
+                <label className="block text-[10px] font-medium text-brand-green ">Contenido del mensaje *</label>
+                <textarea value={msgDetails} onChange={e => setMsgDetails(e.target.value)}
                   placeholder="Copia el texto del mensaje enviado..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-24 font-semibold"
                   required
@@ -1158,10 +1117,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             <div className="p-4 space-y-3.5">
               <div className="grid grid-cols-3 gap-2.5">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Desarrollador</label>
-                  <select
-                    value={selectedDevId}
-                    onChange={e => {
+                  <label className="block text-[10px] font-medium text-brand-green ">Desarrollador</label>
+                  <select value={selectedDevId} onChange={e => {
                       setSelectedDevId(e.target.value);
                       setSelectedProjId('');
                       setContractData(prev => ({ ...prev, propertyId: '' }));
@@ -1175,10 +1132,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Proyecto</label>
-                  <select
-                    value={selectedProjId}
-                    onChange={e => {
+                  <label className="block text-[10px] font-medium text-brand-green ">Proyecto</label>
+                  <select value={selectedProjId} onChange={e => {
                       setSelectedProjId(e.target.value);
                       setContractData(prev => ({ ...prev, propertyId: '' }));
                     }}
@@ -1191,10 +1146,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Propiedad *</label>
-                  <select
-                    value={contractData.propertyId}
-                    onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
+                  <label className="block text-[10px] font-medium text-brand-green ">Propiedad *</label>
+                  <select value={contractData.propertyId} onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-bold"
                     required
                   >
@@ -1210,10 +1163,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </div>
               <div className="grid grid-cols-3 gap-2.5">
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Tipo de Documento</label>
-                  <select
-                    value={contractData.type}
-                    onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
+                  <label className="block text-[10px] font-medium text-brand-green ">Tipo de documento</label>
+                  <select value={contractData.type} onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     <option value="COMPRAVENTA">Compraventa</option>
@@ -1222,21 +1173,16 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   </select>
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Monto de Cierre *</label>
-                  <input
-                    type="number"
-                    value={contractData.amount}
-                    onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
+                  <label className="block text-[10px] font-medium text-brand-green ">Monto de cierre *</label>
+                  <input type="number" value={contractData.amount} onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
                     placeholder="Monto"
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                     required
                   />
                 </div>
                 <div className="space-y-0.5">
-                  <label className="block text-[10px] font-bold text-brand-green uppercase">Moneda</label>
-                  <select
-                    value={contractData.currency}
-                    onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
+                  <label className="block text-[10px] font-medium text-brand-green ">Moneda</label>
+                  <select value={contractData.currency} onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
                   >
                     <option value="USD">Dólares ($)</option>
@@ -1246,10 +1192,8 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                 </div>
               </div>
               <div className="space-y-0.5">
-                <label className="block text-[10px] font-bold text-brand-green uppercase">Comentarios de Cierre</label>
-                <textarea
-                  value={contractData.notes}
-                  onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
+                <label className="block text-[10px] font-medium text-brand-green ">Comentarios de cierre</label>
+                <textarea value={contractData.notes} onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Indica las cuotas, condiciones acordadas..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white resize-none h-16"
                 />
@@ -1261,11 +1205,19 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                   disabled={submittingContract}
                   onClick={async () => {
                     if (!contractData.propertyId || !contractData.amount) {
-                      alert('Por favor completa la unidad y el monto de cierre.');
+                      alert('Por favor selecciona la unidad y el monto de cierre.');
                       return;
                     }
+                    
+                    const c = opportunity.contact;
+                    if (!c || !c.dni || !c.address || !c.phone || !c.email) {
+                      alert('⚠️ ACCIÓN REQUERIDA:\nPara registrar un cierre y firma de contrato, es OBLIGATORIO que el cliente tenga sus datos completos registrados (DNI, Dirección, Teléfono, Correo).\n\nPor favor, actualiza los datos del contacto antes de proceder.');
+                      return;
+                    }
+
                     setSubmittingContract(true);
                     try {
+                      // 1. Crear contrato
                       await createContract({
                         buyerId: opportunity.contactId,
                         propertyId: contractData.propertyId,
@@ -1277,8 +1229,16 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
                         agentId: opportunity.agentId || opportunity.contact?.assignedTo
                       });
 
+                      // 2. Actualizar propiedad a VENDIDO
+                      await updateProperty(contractData.propertyId, { status: 'VENDIDO' });
+
+                      // 3. Promover contacto a CLIENTE formal
+                      await updateContact(opportunity.contactId, { type: 'CLIENTE' });
+
+                      // 4. Actualizar etapa
                       await updateOpportunityStage(opportunity.id, 'CIERRE_GANADO');
-                      alert('🎉 ¡Venta registrada y trato cerrado con éxito!');
+                      
+                      alert('🎉 ¡Venta registrada y trato cerrado con éxito!\n\nSe ha actualizado:\n- El inventario (Unidad vendida)\n- El perfil del cliente\n- La negociación cerrada');
                       onClose();
                       window.location.reload();
                     } catch (err: any) {

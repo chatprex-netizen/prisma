@@ -76,6 +76,7 @@ export function Contacts() {
       spouseDni: contact.spouseDni || '',
       spouseEmail: contact.spouseEmail || '',
       spousePhone: contact.spousePhone || '',
+      stage: contact.opportunities?.[0]?.stage || 'PROSPECCION',
     });
     setEditMode(false);
     setActiveTab('personal');
@@ -137,6 +138,13 @@ export function Contacts() {
   };
 
   const handleDelete = async (id: string) => {
+    if (selectedContact?.type === 'CLIENTE' || selectedContact?.opportunities?.some((o: any) => o.stage === 'CIERRE_GANADO')) {
+      const pwd = prompt('🔒 Este contacto es un CLIENTE formal (Cierre Ganado). Ingresa la contraseña del supervisor para eliminarlo (admin123):');
+      if (pwd !== 'admin123') {
+        alert('Contraseña incorrecta. No tienes permisos para borrar este cliente.');
+        return;
+      }
+    }
     if (!window.confirm('¿Estás seguro de que deseas eliminar permanentemente este contacto?')) return;
     try {
       await deleteContact(id);
@@ -164,8 +172,32 @@ export function Contacts() {
     return matchesSearch && matchesSource && matchesType && matchesVip && matchesBudget && matchesAssigned;
   });
 
+  
+  const truncate = (str, max) => str && str.length > max ? str.substring(0, max) + '...' : (str || '');
+  const getSourceColor = (source) => {
+    switch ((source || '').toUpperCase()) {
+      case 'WHATSAPP': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'FACEBOOK': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'INSTAGRAM': return 'bg-pink-100 text-pink-700 border-pink-200';
+      case 'REFERIDO': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'PORTAL': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+  const getStageColor = (stage) => {
+    switch ((stage || '').toUpperCase()) {
+      case 'PROSPECCION': return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'CALIFICACION': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'PROPUESTA': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      case 'NEGOCIACION': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'CIERRE_GANADO': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'CIERRE_PERDIDO': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 min-h-full flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
@@ -179,10 +211,7 @@ export function Contacts() {
         {/* Compact Single-Row Action Buttons */}
         <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
           {showSearch && (
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
               className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
               autoFocus
@@ -240,10 +269,8 @@ export function Contacts() {
         <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Origen / Canal</label>
-            <select
-              value={sourceFilter}
-              onChange={e => setSourceFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Origen / canal</label>
+            <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Origen</option>
@@ -254,10 +281,8 @@ export function Contacts() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo de Lead</label>
-            <select
-              value={typeFilter}
-              onChange={e => setTypeFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Tipo de lead</label>
+            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Tipo</option>
@@ -267,21 +292,16 @@ export function Contacts() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Presupuesto Mínimo</label>
-            <input
-              type="number"
-              value={minBudget}
-              onChange={e => setMinBudget(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Presupuesto mínimo</label>
+            <input type="number" value={minBudget} onChange={e => setMinBudget(e.target.value)}
               placeholder="Ej: 50000"
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Asesor Asignado</label>
-            <select
-              value={assignedFilter}
-              onChange={e => setAssignedFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Asesor asignado</label>
+            <select value={assignedFilter} onChange={e => setAssignedFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Asesor</option>
@@ -293,10 +313,7 @@ export function Contacts() {
 
           <div className="flex items-center pt-5">
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={vipFilter}
-                onChange={e => setVipFilter(e.target.checked)}
+              <input type="checkbox" checked={vipFilter} onChange={e => setVipFilter(e.target.checked)}
                 className="w-4 h-4 text-brand-green border-slate-200 rounded focus:ring-brand-green"
               />
               <span className="text-xs font-bold text-slate-600">Solo VIP / Estrellas</span>
@@ -307,19 +324,20 @@ export function Contacts() {
       )}
 
       {/* Split Screen Area */}
-      <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
         {/* Contacts Table */}
         <div className={`bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col w-full ${selectedContact ? 'hidden md:flex md:w-1/2' : 'w-full'} transition-all duration-300`}>
           <div className="overflow-y-auto flex-1 custom-scrollbar">
-            <table className="w-full text-left text-sm whitespace-nowrap">
+            <table className="w-full text-left text-[9px] sm:text-sm whitespace-nowrap">
               <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-250 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3">Contacto</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Contacto Info</th>
-                  <th className="px-4 py-3 hidden lg:table-cell">Origen</th>
-                  <th className="px-4 py-3 hidden xl:table-cell">Presupuesto</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Estado / Etapa</th>
-                  <th className="px-4 py-3 hidden xl:table-cell">Etiquetas</th>
+                  <th className="px-2 py-2.5 sm:px-4 sm:py-3">Contacto</th>
+                  <th className="px-2 py-2.5 sm:px-4 sm:py-3 hidden md:table-cell">Contacto Info</th>
+                  <th className="px-2 py-2.5 sm:px-4 sm:py-3 hidden lg:table-cell">Origen</th>
+                  <th className="px-2 py-2.5 sm:px-4 sm:py-3 hidden xl:table-cell">Presupuesto</th>
+                  <th className="px-1 py-1 sm:px-4 sm:py-3">Estado / Etapa</th>
+                  <th className="px-1 py-1 sm:px-4 sm:py-3">Asesor</th>
+                  <th className="px-2 py-2.5 sm:px-4 sm:py-3 hidden xl:table-cell">Etiquetas</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -338,10 +356,10 @@ export function Contacts() {
                 ) : filteredContacts.map((contact) => (
                   <tr 
                     key={contact.id} 
-                    onClick={() => openDetail(contact)}
+                    onDoubleClick={() => openDetail(contact)}
                     className={`cursor-pointer transition-colors group ${selectedContact?.id === contact.id ? 'bg-brand-green/5' : 'hover:bg-slate-50'}`}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center text-brand-green font-bold text-xs shrink-0 relative">
                           {contact.firstName ? contact.firstName.charAt(0).toUpperCase() : '?'}
@@ -353,7 +371,7 @@ export function Contacts() {
                         </div>
                         <div className="min-w-0">
                           <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors truncate flex items-center gap-1.5">
-                            {contact.firstName} {contact.lastName || ''}
+                            {truncate(`${contact.firstName || ''} ${contact.lastName || ''}`, 15)}
                             {contact.type === 'CLIENTE' && (
                               <span className="bg-emerald-50 text-emerald-600 text-[9px] px-1.5 py-0.2 rounded border border-emerald-250 font-bold uppercase shrink-0 animate-fade-in">
                                 Cliente
@@ -364,7 +382,7 @@ export function Contacts() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3 hidden md:table-cell">
                       <div className="space-y-0.5 text-xs">
                         <div className="flex items-center gap-1.5 text-slate-600">
                           <Phone className="w-3.5 h-3.5 text-slate-400" />
@@ -378,12 +396,12 @@ export function Contacts() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3 hidden lg:table-cell">
                       <span className="text-[10px] text-brand-green font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-brand-green/10 border border-brand-green/20">
                         {contact.source ? contact.source.replace('_', ' ') : 'Otro'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 hidden xl:table-cell">
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3 hidden xl:table-cell">
                       {contact.budgetMin ? (
                         <span className="font-semibold text-slate-900 text-xs">
                           {contact.currency === 'EUR' ? '€' : contact.currency === 'PEN' ? 'S/' : '$'} {Number(contact.budgetMin).toLocaleString('es-PE')}
@@ -392,16 +410,27 @@ export function Contacts() {
                         <span className="text-slate-400 text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
+                    <td className="px-1 py-1 sm:px-4 sm:py-3 text-[9px] sm:text-xs">
                       {contact.opportunities?.[0]?.stage ? (
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border bg-slate-50 text-slate-700 border-slate-200 uppercase">
+                        <span className={`font-medium px-2 py-0.5 rounded-full border ${getStageColor(contact.opportunities[0].stage)}`}>
                           {contact.opportunities[0].stage.replace('_', ' ')}
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-[10px] font-semibold bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">Sin op.</span>
+                        <span className="text-slate-400 font-medium bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">Sin op.</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden xl:table-cell">
+                    <td className="px-1 py-1 sm:px-4 sm:py-3 text-[9px] sm:text-xs">
+                      {(() => {
+                        const assignedUser = users.find(u => u.id === (contact.assignedTo || contact.assignedUserId));
+                        const asesorName = assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName || ''}` : 'Sin asignar';
+                        return (
+                          <span className="truncate max-w-[70px] inline-block" title={asesorName}>
+                            {truncate(asesorName, 10)}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3 hidden xl:table-cell">
                       <div className="flex flex-wrap gap-1 max-w-[150px]">
                         {contact.tags?.slice(0, 2).map((tag: string) => (
                           <span key={tag} className="flex items-center gap-1 bg-slate-100 text-slate-600 text-[9px] px-1.5 py-0.2 rounded border border-slate-200">
@@ -502,11 +531,9 @@ export function Contacts() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">Tipo de Contacto</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Tipo de contacto</label>
                       {editMode ? (
-                        <select
-                          value={editData.type || 'LEAD'}
-                          onChange={e => setEditData({...editData, type: e.target.value})}
+                        <select value={editData.type || 'LEAD'} onChange={e => setEditData({...editData, type: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                         >
                           <option value="LEAD">Lead / Prospecto</option>
@@ -536,11 +563,9 @@ export function Contacts() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">Estado Civil</label>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">Estado civil</label>
                           {editMode ? (
-                            <select
-                              value={editData.maritalStatus || 'SOLTERO'}
-                              onChange={e => setEditData({...editData, maritalStatus: e.target.value})}
+                            <select value={editData.maritalStatus || 'SOLTERO'} onChange={e => setEditData({...editData, maritalStatus: e.target.value})}
                               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
                             >
                               <option value="SOLTERO">Soltero(a)</option>
@@ -571,11 +596,9 @@ export function Contacts() {
                     )}
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">Origen del Lead</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Origen del lead</label>
                       {editMode ? (
-                        <select
-                          value={editData.source || 'Otro'}
-                          onChange={e => setEditData({...editData, source: e.target.value})}
+                        <select value={editData.source || 'Otro'} onChange={e => setEditData({...editData, source: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                         >
                           {sources.map(src => (
@@ -591,11 +614,9 @@ export function Contacts() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Asesor Asignado</label>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Asesor asignado</label>
                     {editMode ? (
-                      <select
-                        value={editData.assignedUserId || ''}
-                        onChange={e => setEditData({...editData, assignedUserId: e.target.value})}
+                      <select value={editData.assignedUserId || ''} onChange={e => setEditData({...editData, assignedUserId: e.target.value})}
                         className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                       >
                         <option value="">Sin asignar (Libre)</option>
@@ -615,10 +636,7 @@ export function Contacts() {
                   <div className="pt-2">
                     {editMode ? (
                       <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input 
-                          type="checkbox" 
-                          checked={!!editData.isVip}
-                          onChange={e => setEditData({...editData, isVip: e.target.checked})}
+                        <input type="checkbox" checked={!!editData.isVip} onChange={e => setEditData({...editData, isVip: e.target.checked})}
                           className="w-4 h-4 text-brand-green border-slate-300 rounded focus:ring-brand-green/20"
                         />
                         <span className="text-xs font-bold text-slate-700">¿Es Contacto VIP?</span>
@@ -642,9 +660,7 @@ export function Contacts() {
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Moneda</label>
                       {editMode ? (
-                        <select
-                          value={editData.currency || 'USD'}
-                          onChange={e => setEditData({...editData, currency: e.target.value})}
+                        <select value={editData.currency || 'USD'} onChange={e => setEditData({...editData, currency: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                         >
                           <option value="USD">USD ($)</option>
@@ -658,11 +674,9 @@ export function Contacts() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Proyecto de Interés</label>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Proyecto de interés</label>
                     {editMode ? (
-                      <select
-                        value={editData.projectOfInterest || ''}
-                        onChange={e => setEditData({...editData, projectOfInterest: e.target.value})}
+                      <select value={editData.projectOfInterest || ''} onChange={e => setEditData({...editData, projectOfInterest: e.target.value})}
                         className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                       >
                         <option value="">Ninguno específico</option>
@@ -678,12 +692,9 @@ export function Contacts() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Etiquetas (Separadas por comas)</label>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Etiquetas (separadas por comas)</label>
                     {editMode ? (
-                      <input 
-                        type="text"
-                        value={editData.tags || ''}
-                        onChange={e => setEditData({...editData, tags: e.target.value})}
+                      <input type="text" value={editData.tags || ''} onChange={e => setEditData({...editData, tags: e.target.value})}
                         placeholder="Ej. departamento, miraflores, inversion"
                         className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
                       />
@@ -701,11 +712,9 @@ export function Contacts() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Fase del Pipeline Actual</label>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Fase del pipeline actual</label>
                     {editMode ? (
-                      <select
-                        value={editData.stage || 'PROSPECCION'}
-                        onChange={e => setEditData({...editData, stage: e.target.value})}
+                      <select value={editData.stage || 'PROSPECCION'} onChange={e => setEditData({...editData, stage: e.target.value})}
                         className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 font-semibold"
                       >
                         <option value="PROSPECCION">Prospección</option>
@@ -727,12 +736,9 @@ export function Contacts() {
 
               {activeTab === 'notes' && (
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Notas de Seguimiento</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Notas de seguimiento</label>
                   {editMode ? (
-                    <textarea 
-                      rows={5}
-                      value={editData.notes || ''}
-                      onChange={e => setEditData({...editData, notes: e.target.value})}
+                    <textarea rows={5} value={editData.notes || ''} onChange={e => setEditData({...editData, notes: e.target.value})}
                       className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 resize-none"
                       placeholder="Escribe comentarios sobre las llamadas, coordinaciones, etc..."
                     />
@@ -774,10 +780,7 @@ function FieldGroup({ label, value, field, editMode, onChange, icon }: {
     <div>
       <label className="block text-xs font-semibold text-slate-500 mb-1">{label}</label>
       {editMode ? (
-        <input
-          type="text"
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
+        <input type="text" value={value || ''} onChange={e => onChange(e.target.value)}
           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green"
         />
       ) : (

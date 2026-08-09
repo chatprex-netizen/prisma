@@ -162,10 +162,7 @@ function WhatsAppConnectionTab() {
               <label className="block text-xs font-medium text-slate-700">
                 Identificación del número de teléfono <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={waCreds.phoneNumberId}
-                onChange={e => setWaCreds({...waCreds, phoneNumberId: e.target.value})}
+              <input type="text" value={waCreds.phoneNumberId} onChange={e => setWaCreds({...waCreds, phoneNumberId: e.target.value})}
                 placeholder="e.g. 100234567890123"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
@@ -176,10 +173,7 @@ function WhatsAppConnectionTab() {
               <label className="block text-xs font-medium text-slate-700">
                 ID de cuenta empresarial de WhatsApp (WABA ID) <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={waCreds.wabaId}
-                onChange={e => setWaCreds({...waCreds, wabaId: e.target.value})}
+              <input type="text" value={waCreds.wabaId} onChange={e => setWaCreds({...waCreds, wabaId: e.target.value})}
                 placeholder="e.g. chatprex@gmail.com o ID numérico"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
@@ -191,10 +185,7 @@ function WhatsAppConnectionTab() {
                 Token de acceso permanente <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <input
-                  type={showToken ? 'text' : 'password'}
-                  value={waCreds.accessToken}
-                  onChange={e => setWaCreds({...waCreds, accessToken: e.target.value})}
+                <input type={showToken ? 'text' : 'password'} value={waCreds.accessToken} onChange={e => setWaCreds({...waCreds, accessToken: e.target.value})}
                   placeholder="EAAxxxxxxxxxxxxxxxxxxxxxxxxx"
                   className="w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-mono"
                 />
@@ -213,10 +204,7 @@ function WhatsAppConnectionTab() {
               <label className="block text-xs font-medium text-slate-700">
                 Token de verificación de webhook <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={waCreds.webhookToken}
-                onChange={e => setWaCreds({...waCreds, webhookToken: e.target.value})}
+              <input type="text" value={waCreds.webhookToken} onChange={e => setWaCreds({...waCreds, webhookToken: e.target.value})}
                 placeholder="Crear un token de verificación personalizado"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
@@ -228,10 +216,7 @@ function WhatsAppConnectionTab() {
               <label className="block text-xs font-medium text-slate-700">
                 PIN de verificación en dos pasos <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
-              <input
-                type="password"
-                value={waCreds.pin}
-                onChange={e => setWaCreds({...waCreds, pin: e.target.value})}
+              <input type="password" value={waCreds.pin} onChange={e => setWaCreds({...waCreds, pin: e.target.value})}
                 placeholder="PIN de 6 dígitos de Meta WhatsApp Manager"
                 maxLength={6}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all tracking-widest font-mono"
@@ -400,7 +385,7 @@ export function Settings() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 min-h-full flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 shrink-0">
         <div>
@@ -479,7 +464,7 @@ export function Settings() {
                   <input type="text" defaultValue="Mendoza" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                 </div>
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="block text-xs font-medium text-slate-700">Correo Electrónico</label>
+                  <label className="block text-xs font-medium text-slate-700">Correo electrónico</label>
                   <input type="email" defaultValue="carlos.mendoza@inmobiliaria.com" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50" readOnly />
                 </div>
               </div>
@@ -509,15 +494,13 @@ export function Settings() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5 md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700">Nombre de la Inmobiliaria</label>
+                      <label className="block text-xs font-medium text-slate-700">Nombre de la inmobiliaria</label>
                       <input type="text" defaultValue="ChatPrex Inmobiliario" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     </div>
                     
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Moneda por Defecto</label>
-                      <select 
-                        value={defaultCurrency}
-                        onChange={e => setDefaultCurrency(e.target.value)}
+                      <label className="block text-xs font-medium text-slate-700">Moneda por defecto</label>
+                      <select value={defaultCurrency} onChange={e => setDefaultCurrency(e.target.value)}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
                       >
                         <option value="PEN">Soles (PEN - S/)</option>
@@ -528,19 +511,15 @@ export function Settings() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Tipo de Cambio por Defecto (USD a PEN)</label>
-                      <input
-                        type="number"
-                        step="0.001"
-                        value={exchangeRate}
-                        onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)}
+                      <label className="block text-xs font-medium text-slate-700">Tipo de cambio por defecto (usd a pen)</label>
+                      <input type="number" step="0.001" value={exchangeRate} onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
                         placeholder="Ej. 3.75"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-700">Zona Horaria</label>
+                      <label className="block text-xs font-medium text-slate-700">Zona horaria</label>
                       <select className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer">
                         <option value="America/Lima">(GMT-05:00) Lima</option>
                         <option value="America/Bogota">(GMT-05:00) Bogotá</option>
@@ -559,7 +538,7 @@ export function Settings() {
               <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Apariencia y Tema</h2>
               
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-slate-700">Tema del Sistema</label>
+                <label className="block text-sm font-medium text-slate-700">Tema del sistema</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="border-2 border-brand-green bg-slate-50 rounded-xl p-4 cursor-pointer relative">
                     <div className="absolute top-2 right-2 w-4 h-4 bg-brand-green rounded-full flex items-center justify-center">
@@ -653,16 +632,16 @@ export function Settings() {
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-slate-900">Cambiar Contraseña</h3>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-700">Contraseña Actual</label>
+                  <label className="block text-xs font-medium text-slate-700">Contraseña actual</label>
                   <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-700">Nueva Contraseña</label>
+                    <label className="block text-xs font-medium text-slate-700">Nueva contraseña</label>
                     <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-700">Confirmar Nueva Contraseña</label>
+                    <label className="block text-xs font-medium text-slate-700">Confirmar nueva contraseña</label>
                     <input type="password" placeholder="••••••••" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                   </div>
                 </div>
@@ -777,11 +756,8 @@ function LeadSourcesTab() {
       {/* Formulario Agregar */}
       <form onSubmit={handleAdd} className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 flex items-end gap-4">
         <div className="flex-1 space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-700">Nombre de la Fuente</label>
-          <input 
-            type="text" 
-            value={newName} 
-            onChange={e => setNewName(e.target.value)} 
+          <label className="block text-xs font-semibold text-slate-700">Nombre de la fuente</label>
+          <input type="text" value={newName} onChange={e => setNewName(e.target.value)} 
             placeholder="Ej. Facebook Ads, TikTok Orgánico" 
             className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white"
             required
@@ -790,10 +766,7 @@ function LeadSourcesTab() {
         <div className="space-y-1.5 shrink-0">
           <label className="block text-xs font-semibold text-slate-700">Color</label>
           <div className="flex items-center gap-2">
-            <input 
-              type="color" 
-              value={newColor} 
-              onChange={e => setNewColor(e.target.value)} 
+            <input type="color" value={newColor} onChange={e => setNewColor(e.target.value)} 
               className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer bg-white p-1"
             />
           </div>
@@ -823,16 +796,10 @@ function LeadSourcesTab() {
               <div key={src.id} className="p-3.5 flex items-center justify-between gap-4">
                 {editingId === src.id ? (
                   <div className="flex-1 flex items-center gap-3">
-                    <input 
-                      type="color" 
-                      value={editColor} 
-                      onChange={e => setEditColor(e.target.value)} 
+                    <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} 
                       className="w-7 h-7 rounded cursor-pointer border border-slate-200 p-0.5"
                     />
-                    <input 
-                      type="text" 
-                      value={editName} 
-                      onChange={e => setEditName(e.target.value)} 
+                    <input type="text" value={editName} onChange={e => setEditName(e.target.value)} 
                       className="flex-1 px-3 py-1 rounded border border-slate-200 text-sm focus:ring-1 focus:ring-brand-green focus:border-brand-green"
                     />
                     <button 
@@ -951,10 +918,7 @@ function PipelineStagesTab() {
               <div key={stage.id} className="p-3 bg-slate-50/50 hover:bg-slate-100/10 rounded-xl border border-slate-200/60 flex items-center gap-4 transition-colors bg-white">
                 {/* Color Picker (Stylized circle) */}
                 <div className="relative shrink-0 flex items-center">
-                  <input 
-                    type="color" 
-                    value={stage.color || '#64748b'} 
-                    onChange={e => handleFieldChange(idx, 'color', e.target.value)}
+                  <input type="color" value={stage.color || '#64748b'} onChange={e => handleFieldChange(idx, 'color', e.target.value)}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     title="Elegir color de la etapa"
                   />
@@ -966,10 +930,7 @@ function PipelineStagesTab() {
 
                 {/* Custom Name */}
                 <div className="w-1/4 min-w-0">
-                  <input 
-                    type="text" 
-                    value={stage.name}
-                    onChange={e => handleFieldChange(idx, 'name', e.target.value)}
+                  <input type="text" value={stage.name} onChange={e => handleFieldChange(idx, 'name', e.target.value)}
                     placeholder="Nombre de etapa"
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white font-bold text-slate-800"
                   />
@@ -977,10 +938,7 @@ function PipelineStagesTab() {
 
                 {/* Details / Description */}
                 <div className="flex-1 min-w-0">
-                  <input 
-                    type="text" 
-                    value={stage.details || ''}
-                    onChange={e => handleFieldChange(idx, 'details', e.target.value)}
+                  <input type="text" value={stage.details || ''} onChange={e => handleFieldChange(idx, 'details', e.target.value)}
                     placeholder="Detalle o descripción..."
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/15 bg-white text-slate-500 font-medium"
                   />

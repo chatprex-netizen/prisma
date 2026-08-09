@@ -94,20 +94,15 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
           {/* Fila 1: Código de Unidad and Proyecto */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Código de Unidad *</label>
-              <input 
-                type="text" 
-                value={formData.unitCode}
-                onChange={e => setFormData({...formData, unitCode: e.target.value})}
+              <label className="block text-[11px] font-medium text-slate-700">Código de unidad *</label>
+              <input type="text" value={formData.unitCode} onChange={e => setFormData({...formData, unitCode: e.target.value})}
                 placeholder="Ej. Mz A, Lt 01"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Proyecto</label>
-              <select 
-                value={formData.projectId}
-                onChange={e => setFormData({...formData, projectId: e.target.value})}
+              <select value={formData.projectId} onChange={e => setFormData({...formData, projectId: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
               >
                 <option value="">Selecciona proyecto...</option>
@@ -122,9 +117,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Tipo *</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
                 <option value="DEPARTAMENTO">Departamento</option>
                 <option value="DUPLEX">Dúplex</option>
@@ -138,9 +131,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Estado *</label>
-              <select 
-                value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value})}
+              <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
                 <option value="DISPONIBLE">Disponible</option>
                 <option value="SEPARADO">Separado</option>
@@ -152,11 +143,9 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
 
           {/* Fila 3: Precio y Moneda */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Precio y Moneda *</label>
+            <label className="block text-[11px] font-medium text-slate-700">Precio y moneda *</label>
             <div className="flex gap-2">
-              <select 
-                value={formData.currency}
-                onChange={e => setFormData({...formData, currency: e.target.value})}
+              <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})}
                 translate="no"
                 className="w-24 px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-slate-50 text-slate-700 notranslate"
               >
@@ -164,10 +153,7 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
                 <option value="PEN">PEN (S/)</option>
                 <option value="EUR">EUR (€)</option>
               </select>
-              <input 
-                type="number" 
-                value={formData.price}
-                onChange={e => setFormData({...formData, price: e.target.value})}
+              <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})}
                 className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" 
                 placeholder="0.00" 
                 required 
@@ -179,51 +165,35 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
           <div className="grid grid-cols-5 gap-2">
             <div className="space-y-1">
               <label className="block text-[10px] font-medium text-slate-700 truncate">Área (m²)</label>
-              <input 
-                type="number" 
-                step="0.1"
-                value={formData.areaTotal}
-                onChange={e => setFormData({...formData, areaTotal: e.target.value})}
+              <input type="number" step="0.1" value={formData.areaTotal} onChange={e => setFormData({...formData, areaTotal: e.target.value})}
                 placeholder="0.0"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-medium text-slate-700 truncate">Habitac.</label>
-              <input 
-                type="number" 
-                value={formData.bedrooms}
-                onChange={e => setFormData({...formData, bedrooms: e.target.value})}
+              <input type="number" value={formData.bedrooms} onChange={e => setFormData({...formData, bedrooms: e.target.value})}
                 placeholder="0"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-medium text-slate-700 truncate">Baños</label>
-              <input 
-                type="number" 
-                value={formData.bathrooms}
-                onChange={e => setFormData({...formData, bathrooms: e.target.value})}
+              <input type="number" value={formData.bathrooms} onChange={e => setFormData({...formData, bathrooms: e.target.value})}
                 placeholder="0"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-medium text-slate-700 truncate">Piso N°</label>
-              <input 
-                type="number" 
-                value={formData.floor}
-                onChange={e => setFormData({...formData, floor: e.target.value})}
+              <label className="block text-[10px] font-medium text-slate-700 truncate">Piso n°</label>
+              <input type="number" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})}
                 placeholder="1"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-medium text-slate-700 truncate" title="Estacionamiento">Estac.</label>
-              <input 
-                type="number" 
-                value={formData.parkingSpots}
-                onChange={e => setFormData({...formData, parkingSpots: e.target.value})}
+              <input type="number" value={formData.parkingSpots} onChange={e => setFormData({...formData, parkingSpots: e.target.value})}
                 placeholder="0"
                 className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
@@ -232,11 +202,8 @@ export function NewUnitModal({ isOpen, onClose, onSuccess }: NewUnitModalProps) 
 
           {/* Fila 5: Descripción */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Descripción / Notas internas</label>
-            <textarea 
-              rows={2}
-              value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Descripción / notas internas</label>
+            <textarea rows={2} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
               placeholder="Detalles sobre vista, acabados, promociones..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
             />

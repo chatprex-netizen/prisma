@@ -93,14 +93,14 @@ export function Dashboard() {
   };
 
   const sourceColorMap: Record<string, string> = {
-    REDES_SOCIALES: '#10B981',
-    WEB: '#059669',
-    PORTAL_INMOBILIARIO: '#047857',
-    REFERIDO: '#065F46',
-    EVENTO: '#34D399',
-    CALL_CENTER: '#6ee7b7',
-    VISITA_OFICINA: '#a7f3d0',
-    OTRO: '#cbd5e1'
+    REDES_SOCIALES: '#3B82F6', // blue
+    WEB: '#8B5CF6', // purple
+    PORTAL_INMOBILIARIO: '#F59E0B', // amber
+    REFERIDO: '#10B981', // green
+    EVENTO: '#EC4899', // pink
+    CALL_CENTER: '#EF4444', // red
+    VISITA_OFICINA: '#06B6D4', // cyan
+    OTRO: '#94A3B8' // slate
   };
 
   const leadSourceData = Object.keys(sourceGroups).map(key => ({

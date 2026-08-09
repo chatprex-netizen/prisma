@@ -118,6 +118,13 @@ export function Units() {
   };
 
   const handleDelete = async (id: string) => {
+    if (selectedUnit?.status === 'VENDIDO') {
+      const pwd = prompt('🔒 Esta unidad figura como VENDIDA. Ingresa la contraseña de autorización para eliminarla (admin123):');
+      if (pwd !== 'admin123') {
+        alert('Contraseña incorrecta. No tienes permisos para borrar esta unidad.');
+        return;
+      }
+    }
     if (!window.confirm('¿Estás seguro de que deseas eliminar permanentemente esta unidad del inventario?')) return;
     try {
       await deleteProperty(id);
@@ -150,7 +157,7 @@ export function Units() {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 h-full flex flex-col bg-slate-50/30 animate-fade-in">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 min-h-full flex flex-col bg-slate-50/30 animate-fade-in">
       {/* Header */}
       <div className="flex flex-row justify-between items-center gap-4 shrink-0">
         <div>
@@ -164,10 +171,7 @@ export function Units() {
         {/* Compact Single-Row Action Buttons */}
         <div className="flex flex-row items-center gap-1.5 shrink-0 justify-end">
           {showSearch && (
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar..." 
               className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-brand-green w-36 sm:w-48 transition-all animate-in fade-in slide-in-from-right-1 duration-200"
               autoFocus
@@ -225,10 +229,8 @@ export function Units() {
         <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-4 shadow-2xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 shrink-0 text-left animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Proyecto</label>
-            <select 
-              value={projectFilter} 
-              onChange={e => setProjectFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Proyecto</label>
+            <select value={projectFilter} onChange={e => setProjectFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Todos los Proyectos</option>
@@ -239,10 +241,8 @@ export function Units() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Estado</label>
-            <select 
-              value={statusFilter} 
-              onChange={e => setStatusFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Estado</label>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Estado</option>
@@ -254,10 +254,8 @@ export function Units() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
-            <select 
-              value={typeFilter} 
-              onChange={e => setTypeFilter(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Tipo</label>
+            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
               className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none cursor-pointer"
             >
               <option value="">Cualquier Tipo</option>
@@ -268,22 +266,16 @@ export function Units() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Precio Mín ($)</label>
-            <input 
-              type="number"
-              value={minPrice}
-              onChange={e => setMinPrice(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Precio mín ($)</label>
+            <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)}
               placeholder="Ej: 80000"
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Precio Máx ($)</label>
-            <input 
-              type="number"
-              value={maxPrice}
-              onChange={e => setMaxPrice(e.target.value)}
+            <label className="block text-[10px] font-medium text-slate-500 ">Precio máx ($)</label>
+            <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)}
               placeholder="Ej: 250000"
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-brand-green focus:outline-none"
             />
@@ -293,50 +285,59 @@ export function Units() {
       )}
 
       {/* Split Screen Area */}
-      <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
         {/* Units Table */}
         <div className={`bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col w-full ${selectedUnit ? 'hidden md:flex md:w-1/2' : 'w-full'} transition-all duration-300`}>
           <div className="overflow-y-auto flex-1 custom-scrollbar">
-            <table className="w-full text-left text-sm whitespace-nowrap">
+            <table className="w-full text-left text-[11px] sm:text-sm whitespace-nowrap">
               <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3">Código / Proyecto</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Tipo</th>
-                  <th className="px-4 py-3 hidden lg:table-cell">Características</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Precio</th>
-                  <th className="px-4 py-3">Estado</th>
+                  <th className="px-2 py-2.5 sm:px-3 sm:py-3 w-1/3">Descripción / Proyecto</th>
+                  <th className="px-2 py-2.5 sm:px-3 sm:py-3">Estado</th>
+                  <th className="px-2 py-2.5 sm:px-3 sm:py-3">Moneda y Precio</th>
+                  <th className="px-2 py-2.5 sm:px-3 sm:py-3 hidden md:table-cell">Ubicación y Características</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center">
+                    <td colSpan={4} className="px-4 py-6 sm:px-6 sm:py-8 text-center">
                       <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto" />
                     </td>
                   </tr>
                 ) : filteredUnits.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
+                    <td colSpan={4} className="px-4 py-6 sm:px-6 sm:py-8 text-center text-slate-400">
                       No se encontraron unidades en el inventario.
                     </td>
                   </tr>
                 ) : filteredUnits.map((unit) => (
                   <tr 
                     key={unit.id} 
-                    onClick={() => openDetail(unit)}
+                    onDoubleClick={() => openDetail(unit)}
                     className={`cursor-pointer transition-colors group ${selectedUnit?.id === unit.id ? 'bg-brand-green/5' : 'hover:bg-slate-50'}`}
                   >
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors">{unit.unitCode}</div>
-                      <div className="text-[10px] text-slate-505 flex items-center gap-1 mt-0.5">
-                        <Building2 className="w-3 h-3 text-slate-400" /> 
-                        {unit.project?.name || 'Sin proyecto'}
+                    <td className="px-2 py-2.5 sm:px-3 sm:py-3 max-w-[140px] sm:max-w-[200px]">
+                      <div className="font-semibold text-slate-900 group-hover:text-brand-green transition-colors truncate" title={`${TYPE_LABELS[unit.type] || unit.type} ${unit.unitCode}`}>
+                        {TYPE_LABELS[unit.type] || unit.type} {unit.unitCode}
+                      </div>
+                      <div className="text-[10px] text-slate-505 flex items-center gap-1 mt-0.5 truncate">
+                        <Building2 className="w-3 h-3 text-slate-400 shrink-0" /> 
+                        <span className="truncate">{unit.project?.name || 'Sin proyecto'}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-slate-600 font-medium text-xs">{TYPE_LABELS[unit.type] || unit.type}</span>
+                    <td className="px-2 py-2.5 sm:px-3 sm:py-3">
+                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide inline-block ${STATUS_COLORS[unit.status]}`}>
+                        {unit.status}
+                      </span>
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
+                    <td className="px-2 py-2.5 sm:px-3 sm:py-3 font-semibold text-slate-900">
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-500 text-[10px] hidden sm:inline">{unit.currency}</span>
+                        <span>{unit.currency === 'USD' ? '$' : unit.currency === 'EUR' ? '€' : 'S/'} {Number(unit.price).toLocaleString()}</span>
+                      </div>
+                    </td>
+                    <td className="px-2 py-2.5 sm:px-3 sm:py-3 hidden md:table-cell">
                       <div className="flex items-center gap-3 text-slate-505">
                         <div className="flex items-center gap-1" title="Área Total">
                           <Maximize className="w-3.5 h-3.5 text-slate-400" />
@@ -355,14 +356,6 @@ export function Units() {
                           </div>
                         )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell font-semibold text-slate-900">
-                      {unit.currency === 'USD' ? '$' : unit.currency === 'EUR' ? '€' : 'S/'} {Number(unit.price).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide inline-block ${STATUS_COLORS[unit.status]}`}>
-                        {unit.status}
-                      </span>
                     </td>
                   </tr>
                 ))}
@@ -399,7 +392,16 @@ export function Units() {
                 ) : (
                   <>
                     <button 
-                      onClick={() => setEditMode(true)} 
+                      onClick={() => {
+                        if (selectedUnit.status === 'VENDIDO') {
+                          const pwd = prompt('🔒 Esta unidad figura como VENDIDA. Ingresa la contraseña de autorización para editarla (admin123):');
+                          if (pwd !== 'admin123') {
+                            alert('Contraseña incorrecta. No tienes permisos para editar esta unidad.');
+                            return;
+                          }
+                        }
+                        setEditMode(true);
+                      }} 
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition-colors"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -444,11 +446,9 @@ export function Units() {
                     <FieldGroup label="Código de Unidad" value={editData.unitCode} field="unitCode" editMode={editMode} onChange={(v) => setEditData({...editData, unitCode: v})} />
                     
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">Proyecto Asoc.</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Proyecto asoc.</label>
                       {editMode ? (
-                        <select
-                          value={editData.projectId || ''}
-                          onChange={e => setEditData({...editData, projectId: e.target.value})}
+                        <select value={editData.projectId || ''} onChange={e => setEditData({...editData, projectId: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="">Selecciona proyecto...</option>
@@ -467,11 +467,9 @@ export function Units() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">Tipo de Propiedad</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Tipo de propiedad</label>
                       {editMode ? (
-                        <select
-                          value={editData.type || 'DEPARTAMENTO'}
-                          onChange={e => setEditData({...editData, type: e.target.value})}
+                        <select value={editData.type || 'DEPARTAMENTO'} onChange={e => setEditData({...editData, type: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="DEPARTAMENTO">Departamento</option>
@@ -491,11 +489,9 @@ export function Units() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1">Estado de Unidad</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Estado de unidad</label>
                       {editMode ? (
-                        <select
-                          value={editData.status || 'DISPONIBLE'}
-                          onChange={e => setEditData({...editData, status: e.target.value})}
+                        <select value={editData.status || 'DISPONIBLE'} onChange={e => setEditData({...editData, status: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 cursor-pointer"
                         >
                           <option value="DISPONIBLE">Disponible</option>
@@ -518,9 +514,7 @@ export function Units() {
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1">Moneda</label>
                       {editMode ? (
-                        <select
-                          value={editData.currency || 'USD'}
-                          onChange={e => setEditData({...editData, currency: e.target.value})}
+                        <select value={editData.currency || 'USD'} onChange={e => setEditData({...editData, currency: e.target.value})}
                           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white cursor-pointer"
                         >
                           <option value="USD">USD ($)</option>
@@ -550,12 +544,9 @@ export function Units() {
 
               {activeTab === 'description' && (
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Descripción y Notas Internas</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Descripción y notas internas</label>
                   {editMode ? (
-                    <textarea 
-                      rows={6}
-                      value={editData.description || ''}
-                      onChange={e => setEditData({...editData, description: e.target.value})}
+                    <textarea rows={6} value={editData.description || ''} onChange={e => setEditData({...editData, description: e.target.value})}
                       className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 resize-none leading-relaxed"
                       placeholder="Detalles sobre vista, acabados, promociones, notas internas..."
                     />
@@ -593,10 +584,7 @@ function FieldGroup({ label, value, field, editMode, onChange, icon }: {
     <div>
       <label className="block text-xs font-semibold text-slate-500 mb-1">{label}</label>
       {editMode ? (
-        <input
-          type="text"
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
+        <input type="text" value={value || ''} onChange={e => onChange(e.target.value)}
           className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green"
         />
       ) : (

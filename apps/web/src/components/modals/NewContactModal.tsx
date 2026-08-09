@@ -154,49 +154,41 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Header */}
-        <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">{initialData ? 'Editar Contacto' : 'Nuevo Contacto'}</h2>
+        <div className="px-3.5 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+          <h2 className="text-sm font-semibold text-slate-900">{initialData ? 'Editar Contacto' : 'Nuevo Contacto'}</h2>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1.5 rounded-full transition-colors"
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1 rounded-full transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
+        <div className="p-3 sm:p-3.5 overflow-y-auto space-y-2.5 flex-1 custom-scrollbar">
           {/* Row 1: Nombre, Apellido, Tipo */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Nombre *</label>
-              <input 
-                type="text" 
-                value={formData.firstName}
-                onChange={e => setFormData({...formData, firstName: e.target.value})}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Nombre *</label>
+              <input type="text" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})}
                 placeholder="Ej. Carlos"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Apellido</label>
-              <input 
-                type="text" 
-                value={formData.lastName}
-                onChange={e => setFormData({...formData, lastName: e.target.value})}
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Apellido</label>
+              <input type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})}
                 placeholder="Ej. Mendoza"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Contacto</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Tipo de contacto</label>
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
               >
                 <option value="LEAD">Lead</option>
                 <option value="CLIENTE">Cliente</option>
@@ -205,51 +197,40 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
           </div>
 
           {/* Row 2: Teléfono, Email, VIP */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Teléfono *</label>
-              <input 
-                type="tel" 
-                value={formData.phone}
-                onChange={e => setFormData({...formData, phone: e.target.value})}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Teléfono *</label>
+              <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
                 placeholder="+51 999 888 777"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Correo Electrónico</label>
-              <input 
-                type="email" 
-                value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Correo electrónico</label>
+              <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
                 placeholder="correo@ejemplo.com"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
-            <div className="flex items-center pt-5 pl-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={formData.isVip}
-                  onChange={e => setFormData({...formData, isVip: e.target.checked})}
-                  className="w-4 h-4 text-brand-green border-slate-300 rounded focus:ring-brand-green/20"
+            <div className="flex items-center pt-4 pl-0.5">
+              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input type="checkbox" checked={formData.isVip} onChange={e => setFormData({...formData, isVip: e.target.checked})}
+                  className="w-3.5 h-3.5 text-brand-green border-slate-300 rounded focus:ring-brand-green/20"
                 />
-                <span className="text-xs font-semibold text-slate-700">¿Es Cliente VIP? (Trato Especial)</span>
+                <span className="text-[11px] font-semibold text-slate-700">¿Es Cliente VIP?</span>
               </label>
             </div>
           </div>
 
-          <div className="p-3 bg-slate-50/50 rounded-lg border border-slate-100 space-y-3">
-            <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Detalles Adicionales & Preferencias</span>
+          <div className="p-2.5 bg-slate-50/50 rounded-lg border border-slate-100 space-y-2">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-600 block uppercase tracking-wider">Detalles Adicionales & Preferencias</span>
             
             {/* Line 1: Proyecto de Interés, Origen, and Asesor Asignado */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Proyecto de Interés</label>
-                <select 
-                  value={formData.projectOfInterest}
-                  onChange={e => setFormData({...formData, projectOfInterest: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Proyecto de interés</label>
+                <select value={formData.projectOfInterest} onChange={e => setFormData({...formData, projectOfInterest: e.target.value})}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   <option value="">Ninguno específico</option>
                   {projects.map(p => (
@@ -257,23 +238,20 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   ))}
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Origen de Lead *</label>
-                <select 
-                  value={formData.source}
-                  onChange={e => setFormData({...formData, source: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Origen de lead *</label>
+                <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
+                >
                   {sources.map(src => (
                     <option key={src.id} value={src.name}>{src.name}</option>
                   ))}
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Asesor Asignado</label>
-                <select 
-                  value={formData.assignedUserId}
-                  onChange={e => setFormData({...formData, assignedUserId: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Asesor asignado</label>
+                <select value={formData.assignedUserId} onChange={e => setFormData({...formData, assignedUserId: e.target.value})}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 >
                   <option value="">Sin asignar (Libre)</option>
                   {users.map(u => (
@@ -284,13 +262,11 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
             </div>
 
             {/* Line 2: Estado según Pipeline, Moneda and Presupuesto */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Estado según Pipeline</label>
-                <select 
-                  value={formData.stage}
-                  onChange={e => setFormData({...formData, stage: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white font-semibold"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Estado según pipeline</label>
+                <select value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white font-semibold"
                 >
                   <option value="PROSPECCION">Prospección</option>
                   <option value="CALIFICACION">Calificación</option>
@@ -301,110 +277,85 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
                   <option value="CIERRE_PERDIDO">Perdido</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
-                <select 
-                  value={formData.currency}
-                  onChange={e => setFormData({...formData, currency: e.target.value})}
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Moneda</label>
+                <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})}
                   translate="no"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white notranslate"
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white notranslate"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="PEN">PEN (S/)</option>
                   <option value="EUR">EUR (€)</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Presupuesto Estimado</label>
-                <input 
-                  type="number" 
-                  value={formData.budgetMin}
-                  onChange={e => setFormData({...formData, budgetMin: e.target.value})}
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Presupuesto estimado</label>
+                <input type="number" value={formData.budgetMin} onChange={e => setFormData({...formData, budgetMin: e.target.value})}
                   placeholder="0"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
                 />
               </div>
             </div>
             
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Etiquetas (Separadas por coma)</label>
-              <input 
-                type="text" 
-                value={formData.tags}
-                onChange={e => setFormData({...formData, tags: e.target.value})}
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Etiquetas (separadas por coma)</label>
+              <input type="text" value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})}
                 placeholder="Ej. departamento, inversion, miraflores"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all bg-white"
               />
             </div>
           </div>
 
           {/* Client Specific Fields in Modal */}
           {formData.type === 'CLIENTE' && (
-            <div className="border border-slate-100 rounded-lg p-3 bg-slate-50/50 space-y-3 pt-2 text-left animate-slide-down">
-              <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Datos de Cliente / Facturación</span>
+            <div className="border border-slate-100 rounded-lg p-2.5 bg-slate-50/50 space-y-2 pt-2 text-left animate-slide-down">
+              <span className="text-[10px] sm:text-[11px] font-bold text-slate-600 block uppercase tracking-wider">Datos de Cliente / Facturación</span>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-medium text-slate-700">DNI / Documento</label>
-                  <input 
-                    type="text" 
-                    value={formData.dni}
-                    onChange={e => setFormData({...formData, dni: e.target.value})}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-2.5">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">DNI / Documento</label>
+                  <input type="text" value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})}
                     placeholder="Ej. 12345678"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-medium text-slate-700">Dirección</label>
-                  <input 
-                    type="text" 
-                    value={formData.address}
-                    onChange={e => setFormData({...formData, address: e.target.value})}
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Dirección</label>
+                  <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})}
                     placeholder="Av. Larco 456"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-medium text-slate-700">Ciudad</label>
-                  <input 
-                    type="text" 
-                    value={formData.city}
-                    onChange={e => setFormData({...formData, city: e.target.value})}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Ciudad</label>
+                  <input type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})}
                     placeholder="Ej. Lima"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-medium text-slate-700">Distrito</label>
-                  <input 
-                    type="text" 
-                    value={formData.district}
-                    onChange={e => setFormData({...formData, district: e.target.value})}
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Distrito</label>
+                  <input type="text" value={formData.district} onChange={e => setFormData({...formData, district: e.target.value})}
                     placeholder="Ej. Miraflores"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-medium text-slate-700">Región/Dpto</label>
-                  <input 
-                    type="text" 
-                    value={formData.department}
-                    onChange={e => setFormData({...formData, department: e.target.value})}
+                <div className="space-y-0.5">
+                  <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Región/Dpto</label>
+                  <input type="text" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}
                     placeholder="Ej. Lima"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                    className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700">Estado Civil</label>
-                <select 
-                  value={formData.maritalStatus}
-                  onChange={e => setFormData({...formData, maritalStatus: e.target.value})}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Estado civil</label>
+                <select value={formData.maritalStatus} onChange={e => setFormData({...formData, maritalStatus: e.target.value})}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green bg-white transition-all appearance-none"
                 >
                   <option value="SOLTERO">Soltero(a)</option>
                   <option value="CASADO">Casado(a)</option>
@@ -415,49 +366,37 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
               </div>
 
               {(formData.maritalStatus === 'CASADO' || formData.maritalStatus === 'CONVIVIENTE') && (
-                <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-3">
-                  <span className="text-xs font-bold text-slate-600 block">Datos del Cónyuge</span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-medium text-slate-700">Nombre Completo</label>
-                      <input 
-                        type="text" 
-                        value={formData.spouseName}
-                        onChange={e => setFormData({...formData, spouseName: e.target.value})}
+                <div className="border border-slate-200 rounded-lg p-2.5 bg-white space-y-2">
+                  <span className="text-[11px] font-bold text-slate-600 block">Datos del Cónyuge</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-2.5">
+                    <div className="space-y-0.5">
+                      <label className="block text-[10px] font-medium text-slate-700">Nombre completo</label>
+                      <input type="text" value={formData.spouseName} onChange={e => setFormData({...formData, spouseName: e.target.value})}
                         placeholder="Ej. María López"
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                        className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-medium text-slate-700">DNI Cónyuge</label>
-                      <input 
-                        type="text" 
-                        value={formData.spouseDni}
-                        onChange={e => setFormData({...formData, spouseDni: e.target.value})}
+                    <div className="space-y-0.5">
+                      <label className="block text-[10px] font-medium text-slate-700">DNI cónyuge</label>
+                      <input type="text" value={formData.spouseDni} onChange={e => setFormData({...formData, spouseDni: e.target.value})}
                         placeholder="Ej. 87654321"
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                        className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-2.5">
+                    <div className="space-y-0.5">
                       <label className="block text-[10px] font-medium text-slate-700">Teléfono</label>
-                      <input 
-                        type="text" 
-                        value={formData.spousePhone}
-                        onChange={e => setFormData({...formData, spousePhone: e.target.value})}
+                      <input type="text" value={formData.spousePhone} onChange={e => setFormData({...formData, spousePhone: e.target.value})}
                         placeholder="Ej. 912345678"
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                        className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                       />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <label className="block text-[10px] font-medium text-slate-700">Email</label>
-                      <input 
-                        type="email" 
-                        value={formData.spouseEmail}
-                        onChange={e => setFormData({...formData, spouseEmail: e.target.value})}
+                      <input type="email" value={formData.spouseEmail} onChange={e => setFormData({...formData, spouseEmail: e.target.value})}
                         placeholder="maria@correo.com"
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+                        className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all"
                       />
                     </div>
                   </div>
@@ -466,31 +405,28 @@ export function NewContactModal({ isOpen, onClose, onSuccess, initialData }: New
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Notas</label>
-            <textarea 
-              rows={2}
-              value={formData.notes}
-              onChange={e => setFormData({...formData, notes: e.target.value})}
+          <div className="space-y-0.5">
+            <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Notas</label>
+            <textarea rows={2} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
               placeholder="Información adicional sobre el contacto..."
-              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
+              className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
+        <div className="px-3.5 py-2 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2 shrink-0">
           <button 
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-1.5 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+            className="px-3 py-1 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shadow-xs shadow-brand-green/20"
           >
             {loading ? 'Guardando...' : initialData ? 'Actualizar Contacto' : 'Guardar Contacto'}
           </button>

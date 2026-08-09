@@ -109,20 +109,13 @@ export function AIAssistants() {
                 </button>
               </div>
 
-              <textarea
-                className="w-full h-96 p-5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-green/20 leading-relaxed font-mono resize-none shadow-sm"
-                defaultValue={`# ROL Y CONTEXTO
-Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de contacto. Tu tono debe ser amable, profesional y muy breve (máximo 2 oraciones).
-
-# TU OBJETIVO PRINCIPAL
+              <textarea className="w-full h-96 p-5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-green/20 leading-relaxed font-mono resize-none shadow-sm" defaultValue={`# ROL Y CONTEXTO
+Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de contacto. Tu tono debe ser amable, profesional y muy breve (máximo 2 oraciones). # TU OBJETIVO PRINCIPAL
 1. Saludar al cliente y darle la bienvenida.
 2. Hacer máximo 2 preguntas para perfilar su interés (¿Qué tipo de propiedad busca? o ¿En qué proyecto está interesado?).
-3. Derivar la conversación inmediatamente al especialista adecuado usando tus Herramientas (Tools).
-
-# REGLAS ESTRICTAS DE DERIVACIÓN (Routing)
+3. Derivar la conversación inmediatamente al especialista adecuado usando tus Herramientas (Tools). # REGLAS ESTRICTAS DE DERIVACIÓN (Routing)
 - Si el cliente menciona un proyecto específico (ej. "Torre Marina"), NO le des detalles de precios ni características. Llama a la función [transferir_conversacion] con el ID del bot de ese proyecto.
-- Si el cliente pide hablar con un asesor o humano, se muestra frustrado o hace preguntas complejas (crédito hipotecario), llama a la función [transferir_humano].`}
-              />
+- Si el cliente pide hablar con un asesor o humano, se muestra frustrado o hace preguntas complejas (crédito hipotecario), llama a la función [transferir_humano].`} />
 
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex gap-3 text-sm text-emerald-800">
                 <InfoIcon className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -179,12 +172,8 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
                 <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium text-slate-700">API Key (Clave de acceso)</label>
-                    <input
-                      type="password"
-                      placeholder="sk-..."
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
-                    />
+                    <label className="block text-sm font-medium text-slate-700">Api key (clave de acceso)</label>
+                    <input type="password" placeholder="sk-..." className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     <p className="text-xs text-slate-500 mt-1">Tu clave segura para conectarse al proveedor seleccionado.</p>
                   </div>
 
@@ -209,7 +198,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
                   </div>
 
                   <div className="space-y-1.5 pt-4">
-                    <label className="block text-sm font-medium text-slate-700">Token Limit (Max Tokens)</label>
+                    <label className="block text-sm font-medium text-slate-700">Token limit (max tokens)</label>
                     <input type="number" defaultValue={500} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" />
                     <p className="text-xs text-slate-500 mt-1">Límite de longitud para la respuesta del bot para ahorrar costos.</p>
                   </div>
@@ -236,11 +225,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
 
               <div>
                 <h4 className="text-sm font-semibold text-slate-900 mb-3">Contexto inyectado manualmente</h4>
-                <textarea
-                  className="w-full h-48 p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-green/20 leading-relaxed font-mono resize-none shadow-sm"
-                  placeholder="Escriba aquí datos rápidos que la IA deba saber de memoria..."
-                  defaultValue={`Proyecto: Torre Marina\nPrecios: Desde $85,000 USD\nEntrega: Inmediata\nCuota Inicial: 10%\n\nPregunta Frecuente: ¿Tienen cochera?\nRespuesta: Sí, el costo adicional es de $12,000 USD.`}
-                />
+                <textarea className="w-full h-48 p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-green/20 leading-relaxed font-mono resize-none shadow-sm" placeholder="Escriba aquí datos rápidos que la IA deba saber de memoria..." defaultValue={`Proyecto: Torre Marina\nPrecios: Desde $85,000 USD\nEntrega: Inmediata\nCuota Inicial: 10%\n\nPregunta Frecuente: ¿Tienen cochera?\nRespuesta: Sí, el costo adicional es de $12,000 USD.`} />
               </div>
             </div>
           )}
@@ -277,11 +262,7 @@ Eres el "Asistente Recepcionista" de la inmobiliaria. Eres el primer punto de co
               <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm mt-6">
                 <h4 className="text-sm font-semibold text-slate-900 mb-1">Palabras clave de activación (Opcional)</h4>
                 <p className="text-xs text-slate-500 mb-3">El bot se activará solo al detectar estos términos exactos en el chat. Déjalo en blanco para responder a todo.</p>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20"
-                  placeholder="Ej: info, cotización, proyecto..."
-                />
+                <input type="text" className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20" placeholder="Ej: info, cotización, proyecto..." />
               </div>
             </div>
           )}

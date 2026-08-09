@@ -108,50 +108,41 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-white rounded-xl shadow-xl w-[95vw] md:w-full max-w-lg overflow-hidden flex flex-col max-h-[88vh]">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">{initialData ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso'}</h2>
+        <div className="px-3.5 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+          <h2 className="text-sm font-semibold text-slate-900">{initialData ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200/50 transition-colors">
-            <X className="w-5 h-5" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-4 flex-1 custom-scrollbar">
-          <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Descripción *</label>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-3 sm:p-3.5 space-y-2.5 flex-1 custom-scrollbar">
+          <div className="space-y-0.5">
+            <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Descripción *</label>
+            <input type="text" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
               placeholder="Ej. Cobro de separación departamento 402"
-              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green"
+              className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green"
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Monto *</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={e => setFormData({ ...formData, amount: e.target.value })}
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Monto *</label>
+              <input type="number" step="0.01" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })}
                 placeholder="0.00"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-green/20 focus:border-brand-green"
                 required
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Moneda</label>
-              <select
-                value={formData.currency}
-                onChange={e => setFormData({ ...formData, currency: e.target.value })}
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Moneda</label>
+              <select value={formData.currency} onChange={e => setFormData({ ...formData, currency: e.target.value })}
                 translate="no"
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white notranslate"
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white notranslate"
               >
                 <option value="PEN">PEN (S/)</option>
                 <option value="USD">USD ($)</option>
@@ -160,13 +151,11 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Tipo de Ingreso</label>
-              <select
-                value={formData.type}
-                onChange={e => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Tipo de ingreso</label>
+              <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
               >
                 <option value="VENTA_PROPIEDAD">Venta de Propiedad</option>
                 <option value="COMISION_PROYECTO">Comisión de Proyecto</option>
@@ -179,25 +168,20 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
                 <option value="OTROS">Otros</option>
               </select>
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Fecha *</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={e => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none"
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Fecha *</label>
+              <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none"
                 required
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Método de Pago</label>
-              <select
-                value={formData.paymentMethod}
-                onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Método de pago</label>
+              <select value={formData.paymentMethod} onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
               >
                 <option value="TRANSFERENCIA">Transferencia</option>
                 <option value="EFECTIVO">Efectivo</option>
@@ -206,12 +190,10 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
                 <option value="DEPOSITO">Depósito</option>
               </select>
             </div>
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Estado</label>
-              <select
-                value={formData.status}
-                onChange={e => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700">Estado</label>
+              <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
               >
                 <option value="PENDIENTE">Pendiente</option>
                 <option value="COBRADO">Cobrado</option>
@@ -220,15 +202,13 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-3 space-y-3">
-            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Vincular a (Opcional)</h4>
+          <div className="border-t border-slate-100 pt-2.5 space-y-2">
+            <h4 className="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-wider">Vincular a (Opcional)</h4>
             
-            <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700 flex items-center gap-1"><User className="w-3.5 h-3.5" /> Cliente</label>
-              <select
-                value={formData.contactId}
-                onChange={e => setFormData({ ...formData, contactId: e.target.value })}
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+            <div className="space-y-0.5">
+              <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700 flex items-center gap-1"><User className="w-3 h-3" /> Cliente</label>
+              <select value={formData.contactId} onChange={e => setFormData({ ...formData, contactId: e.target.value })}
+                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
               >
                 <option value="">Seleccionar cliente...</option>
                 {contacts.map(c => (
@@ -237,13 +217,11 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3.5 h-3.5" /> Proyecto</label>
-                <select
-                  value={formData.projectId}
-                  onChange={e => setFormData({ ...formData, projectId: e.target.value })}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3 h-3" /> Proyecto</label>
+                <select value={formData.projectId} onChange={e => setFormData({ ...formData, projectId: e.target.value })}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
                 >
                   <option value="">Seleccionar...</option>
                   {projects.map(p => (
@@ -251,12 +229,10 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
                   ))}
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3.5 h-3.5" /> Unidad</label>
-                <select
-                  value={formData.propertyId}
-                  onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none bg-white"
+              <div className="space-y-0.5">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-slate-700 flex items-center gap-1"><Building className="w-3 h-3" /> Unidad</label>
+                <select value={formData.propertyId} onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
+                  className="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none bg-white"
                 >
                   <option value="">Seleccionar...</option>
                   {properties.map(p => (
@@ -268,19 +244,19 @@ export function NewIncomeModal({ isOpen, onClose, onSuccess, initialData }: NewI
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-3 shrink-0">
+          <div className="pt-2.5 border-t border-slate-100 flex justify-end gap-2 shrink-0">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
+              className="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200/50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-brand-green text-white text-sm font-medium hover:bg-brand-greenHover transition-colors shadow-sm shadow-brand-green/20"
+              className="px-3 py-1 rounded-lg bg-brand-green text-white text-xs font-medium hover:bg-brand-greenHover transition-colors shadow-xs shadow-brand-green/20"
             >
               {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Guardar Ingreso')}
             </button>

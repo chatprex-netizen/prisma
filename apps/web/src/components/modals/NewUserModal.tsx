@@ -118,44 +118,32 @@ export function NewUserModal({ isOpen, onClose, onSuccess, initialData }: NewUse
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">Nombre *</label>
-                  <input 
-                    type="text" 
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
+                  <label className="block text-[11px] font-medium text-brand-green">Nombre *</label>
+                  <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800" 
                     placeholder="Ej: Juan" 
                     required 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">Apellido *</label>
-                  <input 
-                    type="text" 
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
+                  <label className="block text-[11px] font-medium text-brand-green">Apellido *</label>
+                  <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800" 
                     placeholder="Ej: Pérez" 
                     required 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">Correo Electrónico *</label>
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
+                  <label className="block text-[11px] font-medium text-brand-green">Correo electrónico *</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800" 
                     placeholder="juan.perez@inmobiliaria.com" 
                     required 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">Teléfono</label>
-                  <input 
-                    type="tel" 
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
+                  <label className="block text-[11px] font-medium text-brand-green">Teléfono</label>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800" 
                     placeholder="+51 987 654 321" 
                   />
@@ -173,13 +161,10 @@ export function NewUserModal({ isOpen, onClose, onSuccess, initialData }: NewUse
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">
+                  <label className="block text-[11px] font-medium text-brand-green">
                     {initialData ? 'Cambiar Contraseña' : 'Contraseña Temporal *'}
                   </label>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800" 
                     placeholder={initialData ? "Dejar en blanco para mantener" : "••••••••"} 
                     required={!initialData} 
@@ -189,10 +174,8 @@ export function NewUserModal({ isOpen, onClose, onSuccess, initialData }: NewUse
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-brand-green">Rol del Usuario *</label>
-                  <select 
-                    value={role}
-                    onChange={e => setRole(e.target.value)}
+                  <label className="block text-[11px] font-medium text-brand-green">Rol del usuario *</label>
+                  <select value={role} onChange={e => setRole(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 bg-white text-slate-800"
                   >
                     <option value="AGENTE">Agente Comercial</option>
@@ -205,10 +188,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess, initialData }: NewUse
                 
                 <div className="space-y-1 md:col-span-2 mt-2">
                   <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      checked={isActive}
-                      onChange={e => setIsActive(e.target.checked)}
+                    <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)}
                       className="w-4 h-4 text-brand-green rounded border-slate-300 focus:ring-brand-green" 
                     />
                     <div>

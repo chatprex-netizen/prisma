@@ -99,7 +99,7 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
         <div className="p-4 md:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
           {/* Avatar / Logo URL */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Logo / URL de Avatar</label>
+            <label className="block text-[11px] font-medium text-slate-700">Logo / url de avatar</label>
             <div className="flex gap-3 items-center">
               <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 overflow-hidden shrink-0">
                 {formData.logo ? (
@@ -108,10 +108,7 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
                   <Upload className="w-5 h-5" />
                 )}
               </div>
-              <input 
-                type="text"
-                value={formData.logo}
-                onChange={e => setFormData({ ...formData, logo: e.target.value })}
+              <input type="text" value={formData.logo} onChange={e => setFormData({ ...formData, logo: e.target.value })}
                 placeholder="https://ejemplo.com/logo.png"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
@@ -120,11 +117,8 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
 
           {/* Razón Social */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Razón Social *</label>
-            <input 
-              type="text" 
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Razón social *</label>
+            <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
               placeholder="Ej. Inmobiliaria Praderas S.A.C."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
             />
@@ -132,12 +126,8 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
 
           {/* RUC */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">RUC *</label>
-            <input 
-              type="text" 
-              maxLength={11}
-              value={formData.ruc}
-              onChange={e => setFormData({...formData, ruc: e.target.value.replace(/\D/g, '')})}
+            <label className="block text-[11px] font-medium text-slate-700">Ruc *</label>
+            <input type="text" maxLength={11} value={formData.ruc} onChange={e => setFormData({...formData, ruc: e.target.value.replace(/\D/g, '')})}
               placeholder="Ej. 20123456789"
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
             />
@@ -146,21 +136,15 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
           {/* Contacto & Teléfono */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-medium text-slate-700">Nombre de Contacto</label>
-              <input 
-                type="text" 
-                value={formData.contactName}
-                onChange={e => setFormData({...formData, contactName: e.target.value})}
+              <label className="block text-[11px] font-medium text-slate-700">Nombre de contacto</label>
+              <input type="text" value={formData.contactName} onChange={e => setFormData({...formData, contactName: e.target.value})}
                 placeholder="Ej. Ing. Juan Pérez"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Teléfono</label>
-              <input 
-                type="tel" 
-                value={formData.phone}
-                onChange={e => setFormData({...formData, phone: e.target.value})}
+              <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
                 placeholder="+51 987 654 321"
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
               />
@@ -169,11 +153,8 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
 
           {/* Email */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Correo Electrónico</label>
-            <input 
-              type="email" 
-              value={formData.email}
-              onChange={e => setFormData({...formData, email: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Correo electrónico</label>
+            <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
               placeholder="contacto@inmobiliaria.com"
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
             />
@@ -181,11 +162,8 @@ export function NewDeveloperModal({ isOpen, onClose, onSuccess, initialData }: N
 
           {/* Notas */}
           <div className="space-y-1">
-            <label className="block text-[11px] font-medium text-slate-700">Notas / Descripción</label>
-            <textarea 
-              rows={3}
-              value={formData.notes}
-              onChange={e => setFormData({...formData, notes: e.target.value})}
+            <label className="block text-[11px] font-medium text-slate-700">Notas / descripción</label>
+            <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
               placeholder="Detalles sobre convenios o acuerdos..."
               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all resize-none"
             />
