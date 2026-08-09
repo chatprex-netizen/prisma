@@ -173,8 +173,8 @@ export function Contacts() {
   });
 
   
-  const truncate = (str, max) => str && str.length > max ? str.substring(0, max) + '...' : (str || '');
-  const getSourceColor = (source) => {
+  const truncate = (str: string, max: number) => str && str.length > max ? str.substring(0, max) + '...' : (str || '');
+  const getSourceColor = (source: string) => {
     switch ((source || '').toUpperCase()) {
       case 'WHATSAPP': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
       case 'FACEBOOK': return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -184,7 +184,7 @@ export function Contacts() {
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
-  const getStageColor = (stage) => {
+  const getStageColor = (stage: string) => {
     switch ((stage || '').toUpperCase()) {
       case 'PROSPECCION': return 'bg-slate-100 text-slate-700 border-slate-200';
       case 'CALIFICACION': return 'bg-blue-100 text-blue-700 border-blue-200';
