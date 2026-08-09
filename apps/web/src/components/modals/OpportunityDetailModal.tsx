@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   X, Calendar, Clock, Phone, Video, MapPin, FileSignature, 
   MessageSquare, History, AlignLeft, CheckCircle2, User, 
-  DollarSign, Building, Edit3, ChevronRight, CheckSquare, Plus, Check, AlertCircle, AlertTriangle
+  DollarSign, Building, Edit3, ChevronRight, CheckSquare, Plus, Check, AlertCircle, AlertTriangle, Sparkles, FileText
 } from 'lucide-react';
 import { 
   getProperties, updateProperty, createContract, updateOpportunityStage, 
@@ -10,6 +10,7 @@ import {
   updateContact, getUsers, getActivities 
 } from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
+import { AiAnalysisModal } from './AiAnalysisModal';
 import DocumentList from '../documents/DocumentList';
 
 interface OpportunityDetailModalProps {
@@ -36,6 +37,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [isContractOpen, setIsContractOpen] = useState(false);
   const [isDocumentOpen, setIsDocumentOpen] = useState(false);
+  const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(false);
 
   // Timeline Filter state
   const [timelineFilter, setTimelineFilter] = useState<'TODOS' | 'TASK' | 'CITA' | 'NOTE' | 'COMM'>('TODOS');
@@ -612,16 +614,16 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </span>
             </button>
 
-            {/* Cierre (Contrato) */}
+            {/* Análisis IA */}
             <button 
-              onClick={() => { setIsContractOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); }}
+              onClick={() => { setIsAiAnalysisOpen(true); setIsContractOpen(false); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); }}
               className="flex flex-col items-center gap-1 group focus:outline-none"
             >
-              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-emerald-600 group-hover:border-emerald-600 group-hover:bg-emerald-50 transition-all shadow-sm">
-                <FileSignature className="w-4 h-4" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 flex items-center justify-center text-indigo-500 group-hover:text-white group-hover:border-indigo-600 group-hover:from-indigo-600 group-hover:to-purple-600 transition-all shadow-sm">
+                <Sparkles className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
-                Cerrar Trato
+              <span className="text-[10px] font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                Análisis IA
               </span>
             </button>
 
@@ -1286,6 +1288,15 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             alert('¡Datos del contacto actualizados con éxito!');
             window.location.reload();
           }}
+        />
+      )}
+
+      {/* AI Analysis Modal */}
+      {isAiAnalysisOpen && (
+        <AiAnalysisModal
+          isOpen={isAiAnalysisOpen}
+          onClose={() => setIsAiAnalysisOpen(false)}
+          opportunityId={opportunity.id}
         />
       )}
 

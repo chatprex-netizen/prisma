@@ -127,6 +127,12 @@ router.patch('/:id/stage', authenticate, async (req: AuthRequest, res: Response)
   }
 });
 
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 // Delete Opportunity
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
@@ -136,6 +142,85 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Opportunity deleted successfully' });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Generate AI Analysis
+router.get('/:id/ai-analysis', authenticate, async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const opportunity = await prisma.opportunity.findUnique({
+      where: { id },
+      include: {
+        contact: {
+          include: {
+            chats: {
+              include: { messages: { orderBy: { timestamp: 'desc' }, take: 20 } } // Last 20 messages
+            }
+          }
+        },
+        activities: {
+          orderBy: { createdAt: 'desc' },
+          take: 15
+        }
+      }
+    });
+
+    if (!opportunity) return res.status(404).json({ success: false, error: 'Oportunidad no encontrada' });
+
+    // Prepare context
+    let promptContext = `
+      Cliente: ${opportunity.contact?.firstName} ${opportunity.contact?.lastName || ''}
+      Teléfono: ${opportunity.contact?.phone}
+      Presupuesto: ${opportunity.currency} ${opportunity.value}
+      Etapa de Venta actual: ${opportunity.stage}
+      Intereses: ${opportunity.contact?.interests?.join(', ')}
+      Notas del cliente: ${opportunity.contact?.notes}
+      
+      Actividades Recientes:
+      ${opportunity.activities.map(a => `- ${new Date(a.createdAt).toISOString().split('T')[0]}: [${a.type}] ${a.description}`).join('\n')}
+    `;
+
+    if (opportunity.contact?.chats && opportunity.contact.chats.length > 0) {
+      promptContext += `\nÚltimos mensajes de WhatsApp:\n`;
+      opportunity.contact.chats[0].messages.forEach(m => {
+        promptContext += `${m.isFromUser ? 'Cliente' : 'Asesor'}: ${m.content}\n`;
+      });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      // Simulate if no key is present for demo purposes
+      return res.json({
+        success: true,
+        data: {
+          score: Math.floor(Math.random() * 40) + 50,
+          diagnosis: "Falta configuración de OPENAI_API_KEY. Análisis de prueba: El cliente tiene buen perfil pero falta seguimiento detallado.",
+          suggestions: ["Configurar OpenAI API Key", "Llamar al cliente mañana", "Enviar propuesta económica"]
+        }
+      });
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Eres un experto asesor de ventas inmobiliarias. Analiza el siguiente contexto de un cliente en un CRM. Devuelve un análisis en formato JSON estricto con las siguientes claves: 'score' (número del 1 al 100 indicando probabilidad de cierre), 'diagnosis' (string breve con resumen del perfil y sentimiento), y 'suggestions' (array de 2 a 3 strings con las mejores acciones a tomar a continuación). NO DEVUELVAS MARKDOWN, SÓLO JSON."
+        },
+        {
+          role: "user",
+          content: promptContext
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const aiResult = JSON.parse(response.choices[0].message.content || '{}');
+
+    res.json({ success: true, data: aiResult });
+  } catch (error: any) {
+    console.error("AI Analysis Error:", error);
+    res.status(500).json({ success: false, error: 'Error al generar análisis IA' });
   }
 });
 
