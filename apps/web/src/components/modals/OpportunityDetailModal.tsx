@@ -11,6 +11,7 @@ import {
 } from '../../lib/api';
 import { NewContactModal } from './NewContactModal';
 import { AiAnalysisModal } from './AiAnalysisModal';
+import { NewContractModal } from './NewContractModal';
 import DocumentList from '../documents/DocumentList';
 
 interface OpportunityDetailModalProps {
@@ -35,7 +36,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [isCallOpen, setIsCallOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
-  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [isNewContractModalOpen, setIsNewContractModalOpen] = useState(false);
   const [isDocumentOpen, setIsDocumentOpen] = useState(false);
   const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(false);
 
@@ -603,7 +604,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
 
             {/* Documentos */}
             <button 
-              onClick={() => { setIsDocumentOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsContractOpen(false); }}
+              onClick={() => { setIsDocumentOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsNewContractModalOpen(false); }}
               className="flex flex-col items-center gap-1 group focus:outline-none"
             >
               <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:border-blue-600 group-hover:bg-blue-50 transition-all shadow-sm">
@@ -616,7 +617,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
 
             {/* Análisis IA */}
             <button 
-              onClick={() => { setIsAiAnalysisOpen(true); setIsContractOpen(false); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); }}
+              onClick={() => { setIsAiAnalysisOpen(true); setIsNewContractModalOpen(false); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); }}
               className="flex flex-col items-center gap-1 group focus:outline-none"
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 flex items-center justify-center text-indigo-500 group-hover:text-white group-hover:border-indigo-600 group-hover:from-indigo-600 group-hover:to-purple-600 transition-all shadow-sm">
@@ -630,7 +631,7 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
             {/* Cierre (Contrato) - Dinámico */}
             {currentStage === 'NEGOCIACION' && (
               <button 
-                onClick={() => { setIsContractOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); setIsAiAnalysisOpen(false); }}
+                onClick={() => { setIsNewContractModalOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); setIsAiAnalysisOpen(false); }}
                 className="flex flex-col items-center gap-1 group focus:outline-none animate-in zoom-in duration-300"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:bg-emerald-500 transition-all shadow-sm ring-2 ring-emerald-100">
@@ -1139,159 +1140,6 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
         </div>
       )}
 
-      {/* 6. Modal: Registrar Contrato (Cerrar Trato) */}
-      {isContractOpen && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden text-left">
-            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-sm font-bold text-slate-900">Registrar Cierre y Firma de Contrato</h3>
-              <button onClick={() => setIsContractOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-4 space-y-3.5">
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Desarrollador</label>
-                  <select value={selectedDevId} onChange={e => {
-                      setSelectedDevId(e.target.value);
-                      setSelectedProjId('');
-                      setContractData(prev => ({ ...prev, propertyId: '' }));
-                    }}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
-                  >
-                    <option value="">Selecciona...</option>
-                    {Array.from(new Map(properties.map(p => p.project?.developer).filter(Boolean).map(d => [d.id, d])).values()).map((d: any) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Proyecto</label>
-                  <select value={selectedProjId} onChange={e => {
-                      setSelectedProjId(e.target.value);
-                      setContractData(prev => ({ ...prev, propertyId: '' }));
-                    }}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
-                  >
-                    <option value="">Selecciona...</option>
-                    {Array.from(new Map(properties.filter(p => !selectedDevId || p.project?.developerId === selectedDevId).map(p => p.project).filter(Boolean).map(pr => [pr.id, pr])).values()).map((pr: any) => (
-                      <option key={pr.id} value={pr.id}>{pr.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Propiedad *</label>
-                  <select value={contractData.propertyId} onChange={e => setContractData(prev => ({ ...prev, propertyId: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-bold"
-                    required
-                  >
-                    <option value="">Selecciona Unidad...</option>
-                    {properties
-                      .filter(p => p.status === 'DISPONIBLE' && (!selectedProjId || p.projectId === selectedProjId) && (!selectedDevId || p.project?.developerId === selectedDevId))
-                      .map(p => (
-                        <option key={p.id} value={p.id}>{p.unitCode} - {p.title || 'Sin Título'}</option>
-                      ))
-                    }
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Tipo de documento</label>
-                  <select value={contractData.type} onChange={e => setContractData(prev => ({ ...prev, type: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
-                  >
-                    <option value="COMPRAVENTA">Compraventa</option>
-                    <option value="SEPARACION">Separación</option>
-                    <option value="ALQUILER">Alquiler</option>
-                  </select>
-                </div>
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Monto de cierre *</label>
-                  <input type="number" value={contractData.amount} onChange={e => setContractData(prev => ({ ...prev, amount: e.target.value }))}
-                    placeholder="Monto"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
-                    required
-                  />
-                </div>
-                <div className="space-y-0.5">
-                  <label className="block text-[10px] font-medium text-brand-green ">Moneda</label>
-                  <select value={contractData.currency} onChange={e => setContractData(prev => ({ ...prev, currency: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs bg-white font-semibold"
-                  >
-                    <option value="USD">Dólares ($)</option>
-                    <option value="PEN">Soles (S/)</option>
-                    <option value="EUR">Euros (€)</option>
-                  </select>
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                <label className="block text-[10px] font-medium text-brand-green ">Comentarios de cierre</label>
-                <textarea value={contractData.notes} onChange={e => setContractData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Indica las cuotas, condiciones acordadas..."
-                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white resize-none h-16"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsContractOpen(false)} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-lg font-bold">Cancelar</button>
-                <button
-                  type="button"
-                  disabled={submittingContract}
-                  onClick={async () => {
-                    if (!contractData.propertyId || !contractData.amount) {
-                      alert('Por favor selecciona la unidad y el monto de cierre.');
-                      return;
-                    }
-                    
-                    const c = opportunity.contact;
-                    if (!c || !c.dni || !c.address || !c.phone || !c.email) {
-                      alert('⚠️ ACCIÓN REQUERIDA:\nPara registrar un cierre y firma de contrato, es OBLIGATORIO que el cliente tenga sus datos completos registrados (DNI, Dirección, Teléfono, Correo).\n\nPor favor, actualiza los datos del contacto antes de proceder.');
-                      return;
-                    }
-
-                    setSubmittingContract(true);
-                    try {
-                      // 1. Crear contrato
-                      await createContract({
-                        buyerId: opportunity.contactId,
-                        propertyId: contractData.propertyId,
-                        type: contractData.type,
-                        status: 'FIRMADO',
-                        amount: contractData.amount,
-                        currency: contractData.currency,
-                        notes: contractData.notes,
-                        agentId: opportunity.agentId || opportunity.contact?.assignedTo
-                      });
-
-                      // 2. Actualizar propiedad a VENDIDO
-                      await updateProperty(contractData.propertyId, { status: 'VENDIDO' });
-
-                      // 3. Promover contacto a CLIENTE formal
-                      await updateContact(opportunity.contactId, { type: 'CLIENTE' });
-
-                      // 4. Actualizar etapa
-                      await updateOpportunityStage(opportunity.id, 'CIERRE_GANADO');
-                      
-                      alert('🎉 ¡Venta registrada y trato cerrado con éxito!\n\nSe ha actualizado:\n- El inventario (Unidad vendida)\n- El perfil del cliente\n- La negociación cerrada');
-                      onClose();
-                      window.location.reload();
-                    } catch (err: any) {
-                      alert(err.message || 'Error al registrar la venta');
-                    } finally {
-                      setSubmittingContract(false);
-                    }
-                  }}
-                  className="px-4 py-1.5 bg-brand-green text-white text-xs rounded-lg font-bold shadow-xs shadow-brand-green/20"
-                >
-                  {submittingContract ? 'Registrando...' : 'Confirmar Cierre'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Edit Contact Secondary Modal */}
       {isEditContactOpen && (
         <NewContactModal
@@ -1301,6 +1149,20 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
           onSuccess={() => {
             setIsEditContactOpen(false);
             alert('¡Datos del contacto actualizados con éxito!');
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {/* New Contract Full Modal */}
+      {isNewContractModalOpen && (
+        <NewContractModal
+          isOpen={isNewContractModalOpen}
+          onClose={() => setIsNewContractModalOpen(false)}
+          initialBuyerId={opportunity.contactId}
+          onSuccess={() => {
+            setIsNewContractModalOpen(false);
+            alert('¡Contrato registrado con éxito!');
             window.location.reload();
           }}
         />

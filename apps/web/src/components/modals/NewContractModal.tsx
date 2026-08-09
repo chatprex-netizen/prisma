@@ -1,19 +1,23 @@
-import { useState, useEffect } from 'react';
-import { X, Calendar, Plus, FileText, CheckCircle2, UploadCloud } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { X, Calendar, Plus, FileText, CheckCircle2, UploadCloud, AlertTriangle, Edit2 } from 'lucide-react';
 import { createContract, getContacts, getProperties, getUsers } from '../../lib/api';
+import { NewContactModal } from './NewContactModal';
 
 interface NewContractModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialBuyerId?: string;
 }
 
-export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModalProps) {
+export function NewContractModal({ isOpen, onClose, onSuccess, initialBuyerId }: NewContractModalProps) {
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
+  
+  const [isEditContactOpen, setIsEditContactOpen] = useState(false);
 
   // Closing conditions state
   const [paymentType, setPaymentType] = useState<'CONTADO' | 'FINANCIADO'>('CONTADO');
@@ -27,7 +31,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
   const [formData, setFormData] = useState({
-    buyerId: '',
+    buyerId: initialBuyerId || '',
     type: 'COMPRAVENTA',
     status: 'BORRADOR',
     propertyId: '',
@@ -169,9 +173,20 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
 
   const schedule = generateSchedule();
 
+  const selectedContact = useMemo(() => {
+    return contacts.find(c => c.id === formData.buyerId) || null;
+  }, [contacts, formData.buyerId]);
+
+  const contactHasCompleteData = selectedContact && selectedContact.dni && selectedContact.address && selectedContact.phone && selectedContact.email;
+
   const handleSubmit = async () => {
     if (!formData.buyerId || !formData.amount || !formData.propertyId) {
       alert('El Comprador, la Propiedad y el Monto son obligatorios');
+      return;
+    }
+
+    if (!contactHasCompleteData) {
+      alert('⚠️ ACCIÓN REQUERIDA:\nEl cliente seleccionado no tiene sus datos completos (DNI, Dirección, Teléfono, Correo). Debes completar su información antes de generar el contrato.');
       return;
     }
 
@@ -192,7 +207,7 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
         schedule
       };
 
-      await createContract({
+      const response = await createContract({
         ...formData,
         amount: parseFloat(formData.amount),
         content: `<h1>Contrato de ${formData.type}</h1><p>Monto: ${formData.amount} ${formData.currency}</p>`, // Database content constraint
@@ -200,7 +215,17 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
         number: `DOC-${Date.now()}`
       });
 
-      alert('Contrato registrado exitosamente.');
+      const contractId = response?.data?.id;
+
+      if (formData.type === 'SEPARACION') {
+        alert('Contrato de Separación registrado exitosamente. Se ha habilitado el PDF.');
+        // If we want to auto-download we could window.open, but let's just show success
+        // because the API token might be required for the download endpoint depending on setup.
+        // The user can download it from the table.
+      } else {
+        alert(`Contrato de ${formData.type} registrado exitosamente.\n\nNota: El PDF definitivo para este tipo de contrato está en preparación y se mostrará un formato estándar por ahora.`);
+      }
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (error: any) {
@@ -245,6 +270,26 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
                   <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
                 ))}
               </select>
+              {selectedContact && (
+                <div className={`mt-2 p-2 rounded-lg border text-[11px] ${contactHasCompleteData ? 'bg-emerald-50 border-emerald-100 text-emerald-800' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold flex items-center gap-1">
+                      {!contactHasCompleteData && <AlertTriangle className="w-3 h-3" />}
+                      Datos del Cliente
+                    </span>
+                    <button type="button" onClick={() => setIsEditContactOpen(true)} className="text-brand-green hover:text-brand-greenHover flex items-center gap-1 underline font-medium">
+                      <Edit2 className="w-3 h-3" />
+                      Completar
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                    <div><span className="opacity-70">DNI:</span> {selectedContact.dni || <span className="text-red-500 font-bold">Falta</span>}</div>
+                    <div><span className="opacity-70">Teléfono:</span> {selectedContact.phone || <span className="text-red-500 font-bold">Falta</span>}</div>
+                    <div className="col-span-2"><span className="opacity-70">Correo:</span> {selectedContact.email || <span className="text-red-500 font-bold">Falta</span>}</div>
+                    <div className="col-span-2"><span className="opacity-70">Dir:</span> {selectedContact.address || <span className="text-red-500 font-bold">Falta</span>}</div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-1">
               <label className="block text-[11px] font-medium text-slate-700">Tipo de contrato *</label>
@@ -503,6 +548,20 @@ export function NewContractModal({ isOpen, onClose, onSuccess }: NewContractModa
           </button>
         </div>
       </div>
+
+      {/* Edit Contact Secondary Modal */}
+      {isEditContactOpen && selectedContact && (
+        <NewContactModal
+          isOpen={isEditContactOpen}
+          onClose={() => setIsEditContactOpen(false)}
+          initialData={selectedContact}
+          onSuccess={() => {
+            setIsEditContactOpen(false);
+            // Refresh contacts to get updated info
+            getContacts().then(res => setContacts(res.data || [])).catch(console.error);
+          }}
+        />
+      )}
     </div>
   );
 }
