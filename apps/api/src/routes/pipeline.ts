@@ -129,9 +129,24 @@ router.patch('/:id/stage', authenticate, async (req: AuthRequest, res: Response)
 
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const getAIClient = () => {
+  const provider = (process.env.AI_PROVIDER || 'openai').toLowerCase();
+  if (provider === 'deepseek') {
+    return {
+      client: new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY, baseURL: 'https://api.deepseek.com/v1' }),
+      model: 'deepseek-chat'
+    };
+  } else if (provider === 'grok') {
+    return {
+      client: new OpenAI({ apiKey: process.env.GROK_API_KEY || process.env.OPENAI_API_KEY, baseURL: 'https://api.x.ai/v1' }),
+      model: 'grok-beta'
+    };
+  }
+  return {
+    client: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }),
+    model: 'gpt-4o-mini'
+  };
+};
 
 // Delete Opportunity
 router.delete('/:id', async (req: Request, res: Response) => {
@@ -188,20 +203,27 @@ router.get('/:id/ai-analysis', authenticate, async (req: AuthRequest, res: Respo
       });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    const aiConfig = getAIClient();
+    
+    // Check if the appropriate key is set
+    const hasKey = (process.env.AI_PROVIDER === 'deepseek' && (process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY)) ||
+                   (process.env.AI_PROVIDER === 'grok' && (process.env.GROK_API_KEY || process.env.OPENAI_API_KEY)) ||
+                   process.env.OPENAI_API_KEY;
+
+    if (!hasKey) {
       // Simulate if no key is present for demo purposes
       return res.json({
         success: true,
         data: {
           score: Math.floor(Math.random() * 40) + 50,
-          diagnosis: "Falta configuración de OPENAI_API_KEY. Análisis de prueba: El cliente tiene buen perfil pero falta seguimiento detallado.",
-          suggestions: ["Configurar OpenAI API Key", "Llamar al cliente mañana", "Enviar propuesta económica"]
+          diagnosis: "Falta configuración de API KEY. Análisis de prueba: El cliente tiene buen perfil pero falta seguimiento detallado.",
+          suggestions: ["Configurar API Key", "Llamar al cliente mañana", "Enviar propuesta económica"]
         }
       });
     }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const response = await aiConfig.client.chat.completions.create({
+      model: aiConfig.model,
       messages: [
         {
           role: "system",
@@ -215,7 +237,10 @@ router.get('/:id/ai-analysis', authenticate, async (req: AuthRequest, res: Respo
       response_format: { type: "json_object" }
     });
 
-    const aiResult = JSON.parse(response.choices[0].message.content || '{}');
+    const contentStr = response.choices[0].message.content || '{}';
+    // Clean up potential markdown formatting from the response
+    const cleanContent = contentStr.replace(/```json/g, '').replace(/```/g, '').trim();
+    const aiResult = JSON.parse(cleanContent);
 
     res.json({ success: true, data: aiResult });
   } catch (error: any) {

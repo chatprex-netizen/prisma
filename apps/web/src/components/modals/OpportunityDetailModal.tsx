@@ -627,6 +627,21 @@ export function OpportunityDetailModal({ isOpen, onClose, opportunity }: Opportu
               </span>
             </button>
 
+            {/* Cierre (Contrato) - Dinámico */}
+            {currentStage === 'NEGOCIACION' && (
+              <button 
+                onClick={() => { setIsContractOpen(true); setIsCitaOpen(false); setIsTaskOpen(false); setIsNoteOpen(false); setIsCallOpen(false); setIsDocumentOpen(false); setIsAiAnalysisOpen(false); }}
+                className="flex flex-col items-center gap-1 group focus:outline-none animate-in zoom-in duration-300"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:bg-emerald-500 transition-all shadow-sm ring-2 ring-emerald-100">
+                  <FileSignature className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-bold text-emerald-700">
+                  Cerrar Trato
+                </span>
+              </button>
+            )}
+
           </div>
 
           {/* Unified Chronological Timeline (Historial de Actividades) */}
