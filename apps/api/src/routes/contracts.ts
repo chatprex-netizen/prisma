@@ -181,8 +181,9 @@ router.get('/:id/pdf', authenticate, async (req: AuthRequest, res: Response): Pr
 
     doc.fontSize(14).text('3. CONDICIONES ECONÓMICAS');
     doc.fontSize(12).text(`Monto de Operación: ${contract.currency} ${Number(contract.amount).toLocaleString('es-PE')}`);
-    if (contract.notes) {
-      doc.text(`Condiciones adicionales: ${contract.notes}`);
+    const termsData: any = typeof contract.terms === 'string' ? JSON.parse(contract.terms) : (contract.terms || {});
+    if (termsData.notes) {
+      doc.text(`Condiciones adicionales: ${termsData.notes}`);
     }
     doc.moveDown(4);
 
